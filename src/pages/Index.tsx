@@ -83,12 +83,12 @@ export default function Index() {
               className="h-14 bg-gradient-primary hover:opacity-90 text-white shadow-soft rounded-xl font-semibold"
             >
               <Eye className="w-5 h-5 mr-2" />
-              Investimentos
+              Assinaturas
             </Button>
           </div>
 
           <div>
-            <h2 className="text-lg font-bold mb-3 text-foreground">Investimentos Ativos</h2>
+            <h2 className="text-lg font-bold mb-3 text-foreground">Assinaturas Activas</h2>
             <Card className="p-4 shadow-soft rounded-2xl">
               <p className="text-center text-muted-foreground py-8">
                 Nenhum investimento ativo ainda
