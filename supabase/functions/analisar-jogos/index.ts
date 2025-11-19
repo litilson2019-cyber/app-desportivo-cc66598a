@@ -39,20 +39,44 @@ serve(async (req) => {
 
     const modoInstrucoes = modo === "seguro"
       ? `
-MODO SEGURO ATIVADO - CRITÉRIOS RIGOROSOS:
-- Selecione APENAS apostas com odds entre 1.10 e 1.50
-- Probabilidade mínima de acerto: 75%
-- Priorize: favoritos em casa, times com boa forma, confrontos diretos favoráveis
-- Analise para cada jogo:
-  * Forma dos últimos 5 jogos (vitórias, empates, derrotas)
-  * Força ofensiva (média de golos marcados) e defensiva (média de golos sofridos)
-  * Histórico de confrontos diretos
-  * Posição na tabela
-  * Se é time favorito jogando em casa
-  * Estatísticas de acertos desse tipo de aposta
-- NÃO mostre jogos arriscados
-- Foco em CONSISTÊNCIA, não em lucro alto
-- Ganho reduzido mas SEGURO`
+MODO SEGURO ATIVADO - ODDS MAIS BAIXAS DISPONÍVEIS:
+
+Para cada jogo, faça o seguinte:
+
+1. ANALISE TODOS OS MERCADOS DISPONÍVEIS:
+   - 1X2 (Casa, Empate, Fora)
+   - Chance Dupla (1X, X2, 12)
+   - Mais/Menos Golos (Over/Under 0.5, 1.5, 2.5, 3.5, etc.)
+   - Ambas Marcam (BTTS Sim/Não)
+   - Handicap Asiático e Europeu
+   - Empate Anula Aposta
+   - Resultado Intervalo/Final
+   - Mercado de Golos da Equipa (Casa/Fora Over/Under)
+   - Qualquer outro mercado disponível
+
+2. IDENTIFIQUE A ODD MAIS BAIXA:
+   - Entre TODOS os mercados listados acima
+   - Selecione sempre a odd MAIS BAIXA encontrada
+   - Exemplo: se favorito tem odd 1.50, mas Chance Dupla tem 1.19, ou X2 tem 1.16, selecione a 1.16
+
+3. CRITÉRIOS DE SELEÇÃO:
+   - Prioridade absoluta: SEGURANÇA MÁXIMA
+   - Risco mínimo é mais importante que lucro
+   - Selecione apenas odds entre 1.10 e 1.50
+   - Probabilidade mínima de acerto: 75%
+
+4. ANÁLISE ESTATÍSTICA (para validar a escolha):
+   - Forma dos últimos 5 jogos
+   - Força ofensiva e defensiva
+   - Histórico de confrontos diretos
+   - Posição na tabela
+   - Estatísticas do mercado escolhido
+
+5. RESULTADO FINAL:
+   - Para cada jogo, retornar SOMENTE o mercado com a ODD MAIS BAIXA
+   - NÃO mostrar odds médias ou altas
+   - Foco em CONSISTÊNCIA, não em lucro alto
+   - Ganho reduzido mas SEGURO`
       : `
 MODO RISCO - ANÁLISE NORMAL:
 - Odds razoáveis ou um pouco altas
