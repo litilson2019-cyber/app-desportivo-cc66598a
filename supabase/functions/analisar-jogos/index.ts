@@ -70,6 +70,8 @@ Para cada jogo, faça o seguinte:
    - Força ofensiva e defensiva
    - Histórico de confrontos diretos
    - Posição na tabela
+   - Estatísticas de golos marcados e sofridos
+   - Se é time favorito jogando em casa
    - Estatísticas do mercado escolhido
 
 5. RESULTADO FINAL:
@@ -109,13 +111,22 @@ Para cada jogo, faça o seguinte:
    Ordenação: 1.25 (menor), 1.32 (média), 1.60 (maior)
    Selecionar: 1.32 (a odd média)
 
-5. OBJETIVO DO MODO RISCO:
+5. ANÁLISE ESTATÍSTICA (para validar a escolha):
+   - Forma dos últimos 5 jogos
+   - Força ofensiva e defensiva
+   - Histórico de confrontos diretos
+   - Posição na tabela
+   - Estatísticas de golos marcados e sofridos
+   - Se é time favorito jogando em casa
+   - Estatísticas do mercado escolhido
+
+6. OBJETIVO DO MODO RISCO:
    - Buscar risco moderado
    - Odds equilibradas
    - Melhor relação risco/recompensa
    - Evitar extremos (nem muito baixo, nem muito alto)
 
-6. RESULTADO FINAL:
+7. RESULTADO FINAL:
    - Retornar o mercado que contém a odd MÉDIA
    - Nunca retornar a mais baixa
    - Nunca retornar a mais alta
