@@ -165,11 +165,6 @@ export default function Construcao() {
                 🟢 Modo Seguro
               </Button>
             </div>
-            {modo === "seguro" && (
-              <p className="text-sm text-muted-foreground mt-3 text-center">
-                Odds entre 1.10-1.50 • Probabilidade ≥75% • Risco baixo
-              </p>
-            )}
           </Card>
 
           <div className="space-y-4">
