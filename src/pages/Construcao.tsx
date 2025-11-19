@@ -36,6 +36,7 @@ export default function Construcao() {
   ]);
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
+  const [modo, setModo] = useState<"risco" | "seguro">("risco");
   const { toast } = useToast();
 
   const addJogo = () => {
@@ -90,7 +91,7 @@ export default function Construcao() {
       const { data, error } = await supabase.functions.invoke(
         "analisar-jogos",
         {
-          body: { jogos: jogosValidos },
+          body: { jogos: jogosValidos, modo },
         }
       );
 
@@ -137,6 +138,39 @@ export default function Construcao() {
               Adicione até 5 jogos e deixe a IA analisar
             </p>
           </div>
+
+          {/* Modo de Análise */}
+          <Card className="p-4 shadow-soft rounded-2xl">
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setModo("risco")}
+                variant={modo === "risco" ? "default" : "outline"}
+                className={`flex-1 h-12 font-semibold ${
+                  modo === "risco"
+                    ? "bg-gradient-primary text-white"
+                    : "border-primary/30 text-foreground hover:bg-primary/10"
+                }`}
+              >
+                🔵 Modo Risco
+              </Button>
+              <Button
+                onClick={() => setModo("seguro")}
+                variant={modo === "seguro" ? "default" : "outline"}
+                className={`flex-1 h-12 font-semibold ${
+                  modo === "seguro"
+                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    : "border-emerald-500/30 text-foreground hover:bg-emerald-500/10"
+                }`}
+              >
+                🟢 Modo Seguro
+              </Button>
+            </div>
+            {modo === "seguro" && (
+              <p className="text-sm text-muted-foreground mt-3 text-center">
+                Odds entre 1.10-1.50 • Probabilidade ≥75% • Risco baixo
+              </p>
+            )}
+          </Card>
 
           <div className="space-y-4">
             {jogos.map((jogo, index) => (

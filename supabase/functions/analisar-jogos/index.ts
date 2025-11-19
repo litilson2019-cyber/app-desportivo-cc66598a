@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { jogos } = await req.json();
+    const { jogos, modo = "risco" } = await req.json();
 
     if (!jogos || jogos.length === 0) {
       return new Response(
@@ -37,7 +37,31 @@ serve(async (req) => {
       );
     }
 
-    const prompt = `Você é um analista especializado em apostas desportivas. Analise os seguintes jogos e forneça recomendações:
+    const modoInstrucoes = modo === "seguro"
+      ? `
+MODO SEGURO ATIVADO - CRITÉRIOS RIGOROSOS:
+- Selecione APENAS apostas com odds entre 1.10 e 1.50
+- Probabilidade mínima de acerto: 75%
+- Priorize: favoritos em casa, times com boa forma, confrontos diretos favoráveis
+- Analise para cada jogo:
+  * Forma dos últimos 5 jogos (vitórias, empates, derrotas)
+  * Força ofensiva (média de golos marcados) e defensiva (média de golos sofridos)
+  * Histórico de confrontos diretos
+  * Posição na tabela
+  * Se é time favorito jogando em casa
+  * Estatísticas de acertos desse tipo de aposta
+- NÃO mostre jogos arriscados
+- Foco em CONSISTÊNCIA, não em lucro alto
+- Ganho reduzido mas SEGURO`
+      : `
+MODO RISCO - ANÁLISE NORMAL:
+- Odds razoáveis ou um pouco altas
+- Balance entre risco e retorno
+- Analise estatísticas mas aceite apostas mais arriscadas`;
+
+    const prompt = `Você é um analista especializado em apostas desportivas. ${modoInstrucoes}
+
+Analise os seguintes jogos:
 
 ${jogos
   .map(
@@ -48,12 +72,12 @@ ${jogos
 
 Para cada jogo, determine:
 1. O melhor mercado (1X2, Over/Under, BTTS, Handicap, etc.)
-2. A odd final recomendada
+2. A odd final recomendada ${modo === "seguro" ? "(DEVE estar entre 1.10 e 1.50)" : ""}
 3. Uma breve análise (máx 50 palavras)
 
 Depois, calcule:
 - Odd total combinada
-- Probabilidade estimada de sucesso (%)
+- Probabilidade estimada de sucesso (%) ${modo === "seguro" ? "(mínimo 75%)" : ""}
 - Análise geral do bilhete (máx 100 palavras)
 
 Responda APENAS com um JSON válido neste formato exato:
