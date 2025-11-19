@@ -78,10 +78,48 @@ Para cada jogo, faça o seguinte:
    - Foco em CONSISTÊNCIA, não em lucro alto
    - Ganho reduzido mas SEGURO`
       : `
-MODO RISCO - ANÁLISE NORMAL:
-- Odds razoáveis ou um pouco altas
-- Balance entre risco e retorno
-- Analise estatísticas mas aceite apostas mais arriscadas`;
+MODO RISCO - ODD MÉDIA (RISCO MODERADO):
+
+Para cada jogo, faça o seguinte:
+
+1. ANALISE TODOS OS MERCADOS DISPONÍVEIS:
+   - 1X2 (Casa, Empate, Fora)
+   - Chance Dupla (1X, X2, 12)
+   - Mais/Menos Golos (Over/Under 0.5, 1.5, 2.5, 3.5, etc.)
+   - Ambas Marcam (BTTS Sim/Não)
+   - Handicap Asiático e Europeu
+   - Empate Anula Aposta
+   - Resultado Intervalo/Final
+   - Mercado de Golos da Equipa (Casa/Fora Over/Under)
+   - Qualquer outro mercado disponível
+
+2. IDENTIFIQUE E ORDENE TODAS AS ODDS:
+   - Liste todas as odds encontradas em todos os mercados
+   - Ordene-as de forma crescente (da menor para a maior)
+   - Identifique qual é a odd que está no MEIO da lista
+
+3. SELECIONE A ODD MÉDIA:
+   - NÃO selecione a odd mais baixa (isso é modo seguro)
+   - NÃO selecione a odd mais alta (muito arriscada)
+   - Selecione SEMPRE a odd que está no MEIO da ordenação
+   - Esta representa risco moderado com bom equilíbrio
+
+4. EXEMPLO PRÁTICO:
+   Odds encontradas: 1.60, 1.32, 1.25
+   Ordenação: 1.25 (menor), 1.32 (média), 1.60 (maior)
+   Selecionar: 1.32 (a odd média)
+
+5. OBJETIVO DO MODO RISCO:
+   - Buscar risco moderado
+   - Odds equilibradas
+   - Melhor relação risco/recompensa
+   - Evitar extremos (nem muito baixo, nem muito alto)
+
+6. RESULTADO FINAL:
+   - Retornar o mercado que contém a odd MÉDIA
+   - Nunca retornar a mais baixa
+   - Nunca retornar a mais alta
+   - Foco em EQUILÍBRIO entre segurança e lucro`;
 
     const prompt = `Você é um analista especializado em apostas desportivas. ${modoInstrucoes}
 
