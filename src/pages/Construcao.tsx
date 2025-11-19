@@ -40,10 +40,10 @@ export default function Construcao() {
   const { toast } = useToast();
 
   const addJogo = () => {
-    if (jogos.length >= 5) {
+    if (jogos.length >= 50) {
       toast({
         title: "Limite atingido",
-        description: "Você pode adicionar no máximo 5 jogos.",
+        description: "Você pode adicionar no máximo 50 jogos.",
         variant: "destructive",
       });
       return;
