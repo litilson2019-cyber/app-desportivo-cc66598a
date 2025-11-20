@@ -96,6 +96,27 @@ export type Database = {
           },
         ]
       }
+      invited_users: {
+        Row: {
+          created_at: string | null
+          id: string
+          invited_user_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invited_user_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invited_user_id?: string
+          referrer_id?: string
+        }
+        Relationships: []
+      }
       planos: {
         Row: {
           acesso_mercados_avancados: boolean | null
@@ -170,6 +191,30 @@ export type Database = {
           },
         ]
       }
+      referrals: {
+        Row: {
+          codigo_convite: string
+          created_at: string | null
+          id: string
+          total_convidados: number | null
+          user_id: string
+        }
+        Insert: {
+          codigo_convite: string
+          created_at?: string | null
+          id?: string
+          total_convidados?: number | null
+          user_id: string
+        }
+        Update: {
+          codigo_convite?: string
+          created_at?: string | null
+          id?: string
+          total_convidados?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       transacoes: {
         Row: {
           banco: string | null
@@ -222,6 +267,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: { Args: never; Returns: string }
       increment_saldo: {
         Args: { amount: number; user_id: string }
         Returns: undefined
