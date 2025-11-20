@@ -1,10 +1,9 @@
-import { Home, Package, Wallet, Hammer, Menu } from "lucide-react";
+import { Home, Wallet, Hammer, Menu } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", icon: Home, label: "Início" },
-  { to: "/planos", icon: Package, label: "Planos" },
   { to: "/fundos", icon: Wallet, label: "Fundos" },
   { to: "/construcao", icon: Hammer, label: "Construção" },
   { to: "/menu", icon: Menu, label: "Menu" },
