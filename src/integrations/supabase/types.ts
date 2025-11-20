@@ -172,27 +172,36 @@ export type Database = {
       }
       transacoes: {
         Row: {
+          banco: string | null
+          comprovativo_url: string | null
           created_at: string | null
           descricao: string | null
           id: string
+          motivo_rejeicao: string | null
           status: string | null
           tipo: string
           user_id: string
           valor: number
         }
         Insert: {
+          banco?: string | null
+          comprovativo_url?: string | null
           created_at?: string | null
           descricao?: string | null
           id?: string
+          motivo_rejeicao?: string | null
           status?: string | null
           tipo: string
           user_id: string
           valor: number
         }
         Update: {
+          banco?: string | null
+          comprovativo_url?: string | null
           created_at?: string | null
           descricao?: string | null
           id?: string
+          motivo_rejeicao?: string | null
           status?: string | null
           tipo?: string
           user_id?: string
