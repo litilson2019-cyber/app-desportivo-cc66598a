@@ -135,7 +135,7 @@ export default function Construcao() {
               Construção de Bilhete
             </h1>
             <p className="text-muted-foreground mt-1">
-              Adicione até 5 jogos e deixe a IA analisar
+              Adicione até 12 jogos e deixe a IA analisar
             </p>
           </div>
 
@@ -237,7 +237,7 @@ export default function Construcao() {
               </Card>
             ))}
 
-            {jogos.length < 5 && (
+            {jogos.length < 12 && (
               <Button
                 onClick={addJogo}
                 variant="outline"
