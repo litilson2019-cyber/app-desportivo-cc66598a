@@ -21,6 +21,7 @@ export type Database = {
           id: string
           jogos: Json
           mercados_recomendados: Json | null
+          modo: string | null
           odds_totais: number | null
           probabilidade_estimada: number | null
           status: string | null
@@ -32,6 +33,7 @@ export type Database = {
           id?: string
           jogos: Json
           mercados_recomendados?: Json | null
+          modo?: string | null
           odds_totais?: number | null
           probabilidade_estimada?: number | null
           status?: string | null
@@ -43,6 +45,7 @@ export type Database = {
           id?: string
           jogos?: Json
           mercados_recomendados?: Json | null
+          modo?: string | null
           odds_totais?: number | null
           probabilidade_estimada?: number | null
           status?: string | null
