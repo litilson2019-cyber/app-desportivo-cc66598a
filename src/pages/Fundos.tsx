@@ -38,7 +38,16 @@ export default function Fundos() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [resumo, setResumo] = useState<ResumoGastos>({ modoRisco: 0, modoSeguro: 0, total: 0 });
+  const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
   const { toast } = useToast();
+
+  const bancoIBANs: Record<string, string> = {
+    "BFA": "AO06 0055 0000 1234 5678 9012 3",
+    "BIC": "AO06 0040 0000 1234 5678 9012 3",
+    "BAI": "AO06 0010 0000 1234 5678 9012 3",
+    "ATLANTICO": "AO06 0050 0000 1234 5678 9012 3",
+    "Multicaixa Express": "923 456 789"
+  };
 
   useEffect(() => {
     loadData();
@@ -221,237 +230,281 @@ export default function Fundos() {
             </p>
           </Card>
 
-          {/* Módulo Resumo */}
-          <Card className="p-6 shadow-soft rounded-2xl">
-            <h2 className="text-lg font-bold mb-4 text-foreground">Resumo de Gastos</h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-destructive" />
-                  </div>
-                  <span className="font-medium text-foreground">Modo Arriscado</span>
-                </div>
-                <span className="font-bold text-foreground">{resumo.modoRisco} bilhetes</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
-                    <TrendingDown className="w-5 h-5 text-success" />
-                  </div>
-                  <span className="font-medium text-foreground">Modo Seguro</span>
-                </div>
-                <span className="font-bold text-foreground">{resumo.modoSeguro} bilhetes</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-primary/10 rounded-xl border border-primary/20">
-                <span className="font-bold text-foreground">Total Geral</span>
-                <span className="font-bold text-primary">{resumo.total} bilhetes</span>
-              </div>
-            </div>
-          </Card>
+          {/* Botões de Navegação */}
+          <div className="grid grid-cols-3 gap-3">
+            <Button
+              variant={activeSection === "deposito" ? "default" : "outline"}
+              onClick={() => setActiveSection(activeSection === "deposito" ? null : "deposito")}
+              className="rounded-xl h-11"
+            >
+              Depósito
+            </Button>
+            <Button
+              variant={activeSection === "historicos" ? "default" : "outline"}
+              onClick={() => setActiveSection(activeSection === "historicos" ? null : "historicos")}
+              className="rounded-xl h-11"
+            >
+              Históricos
+            </Button>
+            <Button
+              variant={activeSection === "resumo" ? "default" : "outline"}
+              onClick={() => setActiveSection(activeSection === "resumo" ? null : "resumo")}
+              className="rounded-xl h-11"
+            >
+              Resumo
+            </Button>
+          </div>
 
           {/* Módulo Depósito */}
-          <Card className="p-6 shadow-soft rounded-2xl">
-            <h2 className="text-lg font-bold mb-4 text-foreground">Módulo Depósito</h2>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="banco">Banco</Label>
-                <Select value={banco} onValueChange={setBanco}>
-                  <SelectTrigger className="rounded-xl mt-2">
-                    <SelectValue placeholder="Selecione o banco" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Atlântico">Atlântico</SelectItem>
-                    <SelectItem value="BFA">BFA</SelectItem>
-                    <SelectItem value="BAI">BAI</SelectItem>
-                    <SelectItem value="BCI">BCI</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="valor-deposito">Valor (Kzs)</Label>
-                <Input
-                  id="valor-deposito"
-                  type="number"
-                  value={valor}
-                  onChange={(e) => setValor(e.target.value)}
-                  placeholder="0.00"
-                  className="rounded-xl mt-2"
-                />
-              </div>
-              <div>
-                <Label htmlFor="comprovativo">Comprovativo de Pagamento</Label>
-                <Input
-                  id="comprovativo"
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={handleFileChange}
-                  className="rounded-xl mt-2"
-                />
-              </div>
-              {previewUrl && (
-                <div className="relative">
-                  <Label>Prévia do Comprovativo</Label>
-                  <div className="mt-2 relative rounded-xl overflow-hidden border border-border">
-                    <img src={previewUrl} alt="Prévia" className="w-full h-48 object-cover" />
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={() => window.open(previewUrl, "_blank")}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Ver
-                    </Button>
-                  </div>
+          {activeSection === "deposito" && (
+            <Card className="p-5 shadow-soft rounded-xl">
+              <h2 className="text-lg font-bold mb-4 text-foreground">Depósito</h2>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="banco">Banco</Label>
+                  <Select value={banco} onValueChange={setBanco}>
+                    <SelectTrigger className="rounded-xl mt-1.5">
+                      <SelectValue placeholder="Selecione o banco" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BFA">BFA</SelectItem>
+                      <SelectItem value="BIC">BIC</SelectItem>
+                      <SelectItem value="BAI">BAI</SelectItem>
+                      <SelectItem value="ATLANTICO">ATLANTICO</SelectItem>
+                      <SelectItem value="Multicaixa Express">Multicaixa Express</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-              <Button
-                onClick={handleDeposito}
-                disabled={uploading}
-                className="w-full bg-gradient-primary hover:opacity-90 text-white rounded-xl h-12 font-semibold"
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-5 h-5 mr-2" />
-                    Enviar Depósito
-                  </>
+
+                {banco && (
+                  <div className="p-3 bg-muted/50 rounded-xl border border-border">
+                    <Label className="text-xs text-muted-foreground">
+                      {banco === "Multicaixa Express" ? "Número Express" : "IBAN"}
+                    </Label>
+                    <p className="font-mono font-semibold text-foreground mt-1">
+                      {bancoIBANs[banco]}
+                    </p>
+                  </div>
                 )}
-              </Button>
-            </div>
-          </Card>
+
+                <div>
+                  <Label htmlFor="valor-deposito">Valor (Kzs)</Label>
+                  <Input
+                    id="valor-deposito"
+                    type="number"
+                    value={valor}
+                    onChange={(e) => setValor(e.target.value)}
+                    placeholder="0.00"
+                    className="rounded-xl mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="comprovativo">Comprovativo de Pagamento</Label>
+                  <Input
+                    id="comprovativo"
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handleFileChange}
+                    className="rounded-xl mt-1.5"
+                  />
+                </div>
+                {previewUrl && (
+                  <div className="relative">
+                    <Label>Prévia do Comprovativo</Label>
+                    <div className="mt-1.5 relative rounded-xl overflow-hidden border border-border">
+                      <img src={previewUrl} alt="Prévia" className="w-full h-40 object-cover" />
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => window.open(previewUrl, "_blank")}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Ver
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <Button
+                  onClick={handleDeposito}
+                  disabled={uploading}
+                  className="w-full bg-gradient-primary hover:opacity-90 text-white rounded-xl h-11 font-semibold"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-5 h-5 mr-2" />
+                      Enviar Depósito
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Módulo Históricos */}
-          <Card className="p-6 shadow-soft rounded-2xl">
-            <h2 className="text-lg font-bold mb-4 text-foreground">Módulo Históricos</h2>
-            
-            {/* Pendentes */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-warning mb-3">Pendentes</h3>
-              <div className="space-y-2">
-                {transacoesPendentes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    Nenhum depósito pendente
-                  </p>
-                ) : (
-                  transacoesPendentes.map((t) => (
-                    <div key={t.id} className="p-3 bg-warning/10 rounded-xl border border-warning/20">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium text-foreground">{t.valor.toFixed(2)} Kzs</p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
-                          </p>
+          {activeSection === "historicos" && (
+            <Card className="p-5 shadow-soft rounded-xl">
+              <h2 className="text-lg font-bold mb-4 text-foreground">Históricos</h2>
+              
+              {/* Pendentes */}
+              <div className="mb-5">
+                <h3 className="font-semibold text-warning mb-2 text-sm">Pendentes</h3>
+                <div className="space-y-2">
+                  {transacoesPendentes.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-3 text-center">
+                      Nenhum depósito pendente
+                    </p>
+                  ) : (
+                    transacoesPendentes.map((t) => (
+                      <div key={t.id} className="p-2.5 bg-warning/10 rounded-lg border border-warning/20">
+                        <div className="flex justify-between items-start mb-1.5">
+                          <div>
+                            <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                            <p className="text-xs text-muted-foreground">
+                              {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium text-warning bg-warning/20 px-2 py-0.5 rounded">
+                            {t.status}
+                          </span>
                         </div>
-                        <span className="text-xs font-medium text-warning bg-warning/20 px-2 py-1 rounded">
-                          {t.status}
-                        </span>
+                        {t.comprovativo_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-1.5 h-8 text-xs"
+                            onClick={() => window.open(t.comprovativo_url, "_blank")}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Ver Comprovativo
+                          </Button>
+                        )}
                       </div>
-                      {t.comprovativo_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-2"
-                          onClick={() => window.open(t.comprovativo_url, "_blank")}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Ver Comprovativo
-                        </Button>
-                      )}
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Aprovados */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-success mb-3">Aprovados</h3>
-              <div className="space-y-2">
-                {transacoesAprovadas.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    Nenhum depósito aprovado
-                  </p>
-                ) : (
-                  transacoesAprovadas.map((t) => (
-                    <div key={t.id} className="p-3 bg-success/10 rounded-xl border border-success/20">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium text-foreground">{t.valor.toFixed(2)} Kzs</p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
-                          </p>
+              {/* Aprovados */}
+              <div className="mb-5">
+                <h3 className="font-semibold text-success mb-2 text-sm">Aprovados</h3>
+                <div className="space-y-2">
+                  {transacoesAprovadas.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-3 text-center">
+                      Nenhum depósito aprovado
+                    </p>
+                  ) : (
+                    transacoesAprovadas.map((t) => (
+                      <div key={t.id} className="p-2.5 bg-success/10 rounded-lg border border-success/20">
+                        <div className="flex justify-between items-start mb-1.5">
+                          <div>
+                            <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                            <p className="text-xs text-muted-foreground">
+                              {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium text-success bg-success/20 px-2 py-0.5 rounded">
+                            {t.status}
+                          </span>
                         </div>
-                        <span className="text-xs font-medium text-success bg-success/20 px-2 py-1 rounded">
-                          {t.status}
-                        </span>
+                        {t.comprovativo_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-1.5 h-8 text-xs"
+                            onClick={() => window.open(t.comprovativo_url, "_blank")}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Ver Comprovativo
+                          </Button>
+                        )}
                       </div>
-                      {t.comprovativo_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-2"
-                          onClick={() => window.open(t.comprovativo_url, "_blank")}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Ver Comprovativo
-                        </Button>
-                      )}
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Rejeitados */}
-            <div>
-              <h3 className="font-semibold text-destructive mb-3">Rejeitados</h3>
-              <div className="space-y-2">
-                {transacoesRejeitadas.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    Nenhum depósito rejeitado
-                  </p>
-                ) : (
-                  transacoesRejeitadas.map((t) => (
-                    <div key={t.id} className="p-3 bg-destructive/10 rounded-xl border border-destructive/20">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium text-foreground">{t.valor.toFixed(2)} Kzs</p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
-                          </p>
+              {/* Rejeitados */}
+              <div>
+                <h3 className="font-semibold text-destructive mb-2 text-sm">Rejeitados</h3>
+                <div className="space-y-2">
+                  {transacoesRejeitadas.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-3 text-center">
+                      Nenhum depósito rejeitado
+                    </p>
+                  ) : (
+                    transacoesRejeitadas.map((t) => (
+                      <div key={t.id} className="p-2.5 bg-destructive/10 rounded-lg border border-destructive/20">
+                        <div className="flex justify-between items-start mb-1.5">
+                          <div>
+                            <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                            <p className="text-xs text-muted-foreground">
+                              {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium text-destructive bg-destructive/20 px-2 py-0.5 rounded">
+                            {t.status}
+                          </span>
                         </div>
-                        <span className="text-xs font-medium text-destructive bg-destructive/20 px-2 py-1 rounded">
-                          {t.status}
-                        </span>
+                        {t.motivo_rejeicao && (
+                          <p className="text-xs text-destructive mt-1.5 p-2 bg-destructive/5 rounded">
+                            Motivo: {t.motivo_rejeicao}
+                          </p>
+                        )}
+                        {t.comprovativo_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-1.5 h-8 text-xs"
+                            onClick={() => window.open(t.comprovativo_url, "_blank")}
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            Ver Comprovativo
+                          </Button>
+                        )}
                       </div>
-                      {t.motivo_rejeicao && (
-                        <p className="text-xs text-destructive mt-2 p-2 bg-destructive/5 rounded">
-                          Motivo: {t.motivo_rejeicao}
-                        </p>
-                      )}
-                      {t.comprovativo_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full mt-2"
-                          onClick={() => window.open(t.comprovativo_url, "_blank")}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Ver Comprovativo
-                        </Button>
-                      )}
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
+
+          {/* Módulo Resumo */}
+          {activeSection === "resumo" && (
+            <Card className="p-5 shadow-soft rounded-xl">
+              <h2 className="text-lg font-bold mb-4 text-foreground">Resumo de Gastos</h2>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-destructive/10 flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-destructive" />
+                    </div>
+                    <span className="font-medium text-foreground text-sm">Modo Arriscado</span>
+                  </div>
+                  <span className="font-bold text-foreground text-sm">{resumo.modoRisco} bilhetes</span>
+                </div>
+                <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-full bg-success/10 flex items-center justify-center">
+                      <TrendingDown className="w-4 h-4 text-success" />
+                    </div>
+                    <span className="font-medium text-foreground text-sm">Modo Seguro</span>
+                  </div>
+                  <span className="font-bold text-foreground text-sm">{resumo.modoSeguro} bilhetes</span>
+                </div>
+                <div className="flex items-center justify-between p-2.5 bg-primary/10 rounded-lg border border-primary/20">
+                  <span className="font-bold text-foreground text-sm">Total Geral</span>
+                  <span className="font-bold text-primary text-sm">{resumo.total} bilhetes</span>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
       </div>
       <BottomNav />
