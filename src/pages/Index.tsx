@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,10 @@ import Autoplay from "embla-carousel-autoplay";
 export default function Index() {
   const [nome, setNome] = useState("Investidor");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const autoplayPlugin = useRef(
+    Autoplay({ delay: 30000, stopOnInteraction: true })
+  );
 
   useEffect(() => {
     loadData();
@@ -47,8 +51,6 @@ export default function Index() {
     );
   }
 
-  const navigate = useNavigate();
-
   const bannerImages = [
     "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
@@ -69,11 +71,7 @@ export default function Index() {
 
           <Carousel
             opts={{ loop: true }}
-            plugins={[
-              Autoplay({
-                delay: 30000,
-              }),
-            ]}
+            plugins={[autoplayPlugin.current]}
             className="w-full"
           >
             <CarouselContent>
