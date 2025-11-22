@@ -163,6 +163,7 @@ export type Database = {
           id: string
           nome_completo: string | null
           plano_id: string | null
+          primeiro_deposito_processado: boolean | null
           saldo: number | null
           updated_at: string | null
         }
@@ -172,6 +173,7 @@ export type Database = {
           id: string
           nome_completo?: string | null
           plano_id?: string | null
+          primeiro_deposito_processado?: boolean | null
           saldo?: number | null
           updated_at?: string | null
         }
@@ -181,6 +183,7 @@ export type Database = {
           id?: string
           nome_completo?: string | null
           plano_id?: string | null
+          primeiro_deposito_processado?: boolean | null
           saldo?: number | null
           updated_at?: string | null
         }
@@ -270,6 +273,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_bonus_amount: {
+        Args: { valor_depositado: number }
+        Returns: number
+      }
       generate_referral_code: { Args: never; Returns: string }
       increment_saldo: {
         Args: { amount: number; user_id: string }
