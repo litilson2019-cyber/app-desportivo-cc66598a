@@ -10,7 +10,6 @@ import Autoplay from "embla-carousel-autoplay";
 
 export default function Index() {
   const [nome, setNome] = useState("Investidor");
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const autoplayPlugin = useRef(
     Autoplay({ delay: 30000, stopOnInteraction: true })
@@ -36,20 +35,8 @@ export default function Index() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex items-center justify-center min-h-screen bg-gradient-subtle">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </AuthGuard>
-    );
-  }
 
   const bannerImages = [
     "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",

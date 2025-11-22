@@ -31,7 +31,6 @@ interface ResumoGastos {
 export default function Fundos() {
   const [saldo, setSaldo] = useState(0);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
-  const [loading, setLoading] = useState(true);
   const [valor, setValor] = useState("");
   const [banco, setBanco] = useState("");
   const [comprovativo, setComprovativo] = useState<File | null>(null);
@@ -98,8 +97,6 @@ export default function Fundos() {
         description: "Não foi possível carregar os dados.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -198,17 +195,6 @@ export default function Fundos() {
       setUploading(false);
     }
   };
-
-
-  if (loading) {
-    return (
-      <AuthGuard>
-        <div className="flex items-center justify-center min-h-screen bg-gradient-subtle">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </AuthGuard>
-    );
-  }
 
   const transacoesPendentes = transacoes.filter(t => t.status === "pendente");
   const transacoesAprovadas = transacoes.filter(t => t.status === "aprovado");
