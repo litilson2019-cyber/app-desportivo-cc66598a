@@ -3,9 +3,11 @@ import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import {
   User,
   HelpCircle,
@@ -18,6 +20,8 @@ import {
   Share2,
   Copy,
   Check,
+  Moon,
+  Sun,
 } from "lucide-react";
 import {
   Dialog,
@@ -42,6 +46,7 @@ const menuItems = [
 export default function Menu() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [showConvitesDialog, setShowConvitesDialog] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
   const [totalConvidados, setTotalConvidados] = useState(0);
@@ -141,6 +146,30 @@ export default function Menu() {
       <div className="min-h-screen bg-gradient-subtle pb-20 p-4">
         <div className="max-w-2xl mx-auto pt-6 space-y-6">
           <h1 className="text-3xl font-bold text-foreground">Menu</h1>
+
+          <Card className="p-4 shadow-soft rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
+                  {theme === "dark" ? (
+                    <Moon className="w-5 h-5 text-white" />
+                  ) : (
+                    <Sun className="w-5 h-5 text-white" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">Modo Escuro</p>
+                  <p className="text-sm text-muted-foreground">
+                    Alternar entre claro e escuro
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
+            </div>
+          </Card>
 
           <Card className="divide-y divide-border shadow-soft rounded-2xl overflow-hidden">
             {menuItems.map((item, index) => (
