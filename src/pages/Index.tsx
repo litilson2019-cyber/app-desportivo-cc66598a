@@ -12,7 +12,7 @@ export default function Index() {
   const [nome, setNome] = useState("Investidor");
   const navigate = useNavigate();
   const autoplayPlugin = useRef(
-    Autoplay({ delay: 30000, stopOnInteraction: true })
+    Autoplay({ delay: 3000, stopOnInteraction: true })
   );
 
   useEffect(() => {
@@ -51,8 +51,7 @@ export default function Index() {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Olá, {nome}!</h1>
             <p className="text-muted-foreground">
-              👋 Bem-vindo à Sua Plataforma Exclusiva<br />
-              Aqui você tem acesso às principais ferramentas para maximizar suas oportunidades com simplicidade e segurança.
+              👋 Bem-vindo à Sua Plataforma Exclusiva
             </p>
           </div>
 
@@ -79,13 +78,13 @@ export default function Index() {
           </Carousel>
 
           <div>
-            <h2 className="text-xl font-bold text-foreground mb-4">🔥 Recursos Principais</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Recursos Principais</h2>
             <div className="space-y-3">
               <Card className="p-4 shadow-soft rounded-xl">
                 <div className="flex items-start gap-3">
                   <TrendingUp className="w-5 h-5 text-primary mt-1" />
                   <div>
-                    <h3 className="font-semibold text-foreground">📊 Palpites Inteligentes</h3>
+                    <h3 className="font-semibold text-foreground">📈 Palpites Inteligentes</h3>
                     <p className="text-sm text-muted-foreground">
                       Receba análises automáticas com base nas melhores probabilidades do momento.
                     </p>
@@ -97,7 +96,7 @@ export default function Index() {
                 <div className="flex items-start gap-3">
                   <Shield className="w-5 h-5 text-primary mt-1" />
                   <div>
-                    <h3 className="font-semibold text-foreground">🛡️ Modo Seguro</h3>
+                    <h3 className="font-semibold text-foreground">🛡 Modo Seguro</h3>
                     <p className="text-sm text-muted-foreground">
                       Recomendações equilibradas com foco em estabilidade.
                     </p>
@@ -120,14 +119,14 @@ export default function Index() {
           </div>
 
           <Card className="p-4 shadow-soft rounded-xl bg-primary/5">
-            <h3 className="font-semibold text-foreground mb-2">💡 Dica Rápida</h3>
+            <h3 className="font-semibold text-foreground mb-2">💬 Dica Rápida</h3>
             <p className="text-sm text-muted-foreground">
               Use o menu abaixo para navegar. Tudo foi organizado para facilitar a tua experiência.
             </p>
           </Card>
 
           <div>
-            <h2 className="text-xl font-bold text-foreground mb-4">🎯 Qual é o teu objetivo hoje?</h2>
+            <h2 className="text-xl font-bold text-foreground mb-4">Qual é o teu objetivo hoje?</h2>
             <div className="grid grid-cols-2 gap-3">
               <Card 
                 className="p-4 shadow-soft rounded-xl cursor-pointer hover:bg-accent transition-colors"
@@ -164,7 +163,7 @@ export default function Index() {
           </div>
 
           <Card className="p-4 shadow-soft rounded-xl">
-            <h3 className="font-semibold text-foreground mb-3">🏆 Painel de Desempenho</h3>
+            <h3 className="font-semibold text-foreground mb-3">📊 Painel de Desempenho</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Última atualização:</span>
@@ -183,7 +182,7 @@ export default function Index() {
 
           <Card className="p-4 shadow-soft rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10">
             <p className="text-sm text-center text-foreground">
-              🚀 Novidades em breve! Fica atento às campanhas, promoções e oportunidades que vão aparecer aqui.
+              🎉 Novidades em breve! Fica atento às campanhas, promoções e oportunidades que vão aparecer aqui.
             </p>
           </Card>
         </div>

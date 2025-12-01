@@ -165,6 +165,19 @@ export default function Construcao() {
                 🟢 Modo Seguro
               </Button>
             </div>
+            
+            {modo && (
+              <div className="mt-4 p-4 bg-muted/30 rounded-xl space-y-2">
+                <h3 className="font-semibold text-foreground">
+                  {modo === "risco" ? "Modo Arriscado" : "Modo Seguro"}
+                </h3>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• {modo === "risco" ? "Até 5 jogos" : "Até 3 jogos"}</li>
+                  <li>• {modo === "risco" ? "Alto potencial de retorno" : "Alta estabilidade"}</li>
+                  <li>• Preço por análise: 1 Bilhete {modo === "risco" ? "300 Kz" : "500 Kz"}</li>
+                </ul>
+              </div>
+            )}
           </Card>
 
           <div className="space-y-4">
