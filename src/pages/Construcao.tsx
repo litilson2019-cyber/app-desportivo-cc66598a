@@ -40,10 +40,12 @@ export default function Construcao() {
   const { toast } = useToast();
 
   const addJogo = () => {
-    if (jogos.length >= 50) {
+    const limiteJogos = modo === "seguro" ? 3 : modo === "risco" ? 5 : 12;
+    
+    if (jogos.length >= limiteJogos) {
       toast({
         title: "Limite atingido",
-        description: "Você pode adicionar no máximo 50 jogos.",
+        description: `Você pode adicionar no máximo ${limiteJogos} jogos no modo ${modo === "seguro" ? "seguro" : "arriscado"}.`,
         variant: "destructive",
       });
       return;
@@ -135,7 +137,7 @@ export default function Construcao() {
               Construção de Bilhete
             </h1>
             <p className="text-muted-foreground mt-1">
-              Adicione até 12 jogos e deixe a IA analisar
+              Adicione jogos e deixe a IA analisar
             </p>
           </div>
 
@@ -250,7 +252,7 @@ export default function Construcao() {
               </Card>
             ))}
 
-            {jogos.length < 12 && (
+            {jogos.length < (modo === "seguro" ? 3 : modo === "risco" ? 5 : 12) && (
               <Button
                 onClick={addJogo}
                 variant="outline"
