@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface Transacao {
   id: string;
@@ -38,6 +40,7 @@ export default function Fundos() {
   const [uploading, setUploading] = useState(false);
   const [resumo, setResumo] = useState<ResumoGastos>({ modoRisco: 0, modoSeguro: 0, total: 0 });
   const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const bancoIBANs: Record<string, string> = {
@@ -244,7 +247,79 @@ export default function Fundos() {
           {/* Módulo Depósito */}
           {activeSection === "deposito" && (
             <Card className="p-5 shadow-soft rounded-xl">
-              <h2 className="text-lg font-bold mb-4 text-foreground">Depósito</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-foreground">Depósito</h2>
+                <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full h-9 w-9"
+                    >
+                      <Clock className="w-5 h-5 text-muted-foreground" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Status de Depósitos</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Data</TableHead>
+                            <TableHead>Valor (Kz)</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Observações</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {transacoes.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                                Nenhum depósito encontrado
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            transacoes.map((t) => (
+                              <TableRow key={t.id}>
+                                <TableCell className="text-sm">
+                                  {new Date(t.created_at).toLocaleDateString("pt-PT", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  })}
+                                </TableCell>
+                                <TableCell className="text-sm font-medium">
+                                  {t.valor.toFixed(2)} Kz
+                                </TableCell>
+                                <TableCell>
+                                  <span
+                                    className={`text-xs font-medium px-2 py-1 rounded ${
+                                      t.status === "aprovado"
+                                        ? "bg-success/20 text-success"
+                                        : t.status === "rejeitado"
+                                        ? "bg-destructive/20 text-destructive"
+                                        : "bg-warning/20 text-warning"
+                                    }`}
+                                  >
+                                    {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                  {t.status === "rejeitado" && t.motivo_rejeicao
+                                    ? t.motivo_rejeicao
+                                    : t.banco || "-"}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="space-y-3">
                 <div>
                   <Label htmlFor="banco">Banco</Label>
