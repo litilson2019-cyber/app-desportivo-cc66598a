@@ -1,6 +1,7 @@
 import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +23,7 @@ import {
   Check,
   Moon,
   Sun,
+  Settings,
 } from "lucide-react";
 import {
   Dialog,
@@ -47,6 +49,7 @@ export default function Menu() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { isAdmin } = useAdminCheck();
   const [showConvitesDialog, setShowConvitesDialog] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
   const [totalConvidados, setTotalConvidados] = useState(0);
@@ -97,6 +100,8 @@ export default function Menu() {
   const handleMenuClick = (action: string) => {
     if (action === "convites") {
       setShowConvitesDialog(true);
+    } else if (action === "admin") {
+      navigate("/admin");
     } else {
       toast({
         title: "Em desenvolvimento",
@@ -172,6 +177,23 @@ export default function Menu() {
           </Card>
 
           <Card className="divide-y divide-border shadow-soft rounded-2xl overflow-hidden">
+            {isAdmin && (
+              <button
+                onClick={() => handleMenuClick("admin")}
+                className="w-full p-4 flex items-center gap-4 hover:bg-muted/50 transition-colors bg-primary/5"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                  <Settings className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-foreground">Administração</p>
+                  <p className="text-sm text-muted-foreground">
+                    Painel administrativo
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
             {menuItems.map((item, index) => (
               <button
                 key={index}
