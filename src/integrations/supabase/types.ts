@@ -226,36 +226,42 @@ export type Database = {
           banco: string | null
           comprovativo_url: string | null
           created_at: string | null
+          data_validacao: string | null
           descricao: string | null
           id: string
           motivo_rejeicao: string | null
           status: string | null
           tipo: string
           user_id: string
+          validador_id: string | null
           valor: number
         }
         Insert: {
           banco?: string | null
           comprovativo_url?: string | null
           created_at?: string | null
+          data_validacao?: string | null
           descricao?: string | null
           id?: string
           motivo_rejeicao?: string | null
           status?: string | null
           tipo: string
           user_id: string
+          validador_id?: string | null
           valor: number
         }
         Update: {
           banco?: string | null
           comprovativo_url?: string | null
           created_at?: string | null
+          data_validacao?: string | null
           descricao?: string | null
           id?: string
           motivo_rejeicao?: string | null
           status?: string | null
           tipo?: string
           user_id?: string
+          validador_id?: string | null
           valor?: number
         }
         Relationships: [
