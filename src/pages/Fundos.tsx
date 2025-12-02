@@ -41,7 +41,10 @@ export default function Fundos() {
   const [resumo, setResumo] = useState<ResumoGastos>({ modoRisco: 0, modoSeguro: 0, total: 0 });
   const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [showAllDeposits, setShowAllDeposits] = useState(false);
   const { toast } = useToast();
+
+  const depositosVisiveis = showAllDeposits ? transacoes : transacoes.slice(0, 5);
 
   const bancoIBANs: Record<string, string> = {
     "BFA": "AO06 0055 0000 1234 5678 9012 3",
@@ -249,7 +252,10 @@ export default function Fundos() {
             <Card className="p-5 shadow-soft rounded-xl">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-bold text-foreground">Depósito</h2>
-                <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+                <Dialog open={statusDialogOpen} onOpenChange={(open) => {
+                  setStatusDialogOpen(open);
+                  if (!open) setShowAllDeposits(false);
+                }}>
                   <DialogTrigger asChild>
                     <Button
                       variant="ghost"
@@ -264,58 +270,67 @@ export default function Fundos() {
                       <DialogTitle>Status de Depósitos</DialogTitle>
                     </DialogHeader>
                     <div className="mt-4">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Data</TableHead>
-                            <TableHead>Valor (Kz)</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Observações</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {transacoes.length === 0 ? (
-                            <TableRow>
-                              <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                                Nenhum depósito encontrado
-                              </TableCell>
-                            </TableRow>
-                          ) : (
-                            transacoes.map((t) => (
-                              <TableRow key={t.id}>
-                                <TableCell className="text-sm">
-                                  {new Date(t.created_at).toLocaleDateString("pt-PT", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  })}
-                                </TableCell>
-                                <TableCell className="text-sm font-medium">
-                                  {t.valor.toFixed(2)} Kz
-                                </TableCell>
-                                <TableCell>
-                                  <span
-                                    className={`text-xs font-medium px-2 py-1 rounded ${
-                                      t.status === "aprovado"
-                                        ? "bg-success/20 text-success"
-                                        : t.status === "rejeitado"
-                                        ? "bg-destructive/20 text-destructive"
-                                        : "bg-warning/20 text-warning"
-                                    }`}
-                                  >
-                                    {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
-                                  </span>
-                                </TableCell>
-                                <TableCell className="text-sm text-muted-foreground">
-                                  {t.status === "rejeitado" && t.motivo_rejeicao
-                                    ? t.motivo_rejeicao
-                                    : t.banco || "-"}
-                                </TableCell>
+                      {transacoes.length === 0 ? (
+                        <p className="text-center text-muted-foreground py-8">
+                          Nenhum depósito enviado ainda.
+                        </p>
+                      ) : (
+                        <>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Data</TableHead>
+                                <TableHead>Valor (Kz)</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Observações</TableHead>
                               </TableRow>
-                            ))
+                            </TableHeader>
+                            <TableBody>
+                              {depositosVisiveis.map((t) => (
+                                <TableRow key={t.id}>
+                                  <TableCell className="text-sm">
+                                    {new Date(t.created_at).toLocaleDateString("pt-PT", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                    })}
+                                  </TableCell>
+                                  <TableCell className="text-sm font-medium">
+                                    {t.valor.toFixed(2)} Kz
+                                  </TableCell>
+                                  <TableCell>
+                                    <span
+                                      className={`text-xs font-medium px-2 py-1 rounded ${
+                                        t.status === "aprovado"
+                                          ? "bg-success/20 text-success"
+                                          : t.status === "rejeitado"
+                                          ? "bg-destructive/20 text-destructive"
+                                          : "bg-warning/20 text-warning"
+                                      }`}
+                                    >
+                                      {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-sm text-muted-foreground">
+                                    {t.status === "rejeitado" && t.motivo_rejeicao
+                                      ? t.motivo_rejeicao
+                                      : t.banco || "-"}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                          {transacoes.length > 5 && !showAllDeposits && (
+                            <Button
+                              variant="outline"
+                              className="w-full mt-4 rounded-xl"
+                              onClick={() => setShowAllDeposits(true)}
+                            >
+                              Ver mais ({transacoes.length - 5} restantes)
+                            </Button>
                           )}
-                        </TableBody>
-                      </Table>
+                        </>
+                      )}
                     </div>
                   </DialogContent>
                 </Dialog>
