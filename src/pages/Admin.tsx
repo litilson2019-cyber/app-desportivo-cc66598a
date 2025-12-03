@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAdminCheck } from '@/hooks/useAdminCheck';
@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { 
@@ -18,7 +20,9 @@ import {
   Loader2,
   Users,
   DollarSign,
-  FileText
+  FileText,
+  Filter,
+  X
 } from 'lucide-react';
 
 interface Transacao {
@@ -46,12 +50,63 @@ const Admin = () => {
   const [motivoRejeicao, setMotivoRejeicao] = useState('');
   const [processing, setProcessing] = useState(false);
   const [viewImage, setViewImage] = useState<string | null>(null);
+  
+  // Filters
+  const [filterStatus, setFilterStatus] = useState<string>('todos');
+  const [filterBanco, setFilterBanco] = useState<string>('todos');
+  const [filterDataInicio, setFilterDataInicio] = useState<string>('');
+  const [filterDataFim, setFilterDataFim] = useState<string>('');
+  const [showFilters, setShowFilters] = useState(false);
+
   const [stats, setStats] = useState({
     pendentes: 0,
     aprovados: 0,
     rejeitados: 0,
     totalValor: 0
   });
+
+  // Get unique banks from transactions
+  const bancos = useMemo(() => {
+    const uniqueBanks = [...new Set(transacoes.map(t => t.banco).filter(Boolean))];
+    return uniqueBanks as string[];
+  }, [transacoes]);
+
+  // Filtered transactions
+  const filteredTransacoes = useMemo(() => {
+    return transacoes.filter(t => {
+      // Status filter
+      if (filterStatus !== 'todos' && t.status !== filterStatus) return false;
+      
+      // Bank filter
+      if (filterBanco !== 'todos' && t.banco !== filterBanco) return false;
+      
+      // Date filters
+      if (filterDataInicio) {
+        const transacaoDate = new Date(t.created_at);
+        const startDate = new Date(filterDataInicio);
+        startDate.setHours(0, 0, 0, 0);
+        if (transacaoDate < startDate) return false;
+      }
+      
+      if (filterDataFim) {
+        const transacaoDate = new Date(t.created_at);
+        const endDate = new Date(filterDataFim);
+        endDate.setHours(23, 59, 59, 999);
+        if (transacaoDate > endDate) return false;
+      }
+      
+      return true;
+    });
+  }, [transacoes, filterStatus, filterBanco, filterDataInicio, filterDataFim]);
+
+  const hasActiveFilters = filterStatus !== 'todos' || filterBanco !== 'todos' || filterDataInicio || filterDataFim;
+
+  const clearFilters = () => {
+    setFilterStatus('todos');
+    setFilterBanco('todos');
+    setFilterDataInicio('');
+    setFilterDataFim('');
+  };
 
   useEffect(() => {
     if (!adminLoading && !isAdmin) {
@@ -247,19 +302,117 @@ const Admin = () => {
         </Card>
       </div>
 
+      {/* Filters Section */}
+      <Card className="bg-card/50 backdrop-blur border-border/50 mb-4">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2"
+            >
+              <Filter className="w-4 h-4" />
+              Filtros
+              {hasActiveFilters && (
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  Ativo
+                </Badge>
+              )}
+            </Button>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-muted-foreground text-xs"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Limpar
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        
+        {showFilters && (
+          <CardContent className="pt-2 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Status</label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="aprovado">Aprovado</SelectItem>
+                    <SelectItem value="rejeitado">Rejeitado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Banco</label>
+                <Select value={filterBanco} onValueChange={setFilterBanco}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Todos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {bancos.map(banco => (
+                      <SelectItem key={banco} value={banco}>{banco}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Data Início</label>
+                <Input
+                  type="date"
+                  value={filterDataInicio}
+                  onChange={(e) => setFilterDataInicio(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+              
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Data Fim</label>
+                <Input
+                  type="date"
+                  value={filterDataFim}
+                  onChange={(e) => setFilterDataFim(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
       {/* Deposits List */}
       <Card className="bg-card/50 backdrop-blur border-border/50">
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Depósitos para Validar
+          <CardTitle className="text-lg flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Depósitos
+            </span>
+            <span className="text-sm font-normal text-muted-foreground">
+              {filteredTransacoes.length} de {transacoes.length}
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {transacoes.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Nenhum depósito encontrado</p>
+          {filteredTransacoes.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              {hasActiveFilters ? 'Nenhum depósito encontrado com os filtros aplicados' : 'Nenhum depósito encontrado'}
+            </p>
           ) : (
-            transacoes.map((transacao) => (
+            filteredTransacoes.map((transacao) => (
               <Card key={transacao.id} className="bg-background/50 border-border/30">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-3">
