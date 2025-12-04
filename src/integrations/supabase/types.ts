@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ajustes_saldo: {
+        Row: {
+          admin_id: string
+          created_at: string | null
+          id: string
+          motivo: string | null
+          saldo_anterior: number
+          saldo_novo: number
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string | null
+          id?: string
+          motivo?: string | null
+          saldo_anterior: number
+          saldo_novo: number
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string | null
+          id?: string
+          motivo?: string | null
+          saldo_anterior?: number
+          saldo_novo?: number
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       bilhetes: {
         Row: {
           analise_ia: string | null
@@ -159,6 +195,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bloqueado: boolean | null
           created_at: string | null
           id: string
           nome_completo: string | null
@@ -169,6 +206,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bloqueado?: boolean | null
           created_at?: string | null
           id: string
           nome_completo?: string | null
@@ -179,6 +217,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bloqueado?: boolean | null
           created_at?: string | null
           id?: string
           nome_completo?: string | null
