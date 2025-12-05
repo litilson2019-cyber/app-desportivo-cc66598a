@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          acao: string
+          admin_id: string
+          created_at: string | null
+          detalhes: Json | null
+          id: string
+          ip_address: string | null
+        }
+        Insert: {
+          acao: string
+          admin_id: string
+          created_at?: string | null
+          detalhes?: Json | null
+          id?: string
+          ip_address?: string | null
+        }
+        Update: {
+          acao?: string
+          admin_id?: string
+          created_at?: string | null
+          detalhes?: Json | null
+          id?: string
+          ip_address?: string | null
+        }
+        Relationships: []
+      }
       ajustes_saldo: {
         Row: {
           admin_id: string
@@ -47,6 +74,42 @@ export type Database = {
           tipo?: string
           user_id?: string
           valor?: number
+        }
+        Relationships: []
+      }
+      banners: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          imagem_url: string
+          link: string | null
+          ordem: number | null
+          titulo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          imagem_url: string
+          link?: string | null
+          ordem?: number | null
+          titulo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          imagem_url?: string
+          link?: string | null
+          ordem?: number | null
+          titulo?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -96,6 +159,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      configuracoes_sistema: {
+        Row: {
+          chave: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          updated_at: string | null
+          valor: string | null
+        }
+        Insert: {
+          chave: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          updated_at?: string | null
+          valor?: string | null
+        }
+        Update: {
+          chave?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          updated_at?: string | null
+          valor?: string | null
+        }
+        Relationships: []
       }
       investimentos_ativos: {
         Row: {
@@ -153,6 +243,39 @@ export type Database = {
           id?: string
           invited_user_id?: string
           referrer_id?: string
+        }
+        Relationships: []
+      }
+      metodos_deposito: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          iban: string | null
+          id: string
+          nome: string
+          numero_express: string | null
+          ordem: number | null
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          iban?: string | null
+          id?: string
+          nome: string
+          numero_express?: string | null
+          ordem?: number | null
+          tipo: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          iban?: string | null
+          id?: string
+          nome?: string
+          numero_express?: string | null
+          ordem?: number | null
+          tipo?: string
         }
         Relationships: []
       }
