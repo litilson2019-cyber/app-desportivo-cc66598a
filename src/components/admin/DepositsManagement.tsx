@@ -19,7 +19,8 @@ import {
   FileText,
   Filter,
   X,
-  Search
+  Search,
+  Download
 } from 'lucide-react';
 
 interface Transacao {
@@ -192,12 +193,19 @@ export const DepositsManagement = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'aprovado':
+      case 'concluido':
         return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><CheckCircle className="w-3 h-3 mr-1" /> Aprovado</Badge>;
       case 'rejeitado':
         return <Badge className="bg-red-500/20 text-red-400 border-red-500/30"><XCircle className="w-3 h-3 mr-1" /> Rejeitado</Badge>;
-      default:
+      case 'pendente':
         return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30"><Clock className="w-3 h-3 mr-1" /> Pendente</Badge>;
+      default:
+        return <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30"><Clock className="w-3 h-3 mr-1" /> {status}</Badge>;
     }
+  };
+
+  const handleDownloadComprovativo = (url: string) => {
+    window.open(url, '_blank');
   };
 
   const formatDate = (dateString: string) => {
@@ -411,17 +419,26 @@ export const DepositsManagement = () => {
                     </p>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {transacao.comprovativo_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setViewImage(transacao.comprovativo_url)}
-                        className="flex-1"
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        Ver Comprovativo
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setViewImage(transacao.comprovativo_url)}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Ver
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownloadComprovativo(transacao.comprovativo_url!)}
+                        >
+                          <Download className="w-4 h-4 mr-1" />
+                          Baixar
+                        </Button>
+                      </>
                     )}
                     
                     {transacao.status === 'pendente' && (
@@ -432,7 +449,7 @@ export const DepositsManagement = () => {
                             setSelectedTransacao(transacao);
                             setActionType('aprovar');
                           }}
-                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700"
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
                           Aprovar
@@ -444,12 +461,15 @@ export const DepositsManagement = () => {
                             setSelectedTransacao(transacao);
                             setActionType('rejeitar');
                           }}
-                          className="flex-1"
                         >
                           <XCircle className="w-4 h-4 mr-1" />
                           Rejeitar
                         </Button>
                       </>
+                    )}
+                    
+                    {!transacao.comprovativo_url && transacao.status !== 'pendente' && (
+                      <span className="text-xs text-muted-foreground italic">Sem comprovativo</span>
                     )}
                   </div>
                 </CardContent>
