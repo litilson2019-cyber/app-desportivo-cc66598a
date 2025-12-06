@@ -157,9 +157,9 @@ export default function Fundos() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Upload do comprovativo
+      // Upload do comprovativo (usando user.id como pasta para RLS)
       const fileExt = comprovativo.name.split(".").pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("comprovativos")
         .upload(fileName, comprovativo);
