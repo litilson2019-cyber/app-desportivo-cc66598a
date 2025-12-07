@@ -103,6 +103,28 @@ export const DepositsManagement = () => {
 
   useEffect(() => {
     fetchTransacoes();
+
+    // Setup realtime subscription para atualizações em tempo real
+    const channel = supabase
+      .channel('transacoes-admin')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transacoes',
+          filter: 'tipo=eq.deposito'
+        },
+        (payload) => {
+          console.log('Realtime update:', payload);
+          fetchTransacoes();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchTransacoes = async () => {
@@ -134,6 +156,23 @@ export const DepositsManagement = () => {
     }
   };
 
+  // Função para registrar log de ação administrativa
+  const logAdminAction = async (acao: string, detalhes: Record<string, string | number | null | undefined>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from('admin_logs').insert as any)([{
+        admin_id: user.id,
+        acao,
+        detalhes
+      }]);
+    } catch (error) {
+      console.error('Erro ao registrar log:', error);
+    }
+  };
+
   const handleAction = async () => {
     if (!selectedTransacao || !actionType) return;
 
@@ -161,6 +200,16 @@ export const DepositsManagement = () => {
 
         if (profileError) throw profileError;
 
+        // Registrar log de aprovação
+        await logAdminAction('aprovar_deposito', {
+          transacao_id: selectedTransacao.id,
+          user_id: selectedTransacao.user_id,
+          user_nome: selectedTransacao.profiles?.nome_completo,
+          valor: selectedTransacao.valor,
+          banco: selectedTransacao.banco,
+          status_final: 'aprovado'
+        });
+
         toast.success('Depósito aprovado com sucesso!');
       } else {
         const { error } = await supabase
@@ -174,6 +223,17 @@ export const DepositsManagement = () => {
           .eq('id', selectedTransacao.id);
 
         if (error) throw error;
+
+        // Registrar log de rejeição
+        await logAdminAction('rejeitar_deposito', {
+          transacao_id: selectedTransacao.id,
+          user_id: selectedTransacao.user_id,
+          user_nome: selectedTransacao.profiles?.nome_completo,
+          valor: selectedTransacao.valor,
+          banco: selectedTransacao.banco,
+          motivo: motivoRejeicao,
+          status_final: 'rejeitado'
+        });
 
         toast.success('Depósito rejeitado');
       }

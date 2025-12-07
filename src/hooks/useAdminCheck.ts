@@ -16,17 +16,19 @@ export const useAdminCheck = () => {
           return;
         }
 
+        // Verificar se tem alguma role administrativa (admin ou moderador)
         const { data, error } = await supabase
           .from('user_roles')
-          .select('role')
+          .select('role, team_profile_id')
           .eq('user_id', user.id)
-          .eq('role', 'admin')
+          .in('role', ['admin', 'moderator'])
           .maybeSingle();
 
         if (error) {
           console.error('Error checking admin status:', error);
           setIsAdmin(false);
         } else {
+          // Tem acesso se tiver role admin ou moderador
           setIsAdmin(!!data);
         }
       } catch (error) {
