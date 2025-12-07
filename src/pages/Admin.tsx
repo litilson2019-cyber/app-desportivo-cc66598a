@@ -110,57 +110,53 @@ const Admin = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        {/* First row of tabs */}
-        <TabsList className={`w-full grid ${visibleTabs <= 3 ? `grid-cols-${visibleTabs}` : 'grid-cols-3'} mb-2 h-auto`}>
-          {permissions.dashboard && (
-            <TabsTrigger value="dashboard" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
-              <BarChart3 className="w-4 h-4" />
-              Dashboard
-            </TabsTrigger>
-          )}
-          {permissions.depositos && (
-            <TabsTrigger value="depositos" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
-              <DollarSign className="w-4 h-4" />
-              Depósitos
-            </TabsTrigger>
-          )}
-          {permissions.usuarios && (
-            <TabsTrigger value="usuarios" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
-              <Users className="w-4 h-4" />
-              Usuários
-            </TabsTrigger>
-          )}
-        </TabsList>
-        
-        {/* Second row of tabs */}
-        {visibleTabs > 3 && (
-          <TabsList className={`w-full grid grid-cols-${Math.min(visibleTabs - 3, 4)} mb-4 h-auto`}>
+        {/* Horizontal scrollable tabs */}
+        <div className="overflow-x-auto pb-2 mb-4">
+          <TabsList className="inline-flex w-max min-w-full h-auto gap-1 p-1">
+            {permissions.dashboard && (
+              <TabsTrigger value="dashboard" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <BarChart3 className="w-4 h-4" />
+                Dashboard
+              </TabsTrigger>
+            )}
+            {permissions.depositos && (
+              <TabsTrigger value="depositos" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <DollarSign className="w-4 h-4" />
+                Depósitos
+              </TabsTrigger>
+            )}
+            {permissions.usuarios && (
+              <TabsTrigger value="usuarios" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <Users className="w-4 h-4" />
+                Usuários
+              </TabsTrigger>
+            )}
             {permissions.bilhetes && (
-              <TabsTrigger value="bilhetes" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
+              <TabsTrigger value="bilhetes" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <FileText className="w-4 h-4" />
                 Bilhetes
               </TabsTrigger>
             )}
             {permissions.configuracoes && (
-              <TabsTrigger value="configuracoes" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
+              <TabsTrigger value="configuracoes" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <Settings className="w-4 h-4" />
                 Config
               </TabsTrigger>
             )}
             {permissions.logs && (
-              <TabsTrigger value="logs" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
+              <TabsTrigger value="logs" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <ClipboardList className="w-4 h-4" />
                 Logs
               </TabsTrigger>
             )}
             {permissions.gerenciar_equipa && (
-              <TabsTrigger value="equipa" className="flex flex-col items-center gap-0.5 py-2 text-[10px]">
+              <TabsTrigger value="equipa" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <UserCog className="w-4 h-4" />
                 Equipa
               </TabsTrigger>
             )}
           </TabsList>
-        )}
+        </div>
 
         {permissions.dashboard && (
           <TabsContent value="dashboard" className="mt-0">
