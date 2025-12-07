@@ -56,7 +56,78 @@ export default function Fundos() {
 
   useEffect(() => {
     loadData();
-  }, []);
+
+    // Setup realtime subscription para atualizações em tempo real
+    const setupRealtime = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Subscrição para transações
+      const transacoesChannel = supabase
+        .channel('transacoes-user')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'transacoes',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Transação atualizada:', payload);
+            loadData(); // Recarregar dados quando houver mudança
+            
+            // Notificar o usuário sobre mudança de status
+            if (payload.eventType === 'UPDATE') {
+              const newData = payload.new as Transacao;
+              if (newData.status === 'aprovado') {
+                toast({
+                  title: "✅ Depósito Aprovado!",
+                  description: `Seu depósito de ${Number(newData.valor).toLocaleString()} Kz foi aprovado e creditado na sua conta.`,
+                });
+              } else if (newData.status === 'rejeitado') {
+                toast({
+                  title: "❌ Depósito Rejeitado",
+                  description: newData.motivo_rejeicao || "Seu depósito foi rejeitado. Verifique o motivo no histórico.",
+                  variant: "destructive"
+                });
+              }
+            }
+          }
+        )
+        .subscribe();
+
+      // Subscrição para perfil (saldo)
+      const profileChannel = supabase
+        .channel('profile-user')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Perfil atualizado:', payload);
+            const newProfile = payload.new as { saldo: number };
+            setSaldo(Number(newProfile.saldo));
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(transacoesChannel);
+        supabase.removeChannel(profileChannel);
+      };
+    };
+
+    const cleanup = setupRealtime();
+    
+    return () => {
+      cleanup.then(fn => fn?.());
+    };
+  }, [toast]);
 
   const loadData = async () => {
     try {
