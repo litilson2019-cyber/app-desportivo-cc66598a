@@ -166,7 +166,7 @@ export default function Fundos() {
         .eq("user_id", user.id);
 
       if (bilhetesData) {
-        const modoRisco = bilhetesData.filter(b => b.modo === "arriscado").length;
+        const modoRisco = bilhetesData.filter(b => b.modo === "risco").length;
         const modoSeguro = bilhetesData.filter(b => b.modo === "seguro").length;
         const gastoRisco = modoRisco * PRECO_ARRISCADO;
         const gastoSeguro = modoSeguro * PRECO_SEGURO;
