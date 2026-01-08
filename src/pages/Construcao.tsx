@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,9 @@ interface ResultadoAnalise {
   analise_geral: string;
 }
 
+const PRECO_RISCO = 300;
+const PRECO_SEGURO = 500;
+
 export default function Construcao() {
   const [jogos, setJogos] = useState<Jogo[]>([
     { id: "1", equipa_a: "", equipa_b: "", odd_a: "", odd_b: "" },
@@ -37,7 +40,37 @@ export default function Construcao() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
   const [modo, setModo] = useState<"risco" | "seguro">("risco");
+  const [saldo, setSaldo] = useState<number>(0);
+  const [loadingSaldo, setLoadingSaldo] = useState(true);
   const { toast } = useToast();
+
+  const precoAtual = modo === "risco" ? PRECO_RISCO : PRECO_SEGURO;
+  const temSaldoSuficiente = saldo >= precoAtual;
+
+  useEffect(() => {
+    fetchSaldo();
+  }, []);
+
+  const fetchSaldo = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("saldo")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile) {
+          setSaldo(Number(profile.saldo) || 0);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao buscar saldo:", error);
+    } finally {
+      setLoadingSaldo(false);
+    }
+  };
 
   const addJogo = () => {
     const limiteJogos = modo === "seguro" ? 3 : modo === "risco" ? 5 : 12;
@@ -88,8 +121,31 @@ export default function Construcao() {
       return;
     }
 
+    if (!temSaldoSuficiente) {
+      toast({
+        title: "Saldo insuficiente",
+        description: `Você precisa de ${precoAtual} Kz para construir um bilhete no modo ${modo === "risco" ? "arriscado" : "seguro"}. Saldo atual: ${saldo.toFixed(2)} Kz`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Deduzir saldo
+      const novoSaldo = saldo - precoAtual;
+      const { error: saldoError } = await supabase
+        .from("profiles")
+        .update({ saldo: novoSaldo })
+        .eq("id", user.id);
+
+      if (saldoError) throw saldoError;
+
+      setSaldo(novoSaldo);
+
       const { data, error } = await supabase.functions.invoke(
         "analisar-jogos",
         {
@@ -101,21 +157,19 @@ export default function Construcao() {
 
       setResultado(data);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("bilhetes").insert([{
-          user_id: user.id,
-          jogos: jogosValidos as any,
-          mercados_recomendados: data.jogos as any,
-          odds_totais: data.odd_total,
-          analise_ia: data.analise_geral,
-          probabilidade_estimada: data.probabilidade,
-        }]);
-      }
+      await supabase.from("bilhetes").insert([{
+        user_id: user.id,
+        jogos: jogosValidos as any,
+        mercados_recomendados: data.jogos as any,
+        odds_totais: data.odd_total,
+        analise_ia: data.analise_geral,
+        probabilidade_estimada: data.probabilidade,
+        modo: modo === "risco" ? "arriscado" : "seguro",
+      }]);
 
       toast({
         title: "Bilhete construído!",
-        description: "Análise completa da IA disponível.",
+        description: `Análise completa. ${precoAtual} Kz descontados do seu saldo.`,
       });
     } catch (error: any) {
       toast({
@@ -168,18 +222,26 @@ export default function Construcao() {
               </Button>
             </div>
             
-            {modo && (
-              <div className="mt-4 p-4 bg-muted/30 rounded-xl space-y-2">
-                <h3 className="font-semibold text-foreground">
-                  {modo === "risco" ? "Modo Arriscado" : "Modo Seguro"}
-                </h3>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• {modo === "risco" ? "Até 5 jogos" : "Até 3 jogos"}</li>
-                  <li>• {modo === "risco" ? "Alto potencial de retorno" : "Alta estabilidade"}</li>
-                  <li>• Preço por análise: 1 Bilhete {modo === "risco" ? "300 Kz" : "500 Kz"}</li>
-                </ul>
-              </div>
-            )}
+          {/* Saldo do usuário */}
+          <div className="mt-4 p-3 bg-background rounded-xl flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Seu saldo:</span>
+            <span className={`font-bold ${temSaldoSuficiente ? "text-success" : "text-destructive"}`}>
+              {loadingSaldo ? "..." : `${saldo.toFixed(2)} Kz`}
+            </span>
+          </div>
+            
+          {modo && (
+            <div className="mt-4 p-4 bg-muted/30 rounded-xl space-y-2">
+              <h3 className="font-semibold text-foreground">
+                {modo === "risco" ? "Modo Arriscado" : "Modo Seguro"}
+              </h3>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• {modo === "risco" ? "Até 5 jogos" : "Até 3 jogos"}</li>
+                <li>• {modo === "risco" ? "Alto potencial de retorno" : "Alta estabilidade"}</li>
+                <li>• Preço por análise: <span className="font-semibold text-foreground">{precoAtual} Kz</span></li>
+              </ul>
+            </div>
+          )}
           </Card>
 
           <div className="space-y-4">
@@ -266,15 +328,21 @@ export default function Construcao() {
 
           <Button
             onClick={handleConstruirBilhete}
-            disabled={loading}
-            className="w-full bg-gradient-primary hover:opacity-90 text-white rounded-xl h-14 text-lg font-bold"
+            disabled={loading || loadingSaldo || !temSaldoSuficiente}
+            className={`w-full rounded-xl h-14 text-lg font-bold transition-all ${
+              temSaldoSuficiente 
+                ? "bg-gradient-primary hover:opacity-90 text-white" 
+                : "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+            }`}
           >
             {loading ? (
               <Loader2 className="w-6 h-6 animate-spin" />
+            ) : !temSaldoSuficiente ? (
+              <>Saldo Insuficiente ({precoAtual} Kz)</>
             ) : (
               <>
                 <Sparkles className="w-6 h-6 mr-2" />
-                Construir Bilhete com IA
+                Construir Bilhete ({precoAtual} Kz)
               </>
             )}
           </Button>
