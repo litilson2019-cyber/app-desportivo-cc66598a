@@ -167,7 +167,10 @@ export default function Fundos() {
       // Carregar resumo de gastos
       const PRECO_ARRISCADO = 300;
       const PRECO_SEGURO = 500;
-      
+
+      const normalizarModo = (m: string | null) => (m ?? "").trim().toLowerCase();
+      const isSeguro = (m: string | null) => normalizarModo(m) === "seguro";
+
       const { data: bilhetesData } = await supabase
         .from("bilhetes")
         .select("id, modo, created_at")
@@ -176,10 +179,12 @@ export default function Fundos() {
 
       if (bilhetesData) {
         setBilhetes(bilhetesData);
-        // Compatibilidade: bilhetes antigos podem ter vindo com modo = null
-        // e alguns lugares podem usar "arriscado" para o modo risco.
-        const modoRisco = bilhetesData.filter((b) => !b.modo || b.modo === "risco" || b.modo === "arriscado").length;
-        const modoSeguro = bilhetesData.filter((b) => b.modo === "seguro").length;
+
+        // Regra robusta: tudo que NÃO for "seguro" conta como "risco"
+        // (cobre null, "arriscado", "risco", variações de maiúsculas/espacos, etc.)
+        const modoSeguro = bilhetesData.filter((b) => isSeguro(b.modo)).length;
+        const modoRisco = bilhetesData.length - modoSeguro;
+
         const gastoRisco = modoRisco * PRECO_ARRISCADO;
         const gastoSeguro = modoSeguro * PRECO_SEGURO;
         setResumo({

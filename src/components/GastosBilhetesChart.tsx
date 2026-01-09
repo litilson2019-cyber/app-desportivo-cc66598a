@@ -46,16 +46,17 @@ export function GastosBilhetesChart({ bilhetes }: GastosBilhetesChartProps) {
       });
     }
 
+    const normalizarModo = (m: string | null) => (m ?? "").trim().toLowerCase();
+    const isSeguro = (m: string | null) => normalizarModo(m) === "seguro";
+
     return diasParaMostrar.map((dia) => {
       const bilhetesDoDia = bilhetes.filter((b) => {
         const dataBilhete = startOfDay(parseISO(b.created_at));
         return dataBilhete.getTime() === startOfDay(dia).getTime();
       });
 
-      const modoRisco = bilhetesDoDia.filter(
-        (b) => !b.modo || b.modo === "risco" || b.modo === "arriscado"
-      ).length;
-      const modoSeguro = bilhetesDoDia.filter((b) => b.modo === "seguro").length;
+      const modoSeguro = bilhetesDoDia.filter((b) => isSeguro(b.modo)).length;
+      const modoRisco = bilhetesDoDia.length - modoSeguro;
 
       return {
         data: format(dia, periodo === "30dias" ? "dd/MM" : "EEE", { locale: pt }),

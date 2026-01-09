@@ -135,8 +135,10 @@ export default function Construcao() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      const saldoAnterior = saldo;
+
       // Deduzir saldo
-      const novoSaldo = saldo - precoAtual;
+      const novoSaldo = saldoAnterior - precoAtual;
       const { error: saldoError } = await supabase
         .from("profiles")
         .update({ saldo: novoSaldo })
@@ -157,15 +159,26 @@ export default function Construcao() {
 
       setResultado(data);
 
-      await supabase.from("bilhetes").insert([{
+      const { error: bilheteError } = await supabase.from("bilhetes").insert({
         user_id: user.id,
         jogos: jogosValidos as any,
         mercados_recomendados: data.jogos as any,
         odds_totais: data.odd_total,
         analise_ia: data.analise_geral,
         probabilidade_estimada: data.probabilidade,
-        modo: modo === "risco" ? "arriscado" : "seguro",
-      }]);
+        // Guardar o modo de forma consistente: "risco" | "seguro"
+        modo,
+      });
+
+      if (bilheteError) {
+        // Repor saldo caso falhe o registo do bilhete
+        await supabase
+          .from("profiles")
+          .update({ saldo: saldoAnterior })
+          .eq("id", user.id);
+        setSaldo(saldoAnterior);
+        throw bilheteError;
+      }
 
       toast({
         title: "Bilhete construído!",
