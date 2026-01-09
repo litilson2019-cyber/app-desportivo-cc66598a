@@ -11,6 +11,7 @@ import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock } from "l
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { GastosBilhetesChart } from "@/components/GastosBilhetesChart";
 
 interface Transacao {
   id: string;
@@ -22,6 +23,12 @@ interface Transacao {
   banco?: string;
   comprovativo_url?: string;
   motivo_rejeicao?: string;
+}
+
+interface Bilhete {
+  id: string;
+  modo: string | null;
+  created_at: string;
 }
 
 interface ResumoGastos {
@@ -42,6 +49,7 @@ export default function Fundos() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [resumo, setResumo] = useState<ResumoGastos>({ modoRisco: 0, modoSeguro: 0, total: 0, gastoRisco: 0, gastoSeguro: 0, gastoTotal: 0 });
+  const [bilhetes, setBilhetes] = useState<Bilhete[]>([]);
   const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [showAllDeposits, setShowAllDeposits] = useState(false);
@@ -162,10 +170,12 @@ export default function Fundos() {
       
       const { data: bilhetesData } = await supabase
         .from("bilhetes")
-        .select("modo")
-        .eq("user_id", user.id);
+        .select("id, modo, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (bilhetesData) {
+        setBilhetes(bilhetesData);
         // Compatibilidade: bilhetes antigos podem ter vindo com modo = null
         // e alguns lugares podem usar "arriscado" para o modo risco.
         const modoRisco = bilhetesData.filter((b) => !b.modo || b.modo === "risco" || b.modo === "arriscado").length;
@@ -637,42 +647,47 @@ export default function Fundos() {
 
           {/* Módulo Resumo */}
           {activeSection === "resumo" && (
-            <Card className="p-5 shadow-soft rounded-xl">
-              <h2 className="text-lg font-bold mb-4 text-foreground">Resumo de Gastos em Bilhetes</h2>
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-destructive/10 flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-destructive" />
+            <>
+              <Card className="p-5 shadow-soft rounded-xl">
+                <h2 className="text-lg font-bold mb-4 text-foreground">Resumo de Gastos em Bilhetes</h2>
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-destructive/10 flex items-center justify-center">
+                        <TrendingUp className="w-4 h-4 text-destructive" />
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground text-sm block">Modo Arriscado</span>
+                        <span className="text-xs text-muted-foreground">{resumo.modoRisco} bilhetes × 300 Kz</span>
+                      </div>
                     </div>
+                    <span className="font-bold text-foreground text-sm">{resumo.gastoRisco.toLocaleString()} Kz</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-success/10 flex items-center justify-center">
+                        <TrendingDown className="w-4 h-4 text-success" />
+                      </div>
+                      <div>
+                        <span className="font-medium text-foreground text-sm block">Modo Seguro</span>
+                        <span className="text-xs text-muted-foreground">{resumo.modoSeguro} bilhetes × 500 Kz</span>
+                      </div>
+                    </div>
+                    <span className="font-bold text-foreground text-sm">{resumo.gastoSeguro.toLocaleString()} Kz</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/20">
                     <div>
-                      <span className="font-medium text-foreground text-sm block">Modo Arriscado</span>
-                      <span className="text-xs text-muted-foreground">{resumo.modoRisco} bilhetes × 300 Kz</span>
+                      <span className="font-bold text-foreground text-sm block">Total Geral</span>
+                      <span className="text-xs text-muted-foreground">{resumo.total} bilhetes construídos</span>
                     </div>
+                    <span className="font-bold text-primary text-lg">{resumo.gastoTotal.toLocaleString()} Kz</span>
                   </div>
-                  <span className="font-bold text-foreground text-sm">{resumo.gastoRisco.toLocaleString()} Kz</span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-lg">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-full bg-success/10 flex items-center justify-center">
-                      <TrendingDown className="w-4 h-4 text-success" />
-                    </div>
-                    <div>
-                      <span className="font-medium text-foreground text-sm block">Modo Seguro</span>
-                      <span className="text-xs text-muted-foreground">{resumo.modoSeguro} bilhetes × 500 Kz</span>
-                    </div>
-                  </div>
-                  <span className="font-bold text-foreground text-sm">{resumo.gastoSeguro.toLocaleString()} Kz</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/20">
-                  <div>
-                    <span className="font-bold text-foreground text-sm block">Total Geral</span>
-                    <span className="text-xs text-muted-foreground">{resumo.total} bilhetes construídos</span>
-                  </div>
-                  <span className="font-bold text-primary text-lg">{resumo.gastoTotal.toLocaleString()} Kz</span>
-                </div>
-              </div>
-            </Card>
+              </Card>
+              
+              {/* Gráfico de Gastos por Período */}
+              <GastosBilhetesChart bilhetes={bilhetes} />
+            </>
           )}
         </div>
       </div>
