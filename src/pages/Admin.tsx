@@ -29,6 +29,8 @@ import { TeamManagement } from '@/components/admin/TeamManagement';
 import { WithdrawalsManagement } from '@/components/admin/WithdrawalsManagement';
 import { ReferralsManagement } from '@/components/admin/ReferralsManagement';
 import { PlansManagement } from '@/components/admin/PlansManagement';
+import { AdminNotifications } from '@/components/admin/AdminNotifications';
+import { QuickStats } from '@/components/admin/QuickStats';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -91,27 +93,39 @@ const Admin = () => {
     return 'grid-cols-3';
   };
 
+  const handleNavigateToTab = (tab: string) => {
+    setActiveTab(tab);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={() => navigate('/menu')}
-          className="text-white"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex items-center gap-2">
-          <Shield className="w-6 h-6 text-primary" />
-          <div>
-            <h1 className="text-lg font-bold text-white">Painel Admin</h1>
-            {permissions.teamProfileName && (
-              <p className="text-xs text-muted-foreground">{permissions.teamProfileName}</p>
-            )}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate('/menu')}
+            className="text-white"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Shield className="w-6 h-6 text-primary" />
+            <div>
+              <h1 className="text-lg font-bold text-white">Painel Admin</h1>
+              {permissions.teamProfileName && (
+                <p className="text-xs text-muted-foreground">{permissions.teamProfileName}</p>
+              )}
+            </div>
           </div>
         </div>
+        <AdminNotifications onNavigate={handleNavigateToTab} />
+      </div>
+
+      {/* Quick Stats Bar */}
+      <div className="mb-4">
+        <QuickStats onNavigate={handleNavigateToTab} />
       </div>
 
       {/* Tabs */}
