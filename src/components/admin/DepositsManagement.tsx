@@ -22,6 +22,7 @@ import {
   Search,
   Download
 } from 'lucide-react';
+import { ExportButton } from './ExportButton';
 
 interface Transacao {
   id: string;
@@ -437,9 +438,22 @@ export const DepositsManagement = () => {
               <FileText className="w-5 h-5" />
               Depósitos
             </span>
-            <span className="text-sm font-normal text-muted-foreground">
-              {filteredTransacoes.length} de {transacoes.length}
-            </span>
+            <div className="flex items-center gap-2">
+              <ExportButton 
+                data={filteredTransacoes as unknown as Record<string, unknown>[]}
+                filename="depositos"
+                columns={[
+                  { key: 'profiles.nome_completo', label: 'Usuário' },
+                  { key: 'valor', label: 'Valor' },
+                  { key: 'banco', label: 'Banco' },
+                  { key: 'status', label: 'Status' },
+                  { key: 'created_at', label: 'Data' }
+                ]}
+              />
+              <span className="text-sm font-normal text-muted-foreground">
+                {filteredTransacoes.length} de {transacoes.length}
+              </span>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
