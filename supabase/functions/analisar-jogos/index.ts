@@ -37,137 +37,24 @@ serve(async (req) => {
       );
     }
 
-    const modoInstrucoes = modo === "seguro"
-      ? `
-MODO SEGURO ATIVADO - ODDS MAIS BAIXAS DISPONÍVEIS:
+    // Prompt otimizado e mais curto para respostas rápidas
+    const modoDescricao = modo === "seguro"
+      ? "MODO SEGURO: Escolha odds entre 1.10-1.50, máxima segurança, probabilidade mínima 75%."
+      : "MODO RISCO: Escolha odds médias (nem muito baixas, nem muito altas), equilíbrio risco/recompensa.";
 
-Para cada jogo, faça o seguinte:
+    const jogosTexto = jogos
+      .map((j: any, i: number) => `${i + 1}. ${j.equipa_a} (${j.odd_a}) vs ${j.equipa_b} (${j.odd_b})`)
+      .join("; ");
 
-1. ANALISE TODOS OS MERCADOS DISPONÍVEIS:
-   - 1X2 (Casa, Empate, Fora)
-   - Chance Dupla (1X, X2, 12)
-   - Mais/Menos Golos (Over/Under 0.5, 1.5, 2.5, 3.5, etc.)
-   - Ambas Marcam (BTTS Sim/Não)
-   - Handicap Asiático e Europeu
-   - Empate Anula Aposta
-   - Resultado Intervalo/Final
-   - Mercado de Golos da Equipa (Casa/Fora Over/Under)
-   - Qualquer outro mercado disponível
+    const prompt = `Analista de apostas. ${modoDescricao}
 
-2. IDENTIFIQUE A ODD MAIS BAIXA:
-   - Entre TODOS os mercados listados acima
-   - Selecione sempre a odd MAIS BAIXA encontrada
-   - Exemplo: se favorito tem odd 1.50, mas Chance Dupla tem 1.19, ou X2 tem 1.16, selecione a 1.16
+Jogos: ${jogosTexto}
 
-3. CRITÉRIOS DE SELEÇÃO:
-   - Prioridade absoluta: SEGURANÇA MÁXIMA
-   - Risco mínimo é mais importante que lucro
-   - Selecione apenas odds entre 1.10 e 1.50
-   - Probabilidade mínima de acerto: 75%
+Para cada: mercado (1X2/Over-Under/BTTS/Handicap), odd final, análise curta (20 palavras max).
+Depois: odd_total combinada, probabilidade %, análise geral (30 palavras max).
 
-4. ANÁLISE ESTATÍSTICA (para validar a escolha):
-   - Forma dos últimos 5 jogos
-   - Força ofensiva e defensiva
-   - Histórico de confrontos diretos
-   - Posição na tabela
-   - Estatísticas de golos marcados e sofridos
-   - Se é time favorito jogando em casa
-   - Estatísticas do mercado escolhido
-
-5. RESULTADO FINAL:
-   - Para cada jogo, retornar SOMENTE o mercado com a ODD MAIS BAIXA
-   - NÃO mostrar odds médias ou altas
-   - Foco em CONSISTÊNCIA, não em lucro alto
-   - Ganho reduzido mas SEGURO`
-      : `
-MODO RISCO - ODD MÉDIA (RISCO MODERADO):
-
-Para cada jogo, faça o seguinte:
-
-1. ANALISE TODOS OS MERCADOS DISPONÍVEIS:
-   - 1X2 (Casa, Empate, Fora)
-   - Chance Dupla (1X, X2, 12)
-   - Mais/Menos Golos (Over/Under 0.5, 1.5, 2.5, 3.5, etc.)
-   - Ambas Marcam (BTTS Sim/Não)
-   - Handicap Asiático e Europeu
-   - Empate Anula Aposta
-   - Resultado Intervalo/Final
-   - Mercado de Golos da Equipa (Casa/Fora Over/Under)
-   - Qualquer outro mercado disponível
-
-2. IDENTIFIQUE E ORDENE TODAS AS ODDS:
-   - Liste todas as odds encontradas em todos os mercados
-   - Ordene-as de forma crescente (da menor para a maior)
-   - Identifique qual é a odd que está no MEIO da lista
-
-3. SELECIONE A ODD MÉDIA:
-   - NÃO selecione a odd mais baixa (isso é modo seguro)
-   - NÃO selecione a odd mais alta (muito arriscada)
-   - Selecione SEMPRE a odd que está no MEIO da ordenação
-   - Esta representa risco moderado com bom equilíbrio
-
-4. EXEMPLO PRÁTICO:
-   Odds encontradas: 1.60, 1.32, 1.25
-   Ordenação: 1.25 (menor), 1.32 (média), 1.60 (maior)
-   Selecionar: 1.32 (a odd média)
-
-5. ANÁLISE ESTATÍSTICA (para validar a escolha):
-   - Forma dos últimos 5 jogos
-   - Força ofensiva e defensiva
-   - Histórico de confrontos diretos
-   - Posição na tabela
-   - Estatísticas de golos marcados e sofridos
-   - Se é time favorito jogando em casa
-   - Estatísticas do mercado escolhido
-
-6. OBJETIVO DO MODO RISCO:
-   - Buscar risco moderado
-   - Odds equilibradas
-   - Melhor relação risco/recompensa
-   - Evitar extremos (nem muito baixo, nem muito alto)
-
-7. RESULTADO FINAL:
-   - Retornar o mercado que contém a odd MÉDIA
-   - Nunca retornar a mais baixa
-   - Nunca retornar a mais alta
-   - Foco em EQUILÍBRIO entre segurança e lucro`;
-
-    const prompt = `Você é um analista especializado em apostas desportivas. ${modoInstrucoes}
-
-Analise os seguintes jogos:
-
-${jogos
-  .map(
-    (j: any, i: number) =>
-      `Jogo ${i + 1}: ${j.equipa_a} (odd: ${j.odd_a}) vs ${j.equipa_b} (odd: ${j.odd_b})`
-  )
-  .join("\n")}
-
-Para cada jogo, determine:
-1. O melhor mercado (1X2, Over/Under, BTTS, Handicap, etc.)
-2. A odd final recomendada ${modo === "seguro" ? "(DEVE estar entre 1.10 e 1.50)" : ""}
-3. Uma breve análise (máx 50 palavras)
-
-Depois, calcule:
-- Odd total combinada
-- Probabilidade estimada de sucesso (%) ${modo === "seguro" ? "(mínimo 75%)" : ""}
-- Análise geral do bilhete (máx 100 palavras)
-
-Responda APENAS com um JSON válido neste formato exato:
-{
-  "jogos": [
-    {
-      "equipa_a": "Nome A",
-      "equipa_b": "Nome B",
-      "mercado_recomendado": "Mercado",
-      "odd_final": 1.85,
-      "analise": "Texto breve"
-    }
-  ],
-  "odd_total": 5.23,
-  "probabilidade": 65,
-  "analise_geral": "Texto da análise geral"
-}`;
+JSON exato:
+{"jogos":[{"equipa_a":"A","equipa_b":"B","mercado_recomendado":"X","odd_final":1.5,"analise":"..."}],"odd_total":2.5,"probabilidade":70,"analise_geral":"..."}`;
 
     console.log("Enviando request para Lovable AI...");
 
@@ -180,19 +67,16 @@ Responda APENAS com um JSON válido neste formato exato:
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          // Modelo mais rápido para respostas instantâneas
+          model: "google/gemini-2.5-flash-lite",
           messages: [
-            {
-              role: "system",
-              content:
-                "Você é um analista de apostas desportivas. Responda sempre em JSON válido.",
-            },
             {
               role: "user",
               content: prompt,
             },
           ],
-          temperature: 0.7,
+          temperature: 0.5,
+          max_tokens: 800,
         }),
       }
     );
