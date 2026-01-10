@@ -136,29 +136,27 @@ export default function Construcao() {
       if (!user) throw new Error("Usuário não autenticado");
 
       const saldoAnterior = saldo;
-
-      // Deduzir saldo
       const novoSaldo = saldoAnterior - precoAtual;
-      const { error: saldoError } = await supabase
-        .from("profiles")
-        .update({ saldo: novoSaldo })
-        .eq("id", user.id);
 
-      if (saldoError) throw saldoError;
+      // Executar dedução de saldo e chamada à IA em PARALELO para máxima velocidade
+      const [saldoResult, iaResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .update({ saldo: novoSaldo })
+          .eq("id", user.id),
+        supabase.functions.invoke("analisar-jogos", {
+          body: { jogos: jogosValidos, modo },
+        }),
+      ]);
+
+      if (saldoResult.error) throw saldoResult.error;
+      if (iaResult.error) throw iaResult.error;
 
       setSaldo(novoSaldo);
-
-      const { data, error } = await supabase.functions.invoke(
-        "analisar-jogos",
-        {
-          body: { jogos: jogosValidos, modo },
-        }
-      );
-
-      if (error) throw error;
-
+      const data = iaResult.data;
       setResultado(data);
 
+      // Inserir bilhete após termos os resultados
       const { error: bilheteError } = await supabase.from("bilhetes").insert({
         user_id: user.id,
         jogos: jogosValidos as any,
@@ -166,7 +164,6 @@ export default function Construcao() {
         odds_totais: data.odd_total,
         analise_ia: data.analise_geral,
         probabilidade_estimada: data.probabilidade,
-        // Guardar o modo de forma consistente: "risco" | "seguro"
         modo,
       });
 
@@ -182,7 +179,7 @@ export default function Construcao() {
 
       toast({
         title: "Bilhete construído!",
-        description: `Análise completa. ${precoAtual} Kz descontados do seu saldo.`,
+        description: `Análise completa. ${precoAtual} Kz descontados.`,
       });
     } catch (error: any) {
       toast({
