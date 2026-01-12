@@ -35,6 +35,7 @@ interface Banner {
   link: string | null;
   ordem: number;
   ativo: boolean;
+  duracao_segundos: number;
 }
 
 interface MetodoDeposito {
@@ -43,6 +44,7 @@ interface MetodoDeposito {
   tipo: string;
   iban: string | null;
   numero_express: string | null;
+  titular_conta: string | null;
   ativo: boolean;
   ordem: number;
 }
@@ -69,7 +71,8 @@ export const SystemSettings = () => {
     imagem_url: '',
     link: '',
     ordem: 0,
-    ativo: true
+    ativo: true,
+    duracao_segundos: 5
   });
 
   // Metodo form
@@ -78,6 +81,7 @@ export const SystemSettings = () => {
     tipo: 'banco',
     iban: '',
     numero_express: '',
+    titular_conta: '',
     ativo: true,
     ordem: 0
   });
@@ -149,7 +153,7 @@ export const SystemSettings = () => {
       }
       setShowBannerModal(false);
       setEditingBanner(null);
-      setBannerForm({ titulo: '', descricao: '', imagem_url: '', link: '', ordem: 0, ativo: true });
+      setBannerForm({ titulo: '', descricao: '', imagem_url: '', link: '', ordem: 0, ativo: true, duracao_segundos: 5 });
       fetchData();
     } catch (error) {
       console.error('Error saving banner:', error);
@@ -186,7 +190,7 @@ export const SystemSettings = () => {
       }
       setShowMetodoModal(false);
       setEditingMetodo(null);
-      setMetodoForm({ nome: '', tipo: 'banco', iban: '', numero_express: '', ativo: true, ordem: 0 });
+      setMetodoForm({ nome: '', tipo: 'banco', iban: '', numero_express: '', titular_conta: '', ativo: true, ordem: 0 });
       fetchData();
     } catch (error) {
       console.error('Error saving metodo:', error);
@@ -283,7 +287,7 @@ export const SystemSettings = () => {
             <Button
               size="sm"
               onClick={() => {
-                setBannerForm({ titulo: '', descricao: '', imagem_url: '', link: '', ordem: banners.length, ativo: true });
+                setBannerForm({ titulo: '', descricao: '', imagem_url: '', link: '', ordem: banners.length, ativo: true, duracao_segundos: 5 });
                 setEditingBanner(null);
                 setShowBannerModal(true);
               }}
@@ -308,7 +312,7 @@ export const SystemSettings = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">{banner.titulo || 'Sem título'}</p>
-                        <p className="text-xs text-muted-foreground">Ordem: {banner.ordem}</p>
+                        <p className="text-xs text-muted-foreground">Ordem: {banner.ordem} | Duração: {banner.duracao_segundos || 5}s</p>
                       </div>
                       <Switch
                         checked={banner.ativo}
@@ -325,7 +329,8 @@ export const SystemSettings = () => {
                             imagem_url: banner.imagem_url,
                             link: banner.link || '',
                             ordem: banner.ordem,
-                            ativo: banner.ativo
+                            ativo: banner.ativo,
+                            duracao_segundos: banner.duracao_segundos || 5
                           });
                           setShowBannerModal(true);
                         }}
@@ -354,7 +359,7 @@ export const SystemSettings = () => {
             <Button
               size="sm"
               onClick={() => {
-                setMetodoForm({ nome: '', tipo: 'banco', iban: '', numero_express: '', ativo: true, ordem: metodos.length });
+                setMetodoForm({ nome: '', tipo: 'banco', iban: '', numero_express: '', titular_conta: '', ativo: true, ordem: metodos.length });
                 setEditingMetodo(null);
                 setShowMetodoModal(true);
               }}
@@ -373,6 +378,9 @@ export const SystemSettings = () => {
                     <CardContent className="p-3 flex items-center gap-3">
                       <div className="flex-1">
                         <p className="font-medium text-sm">{metodo.nome}</p>
+                        {metodo.titular_conta && (
+                          <p className="text-xs text-primary">Titular: {metodo.titular_conta}</p>
+                        )}
                         <p className="text-xs text-muted-foreground">
                           {metodo.tipo === 'banco' ? `IBAN: ${metodo.iban}` : `Express: ${metodo.numero_express}`}
                         </p>
@@ -391,6 +399,7 @@ export const SystemSettings = () => {
                             tipo: metodo.tipo,
                             iban: metodo.iban || '',
                             numero_express: metodo.numero_express || '',
+                            titular_conta: metodo.titular_conta || '',
                             ativo: metodo.ativo,
                             ordem: metodo.ordem
                           });
@@ -437,13 +446,25 @@ export const SystemSettings = () => {
                 onChange={(e) => setBannerForm({ ...bannerForm, link: e.target.value })}
               />
             </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Ordem</label>
-              <Input
-                type="number"
-                value={bannerForm.ordem}
-                onChange={(e) => setBannerForm({ ...bannerForm, ordem: parseInt(e.target.value) })}
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Ordem</label>
+                <Input
+                  type="number"
+                  value={bannerForm.ordem}
+                  onChange={(e) => setBannerForm({ ...bannerForm, ordem: parseInt(e.target.value) })}
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Duração (segundos)</label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="30"
+                  value={bannerForm.duracao_segundos}
+                  onChange={(e) => setBannerForm({ ...bannerForm, duracao_segundos: parseInt(e.target.value) || 5 })}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -463,10 +484,18 @@ export const SystemSettings = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Nome *</label>
+              <label className="text-sm text-muted-foreground mb-1 block">Nome do Banco/Serviço *</label>
               <Input
                 value={metodoForm.nome}
                 onChange={(e) => setMetodoForm({ ...metodoForm, nome: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground mb-1 block">Nome do Titular da Conta</label>
+              <Input
+                value={metodoForm.titular_conta}
+                onChange={(e) => setMetodoForm({ ...metodoForm, titular_conta: e.target.value })}
+                placeholder="Nome completo do titular"
               />
             </div>
             <div>

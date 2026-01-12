@@ -82,6 +82,7 @@ export type Database = {
           ativo: boolean | null
           created_at: string | null
           descricao: string | null
+          duracao_segundos: number | null
           id: string
           imagem_url: string
           link: string | null
@@ -93,6 +94,7 @@ export type Database = {
           ativo?: boolean | null
           created_at?: string | null
           descricao?: string | null
+          duracao_segundos?: number | null
           id?: string
           imagem_url: string
           link?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           ativo?: boolean | null
           created_at?: string | null
           descricao?: string | null
+          duracao_segundos?: number | null
           id?: string
           imagem_url?: string
           link?: string | null
@@ -250,32 +253,38 @@ export type Database = {
         Row: {
           ativo: boolean | null
           created_at: string | null
+          duracao_exibicao: number | null
           iban: string | null
           id: string
           nome: string
           numero_express: string | null
           ordem: number | null
           tipo: string
+          titular_conta: string | null
         }
         Insert: {
           ativo?: boolean | null
           created_at?: string | null
+          duracao_exibicao?: number | null
           iban?: string | null
           id?: string
           nome: string
           numero_express?: string | null
           ordem?: number | null
           tipo: string
+          titular_conta?: string | null
         }
         Update: {
           ativo?: boolean | null
           created_at?: string | null
+          duracao_exibicao?: number | null
           iban?: string | null
           id?: string
           nome?: string
           numero_express?: string | null
           ordem?: number | null
           tipo?: string
+          titular_conta?: string | null
         }
         Relationships: []
       }
