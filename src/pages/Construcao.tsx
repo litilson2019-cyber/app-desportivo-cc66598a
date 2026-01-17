@@ -21,16 +21,14 @@ interface ResultadoAnalise {
   jogos: Array<{
     equipa_a: string;
     equipa_b: string;
-    resultado_1x2: string;
-    mercado_gols: string;
-    aposta_extra?: string;
-    odd_final: number;
+    aposta_final: string;
+    odd: number;
     probabilidade: number;
     motivo: string;
   }>;
   odd_total: number;
-  probabilidade: number;
-  analise_geral: string;
+  probabilidade_total: number;
+  resumo: string;
 }
 
 const PRECO_RISCO = 300;
@@ -165,8 +163,8 @@ export default function Construcao() {
         jogos: jogosValidos as any,
         mercados_recomendados: data.jogos as any,
         odds_totais: data.odd_total,
-        analise_ia: data.analise_geral,
-        probabilidade_estimada: data.probabilidade,
+        analise_ia: data.resumo,
+        probabilidade_estimada: data.probabilidade_total,
         modo,
       });
 
@@ -390,7 +388,7 @@ export default function Construcao() {
                     Probabilidade
                   </p>
                   <p className="text-2xl font-bold text-success">
-                    {resultado.probabilidade.toFixed(0)}%
+                    {resultado.probabilidade_total.toFixed(0)}%
                   </p>
                 </div>
               </div>
@@ -405,31 +403,19 @@ export default function Construcao() {
                       <h4 className="font-semibold text-foreground">
                         {jogo.equipa_a} vs {jogo.equipa_b}
                       </h4>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-1 bg-success/20 text-success rounded-full font-bold">
-                          {jogo.probabilidade}%
-                        </span>
-                        <span className="text-sm font-bold text-primary">
-                          @ {jogo.odd_final}
-                        </span>
-                      </div>
+                      <span className="text-xs px-2 py-1 bg-success/20 text-success rounded-full font-bold">
+                        {jogo.probabilidade}%
+                      </span>
                     </div>
                     
-                    {/* Apostas recomendadas */}
-                    <div className="grid grid-cols-1 gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs px-3 py-1.5 bg-primary/20 text-primary rounded-lg font-semibold">
-                          🎯 {jogo.resultado_1x2}
-                        </span>
-                        <span className="text-xs px-3 py-1.5 bg-accent/20 text-accent rounded-lg font-semibold">
-                          ⚽ {jogo.mercado_gols}
-                        </span>
-                        {jogo.aposta_extra && (
-                          <span className="text-xs px-3 py-1.5 bg-warning/20 text-warning rounded-lg font-semibold">
-                            ✨ {jogo.aposta_extra}
-                          </span>
-                        )}
-                      </div>
+                    {/* UMA aposta final por jogo */}
+                    <div className="flex items-center justify-between p-3 bg-primary/10 rounded-xl">
+                      <span className="text-base font-bold text-primary">
+                        🎯 {jogo.aposta_final}
+                      </span>
+                      <span className="text-lg font-bold text-foreground">
+                        @ {jogo.odd.toFixed(2)}
+                      </span>
                     </div>
                     
                     <p className="text-sm text-muted-foreground italic">
@@ -441,10 +427,10 @@ export default function Construcao() {
 
               <div className="p-4 bg-muted/30 rounded-xl">
                 <h3 className="font-semibold text-foreground mb-2">
-                  Análise Geral
+                  Resumo
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {resultado.analise_geral}
+                  {resultado.resumo}
                 </p>
               </div>
             </Card>
