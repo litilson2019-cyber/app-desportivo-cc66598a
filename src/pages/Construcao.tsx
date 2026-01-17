@@ -21,9 +21,12 @@ interface ResultadoAnalise {
   jogos: Array<{
     equipa_a: string;
     equipa_b: string;
-    mercado_recomendado: string;
+    resultado_1x2: string;
+    mercado_gols: string;
+    aposta_extra?: string;
     odd_final: number;
-    analise: string;
+    probabilidade: number;
+    motivo: string;
   }>;
   odd_total: number;
   probabilidade: number;
@@ -396,23 +399,41 @@ export default function Construcao() {
                 {resultado.jogos.map((jogo, index) => (
                   <div
                     key={index}
-                    className="p-4 bg-background rounded-xl space-y-2"
+                    className="p-4 bg-background rounded-xl space-y-3"
                   >
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold text-foreground">
                         {jogo.equipa_a} vs {jogo.equipa_b}
                       </h4>
-                      <span className="text-sm font-bold text-primary">
-                        @ {jogo.odd_final}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-2 py-1 bg-success/20 text-success rounded-full font-bold">
+                          {jogo.probabilidade}%
+                        </span>
+                        <span className="text-sm font-bold text-primary">
+                          @ {jogo.odd_final}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full font-medium">
-                        {jogo.mercado_recomendado}
-                      </span>
+                    
+                    {/* Apostas recomendadas */}
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs px-3 py-1.5 bg-primary/20 text-primary rounded-lg font-semibold">
+                          🎯 {jogo.resultado_1x2}
+                        </span>
+                        <span className="text-xs px-3 py-1.5 bg-accent/20 text-accent rounded-lg font-semibold">
+                          ⚽ {jogo.mercado_gols}
+                        </span>
+                        {jogo.aposta_extra && (
+                          <span className="text-xs px-3 py-1.5 bg-warning/20 text-warning rounded-lg font-semibold">
+                            ✨ {jogo.aposta_extra}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {jogo.analise}
+                    
+                    <p className="text-sm text-muted-foreground italic">
+                      💡 {jogo.motivo}
                     </p>
                   </div>
                 ))}
