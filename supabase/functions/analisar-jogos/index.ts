@@ -37,24 +37,50 @@ serve(async (req) => {
       );
     }
 
-    // Prompt otimizado e mais curto para respostas rápidas
+    // Prompt otimizado para apostas diretas e práticas
     const modoDescricao = modo === "seguro"
-      ? "MODO SEGURO: Escolha odds entre 1.10-1.50, máxima segurança, probabilidade mínima 75%."
-      : "MODO RISCO: Escolha odds médias (nem muito baixas, nem muito altas), equilíbrio risco/recompensa.";
+      ? "MODO SEGURO: Apenas apostas com probabilidade ACIMA de 70%. Odds entre 1.10-1.60. Priorize segurança máxima."
+      : "MODO RISCO: Inclui apostas com probabilidade menor que 70%. Pode sugerir odds mais altas para maior retorno.";
 
     const jogosTexto = jogos
-      .map((j: any, i: number) => `${i + 1}. ${j.equipa_a} (${j.odd_a}) vs ${j.equipa_b} (${j.odd_b})`)
-      .join("; ");
+      .map((j: any, i: number) => `${i + 1}. ${j.equipa_a} (odd: ${j.odd_a}) vs ${j.equipa_b} (odd: ${j.odd_b})`)
+      .join("\n");
 
-    const prompt = `Analista de apostas. ${modoDescricao}
+    const prompt = `És um analista de apostas desportivas. ${modoDescricao}
 
-Jogos: ${jogosTexto}
+JOGOS PARA ANALISAR:
+${jogosTexto}
 
-Para cada: mercado (1X2/Over-Under/BTTS/Handicap), odd final, análise curta (20 palavras max).
-Depois: odd_total combinada, probabilidade %, análise geral (30 palavras max).
+REGRAS OBRIGATÓRIAS:
+1. Para CADA jogo, indica diretamente:
+   - resultado_1x2: "Vitória [Equipa]" ou "Empate"
+   - mercado_gols: Over/Under específico (ex: "Over 2.5", "Under 1.5")
+   - aposta_extra: Se relevante (ex: "Ambas Marcam Sim", "Dupla Chance 1X")
+   - odd_final: Odd aproximada da melhor aposta
+   - probabilidade: Percentagem de sucesso estimada
+   - motivo: UMA frase curta explicando a escolha
 
-JSON exato:
-{"jogos":[{"equipa_a":"A","equipa_b":"B","mercado_recomendado":"X","odd_final":1.5,"analise":"..."}],"odd_total":2.5,"probabilidade":70,"analise_geral":"..."}`;
+2. Sê DIRETO e PRÁTICO. Sem textos longos ou análises genéricas.
+3. Foco em aposta clara e confiável.
+
+RESPONDE APENAS com este JSON exato:
+{
+  "jogos": [
+    {
+      "equipa_a": "Nome",
+      "equipa_b": "Nome",
+      "resultado_1x2": "Vitória [Equipa]",
+      "mercado_gols": "Over 2.5",
+      "aposta_extra": "Ambas Marcam Sim",
+      "odd_final": 1.85,
+      "probabilidade": 72,
+      "motivo": "Frase curta explicativa"
+    }
+  ],
+  "odd_total": 3.45,
+  "probabilidade": 65,
+  "analise_geral": "Resumo de 1 frase sobre o bilhete"
+}`;
 
     console.log("Enviando request para Lovable AI...");
 
