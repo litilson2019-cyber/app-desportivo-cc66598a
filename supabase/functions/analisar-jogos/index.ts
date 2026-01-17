@@ -37,49 +37,49 @@ serve(async (req) => {
       );
     }
 
-    // Prompt otimizado para apostas diretas e práticas
+    // Prompt otimizado para UMA aposta final por jogo
     const modoDescricao = modo === "seguro"
-      ? "MODO SEGURO: Apenas apostas com probabilidade ACIMA de 70%. Odds entre 1.10-1.60. Priorize segurança máxima."
-      : "MODO RISCO: Inclui apostas com probabilidade menor que 70%. Pode sugerir odds mais altas para maior retorno.";
+      ? "MODO SEGURO: Escolhe APENAS o mercado MAIS SEGURO com a odd mais BAIXA (entre 1.10-1.50). Prioriza Under (Under 0.5, Under 1.5), empates ou dupla chance. Probabilidade mínima de 70%."
+      : "MODO RISCO: Escolhe mercados com odds moderadas (1.50-2.50). Pode incluir Over 2.5, vitórias claras ou ambas marcam. Aceita probabilidades entre 50-70%.";
 
     const jogosTexto = jogos
       .map((j: any, i: number) => `${i + 1}. ${j.equipa_a} (odd: ${j.odd_a}) vs ${j.equipa_b} (odd: ${j.odd_b})`)
       .join("\n");
 
-    const prompt = `És um analista de apostas desportivas. ${modoDescricao}
+    const prompt = `És um analista de apostas desportivas especializado. ${modoDescricao}
 
 JOGOS PARA ANALISAR:
 ${jogosTexto}
 
-REGRAS OBRIGATÓRIAS:
-1. Para CADA jogo, indica diretamente:
-   - resultado_1x2: "Vitória [Equipa]" ou "Empate"
-   - mercado_gols: Over/Under específico (ex: "Over 2.5", "Under 1.5")
-   - aposta_extra: Se relevante (ex: "Ambas Marcam Sim", "Dupla Chance 1X")
-   - odd_final: Odd aproximada da melhor aposta
-   - probabilidade: Percentagem de sucesso estimada
-   - motivo: UMA frase curta explicando a escolha
+REGRA CRÍTICA - UMA APOSTA POR JOGO:
+Para cada jogo, escolhe APENAS UMA aposta final. Não combines múltiplos mercados.
+Escolhe O mercado mais adequado ao modo (seguro ou risco).
 
-2. Sê DIRETO e PRÁTICO. Sem textos longos ou análises genéricas.
-3. Foco em aposta clara e confiável.
+ESTRUTURA DA RESPOSTA:
+- aposta_final: A aposta escolhida (ex: "Under 1.5", "Vitória Porto", "Ambas Marcam Não", "Dupla Chance 1X")
+- odd: Odd aproximada desta aposta específica
+- probabilidade: Percentagem de sucesso (número inteiro)
+- motivo: UMA frase curta justificando
 
-RESPONDE APENAS com este JSON exato:
+EXEMPLOS DE APOSTAS VÁLIDAS:
+- Modo Seguro: "Under 0.5", "Under 1.5", "Dupla Chance 1X", "Empate ou Vitória Casa"
+- Modo Risco: "Over 2.5", "Vitória Benfica", "Ambas Marcam Sim", "Handicap -1"
+
+RESPONDE APENAS com este JSON:
 {
   "jogos": [
     {
       "equipa_a": "Nome",
       "equipa_b": "Nome",
-      "resultado_1x2": "Vitória [Equipa]",
-      "mercado_gols": "Over 2.5",
-      "aposta_extra": "Ambas Marcam Sim",
-      "odd_final": 1.85,
-      "probabilidade": 72,
-      "motivo": "Frase curta explicativa"
+      "aposta_final": "Under 1.5",
+      "odd": 1.35,
+      "probabilidade": 78,
+      "motivo": "Frase curta"
     }
   ],
-  "odd_total": 3.45,
-  "probabilidade": 65,
-  "analise_geral": "Resumo de 1 frase sobre o bilhete"
+  "odd_total": 2.15,
+  "probabilidade_total": 68,
+  "resumo": "Frase curta sobre o bilhete"
 }`;
 
     console.log("Enviando request para Lovable AI...");
