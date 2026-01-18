@@ -11,10 +11,8 @@ import {
 import {
   Bell,
   DollarSign,
-  ArrowDownCircle,
   UserPlus,
   Clock,
-  CheckCircle,
   X
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,7 +20,7 @@ import { pt } from 'date-fns/locale';
 
 interface Notification {
   id: string;
-  type: 'deposito' | 'levantamento' | 'usuario';
+  type: 'deposito' | 'usuario';
   title: string;
   message: string;
   timestamp: Date;
@@ -39,8 +37,7 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingCounts, setPendingCounts] = useState({
-    depositos: 0,
-    levantamentos: 0
+    depositos: 0
   });
 
   const fetchPendingCounts = useCallback(async () => {
@@ -48,12 +45,12 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
       const { data: transacoes } = await supabase
         .from('transacoes')
         .select('id, tipo, status')
-        .eq('status', 'pendente');
+        .eq('status', 'pendente')
+        .eq('tipo', 'deposito');
 
-      const depositos = transacoes?.filter(t => t.tipo === 'deposito').length || 0;
-      const levantamentos = transacoes?.filter(t => t.tipo === 'levantamento').length || 0;
+      const depositos = transacoes?.length || 0;
 
-      setPendingCounts({ depositos, levantamentos });
+      setPendingCounts({ depositos });
     } catch (error) {
       console.error('Error fetching pending counts:', error);
     }
@@ -107,39 +104,6 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
       )
       .subscribe();
 
-    // Subscribe to new withdrawals
-    const withdrawalChannel = supabase
-      .channel('admin-withdrawals')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'transacoes',
-          filter: 'tipo=eq.levantamento'
-        },
-        async (payload) => {
-          const transaction = payload.new as { id: string; user_id: string; valor: number };
-          
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('nome_completo')
-            .eq('id', transaction.user_id)
-            .single();
-
-          addNotification({
-            type: 'levantamento',
-            title: 'Novo Levantamento',
-            message: `${profile?.nome_completo || 'Usuário'} solicitou ${Number(transaction.valor).toLocaleString()} Kz`,
-            timestamp: new Date(),
-            data: { transacao_id: transaction.id }
-          });
-
-          fetchPendingCounts();
-        }
-      )
-      .subscribe();
-
     // Subscribe to new users
     const userChannel = supabase
       .channel('admin-users')
@@ -182,7 +146,6 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
 
     return () => {
       supabase.removeChannel(depositChannel);
-      supabase.removeChannel(withdrawalChannel);
       supabase.removeChannel(userChannel);
       supabase.removeChannel(updateChannel);
     };
@@ -217,9 +180,6 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
         case 'deposito':
           onNavigate('depositos');
           break;
-        case 'levantamento':
-          onNavigate('levantamentos');
-          break;
         case 'usuario':
           onNavigate('usuarios');
           break;
@@ -231,14 +191,12 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
     switch (type) {
       case 'deposito':
         return <DollarSign className="w-4 h-4 text-green-400" />;
-      case 'levantamento':
-        return <ArrowDownCircle className="w-4 h-4 text-red-400" />;
       case 'usuario':
         return <UserPlus className="w-4 h-4 text-blue-400" />;
     }
   };
 
-  const totalPending = pendingCounts.depositos + pendingCounts.levantamentos;
+  const totalPending = pendingCounts.depositos;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -281,10 +239,7 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
             <div className="flex items-center gap-2 text-xs text-amber-300">
               <Clock className="w-4 h-4" />
               <span>
-                {pendingCounts.depositos > 0 && `${pendingCounts.depositos} depósito(s)`}
-                {pendingCounts.depositos > 0 && pendingCounts.levantamentos > 0 && ' e '}
-                {pendingCounts.levantamentos > 0 && `${pendingCounts.levantamentos} levantamento(s)`}
-                {' aguardando aprovação'}
+                {pendingCounts.depositos} depósito(s) aguardando aprovação
               </span>
             </div>
           </div>

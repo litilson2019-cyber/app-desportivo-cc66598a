@@ -55,6 +55,13 @@ export default function Index() {
             </p>
           </div>
 
+          {/* Aviso Fixo */}
+          <Card className="p-3 bg-amber-500/10 border-amber-500/30 rounded-xl">
+            <p className="text-xs text-amber-300 text-center">
+              ⚠️ Este aplicativo não possui planos nem permite levantamentos. Todo o saldo, incluindo bónus, é apenas para uso interno.
+            </p>
+          </Card>
+
           <Carousel
             opts={{ loop: true }}
             plugins={[autoplayPlugin.current]}

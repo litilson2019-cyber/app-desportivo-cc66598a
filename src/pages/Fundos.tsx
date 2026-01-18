@@ -311,14 +311,22 @@ export default function Fundos() {
         <div className="max-w-2xl mx-auto pt-6 space-y-6">
           <h1 className="text-3xl font-bold text-foreground">Fundos</h1>
 
+          {/* Aviso de Saldo Interno */}
+          <Card className="p-3 bg-amber-500/10 border-amber-500/30 rounded-xl">
+            <p className="text-xs text-amber-300 text-center">
+              ⚠️ Este aplicativo não possui planos nem permite levantamentos. Todo o saldo, incluindo bónus, é apenas para uso interno.
+            </p>
+          </Card>
+
           <Card className="p-6 bg-gradient-primary shadow-strong rounded-2xl">
             <div className="flex items-center gap-3 mb-2">
               <Wallet className="w-6 h-6 text-white" />
-              <span className="text-white/90 text-sm font-medium">Saldo Disponível</span>
+              <span className="text-white/90 text-sm font-medium">Saldo de Uso Interno</span>
             </div>
             <p className="text-4xl font-bold text-white">
               {saldo.toFixed(2)} <span className="text-xl">Kzs</span>
             </p>
+            <p className="text-xs text-white/60 mt-2">Saldo não sacável – apenas para uso interno</p>
           </Card>
 
           {/* Botões de Navegação */}
