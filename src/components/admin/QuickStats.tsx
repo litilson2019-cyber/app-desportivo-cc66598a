@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, ArrowDownCircle, Users, FileText } from 'lucide-react';
+import { DollarSign, Users, FileText } from 'lucide-react';
 
 interface QuickStatsProps {
   onNavigate?: (tab: string) => void;
@@ -10,7 +10,6 @@ interface QuickStatsProps {
 export const QuickStats = ({ onNavigate }: QuickStatsProps) => {
   const [stats, setStats] = useState({
     depositosPendentes: 0,
-    levantamentosPendentes: 0,
     usuariosHoje: 0,
     bilhetesHoje: 0
   });
@@ -63,7 +62,8 @@ export const QuickStats = ({ onNavigate }: QuickStatsProps) => {
       const [transacoesRes, profilesRes, bilhetesRes] = await Promise.all([
         supabase
           .from('transacoes')
-          .select('id, tipo, status'),
+          .select('id, tipo, status')
+          .eq('tipo', 'deposito'),
         supabase
           .from('profiles')
           .select('id, created_at')
@@ -76,15 +76,11 @@ export const QuickStats = ({ onNavigate }: QuickStatsProps) => {
 
       const transacoes = transacoesRes.data || [];
       const depositosPendentes = transacoes.filter(
-        t => t.tipo === 'deposito' && t.status === 'pendente'
-      ).length;
-      const levantamentosPendentes = transacoes.filter(
-        t => t.tipo === 'levantamento' && t.status === 'pendente'
+        t => t.status === 'pendente'
       ).length;
 
       setStats({
         depositosPendentes,
-        levantamentosPendentes,
         usuariosHoje: profilesRes.data?.length || 0,
         bilhetesHoje: bilhetesRes.data?.length || 0
       });
@@ -102,15 +98,6 @@ export const QuickStats = ({ onNavigate }: QuickStatsProps) => {
       bgColor: 'bg-yellow-500/20',
       tab: 'depositos',
       show: stats.depositosPendentes > 0
-    },
-    {
-      icon: ArrowDownCircle,
-      label: 'Lev.',
-      value: stats.levantamentosPendentes,
-      color: 'text-red-400',
-      bgColor: 'bg-red-500/20',
-      tab: 'levantamentos',
-      show: stats.levantamentosPendentes > 0
     },
     {
       icon: Users,

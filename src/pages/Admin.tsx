@@ -14,9 +14,7 @@ import {
   Settings,
   ClipboardList,
   UserCog,
-  ArrowDownCircle,
-  Link2,
-  TrendingUp
+  Link2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DepositsManagement } from '@/components/admin/DepositsManagement';
@@ -26,9 +24,7 @@ import { TicketsManagement } from '@/components/admin/TicketsManagement';
 import { SystemSettings } from '@/components/admin/SystemSettings';
 import { AdminLogs } from '@/components/admin/AdminLogs';
 import { TeamManagement } from '@/components/admin/TeamManagement';
-import { WithdrawalsManagement } from '@/components/admin/WithdrawalsManagement';
 import { ReferralsManagement } from '@/components/admin/ReferralsManagement';
-import { PlansManagement } from '@/components/admin/PlansManagement';
 import { AdminNotifications } from '@/components/admin/AdminNotifications';
 import { QuickStats } from '@/components/admin/QuickStats';
 
@@ -145,12 +141,6 @@ const Admin = () => {
                 Depósitos
               </TabsTrigger>
             )}
-            {permissions.depositos && (
-              <TabsTrigger value="levantamentos" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
-                <ArrowDownCircle className="w-4 h-4" />
-                Levant.
-              </TabsTrigger>
-            )}
             {permissions.usuarios && (
               <TabsTrigger value="usuarios" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <Users className="w-4 h-4" />
@@ -173,12 +163,6 @@ const Admin = () => {
               <TabsTrigger value="configuracoes" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <Settings className="w-4 h-4" />
                 Config
-              </TabsTrigger>
-            )}
-            {permissions.configuracoes && (
-              <TabsTrigger value="planos" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
-                <TrendingUp className="w-4 h-4" />
-                Planos
               </TabsTrigger>
             )}
             {permissions.logs && (
@@ -208,12 +192,6 @@ const Admin = () => {
           </TabsContent>
         )}
 
-        {permissions.depositos && (
-          <TabsContent value="levantamentos" className="mt-0">
-            <WithdrawalsManagement />
-          </TabsContent>
-        )}
-
         {permissions.usuarios && (
           <TabsContent value="usuarios" className="mt-0">
             <UserManagement />
@@ -235,12 +213,6 @@ const Admin = () => {
         {permissions.configuracoes && (
           <TabsContent value="configuracoes" className="mt-0">
             <SystemSettings />
-          </TabsContent>
-        )}
-
-        {permissions.configuracoes && (
-          <TabsContent value="planos" className="mt-0">
-            <PlansManagement />
           </TabsContent>
         )}
 

@@ -12,7 +12,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   RefreshCw,
-  Calendar,
   Wallet,
   Clock,
   CheckCircle,
@@ -34,15 +33,12 @@ interface DashboardStats {
   bilhetesSeguro: number;
   saldoTotal: number;
   depositosHoje: number;
-  levantamentosPendentes: number;
-  levantamentosAprovados: number;
   taxaCrescimento: number;
 }
 
 interface ChartData {
   data: string;
   depositos: number;
-  levantamentos: number;
   bilhetes: number;
 }
 
@@ -68,8 +64,6 @@ export const FinancialDashboard = () => {
     bilhetesSeguro: 0,
     saldoTotal: 0,
     depositosHoje: 0,
-    levantamentosPendentes: 0,
-    levantamentosAprovados: 0,
     taxaCrescimento: 0
   });
   const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -127,13 +121,14 @@ export const FinancialDashboard = () => {
         return date >= periodoAnteriorInicio && date < periodoAtualInicio;
       }).length || 0;
 
-      // Fetch all transactions
+      // Fetch all transactions (only deposits)
       const { data: transacoes } = await supabase
         .from('transacoes')
-        .select('id, valor, status, tipo, created_at');
+        .select('id, valor, status, tipo, created_at')
+        .eq('tipo', 'deposito');
 
       // Deposits
-      const depositos = transacoes?.filter(t => t.tipo === 'deposito') || [];
+      const depositos = transacoes || [];
       const totalDepositos = depositos.length;
       const depositosAprovados = depositos.filter(t => t.status === 'aprovado').reduce((acc, t) => acc + Number(t.valor), 0);
       const depositosPendentes = depositos.filter(t => t.status === 'pendente').length;
@@ -151,11 +146,6 @@ export const FinancialDashboard = () => {
           return date >= periodoAnteriorInicio && date < periodoAtualInicio && t.status === 'aprovado';
         })
         .reduce((acc, t) => acc + Number(t.valor), 0);
-
-      // Withdrawals
-      const levantamentos = transacoes?.filter(t => t.tipo === 'levantamento') || [];
-      const levantamentosPendentes = levantamentos.filter(t => t.status === 'pendente').length;
-      const levantamentosAprovados = levantamentos.filter(t => t.status === 'aprovado').reduce((acc, t) => acc + Number(t.valor), 0);
 
       // Fetch tickets stats
       const { data: bilhetes } = await supabase
@@ -191,8 +181,6 @@ export const FinancialDashboard = () => {
         bilhetesSeguro,
         saldoTotal,
         depositosHoje,
-        levantamentosPendentes,
-        levantamentosAprovados,
         taxaCrescimento
       });
 
@@ -233,11 +221,6 @@ export const FinancialDashboard = () => {
           return tDate === dateStr && t.status === 'aprovado';
         }).reduce((acc, t) => acc + Number(t.valor), 0) || 0;
 
-        const dayWithdrawals = levantamentos?.filter(t => {
-          const tDate = new Date(t.created_at).toISOString().split('T')[0];
-          return tDate === dateStr && t.status === 'aprovado';
-        }).reduce((acc, t) => acc + Number(t.valor), 0) || 0;
-
         const dayTickets = bilhetes?.filter(b => {
           const bDate = new Date(b.created_at).toISOString().split('T')[0];
           return bDate === dateStr;
@@ -246,7 +229,6 @@ export const FinancialDashboard = () => {
         chartDays.push({
           data: date.toLocaleDateString('pt-AO', { day: '2-digit', month: '2-digit' }),
           depositos: dayDeposits / 1000,
-          levantamentos: dayWithdrawals / 1000,
           bilhetes: dayTickets
         });
       }
@@ -306,16 +288,14 @@ export const FinancialDashboard = () => {
       </div>
 
       {/* Alerts for pending items */}
-      {(stats.depositosPendentes > 0 || stats.levantamentosPendentes > 0) && (
+      {stats.depositosPendentes > 0 && (
         <Card className="bg-amber-500/10 border-amber-500/30">
           <CardContent className="p-3 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-400" />
             <div className="flex-1 text-sm">
               <span className="text-amber-300 font-medium">Atenção: </span>
               <span className="text-amber-200/80">
-                {stats.depositosPendentes > 0 && `${stats.depositosPendentes} depósito(s) pendente(s)`}
-                {stats.depositosPendentes > 0 && stats.levantamentosPendentes > 0 && ' e '}
-                {stats.levantamentosPendentes > 0 && `${stats.levantamentosPendentes} levantamento(s) pendente(s)`}
+                {stats.depositosPendentes} depósito(s) pendente(s)
               </span>
             </div>
           </CardContent>
@@ -397,9 +377,9 @@ export const FinancialDashboard = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-amber-300/70">Saldo Total</p>
+                <p className="text-xs text-amber-300/70">Saldo Total Interno</p>
                 <p className="text-2xl font-bold text-amber-300">{(stats.saldoTotal / 1000).toFixed(0)}k</p>
-                <p className="text-xs text-muted-foreground">Kz na plataforma</p>
+                <p className="text-xs text-muted-foreground">Kz (uso interno)</p>
               </div>
               <Wallet className="w-8 h-8 text-amber-400/50" />
             </div>
@@ -481,12 +461,12 @@ export const FinancialDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Deposits vs Withdrawals Chart */}
+      {/* Deposits Chart */}
       <Card className="bg-card/50 backdrop-blur border-border/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
-            Depósitos vs Levantamentos
+            Depósitos Aprovados
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -508,25 +488,11 @@ export const FinancialDashboard = () => {
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px'
                   }}
-                  formatter={(value: number, name: string) => [
-                    `${value.toFixed(1)}k Kz`, 
-                    name === 'depositos' ? 'Depósitos' : 'Levantamentos'
-                  ]}
+                  formatter={(value: number) => [`${value.toFixed(1)}k Kz`, 'Depósitos']}
                 />
                 <Bar dataKey="depositos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="depositos" />
-                <Bar dataKey="levantamentos" fill="hsl(0, 84%, 60%)" radius={[4, 4, 0, 0]} name="levantamentos" />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div className="flex justify-center gap-4 mt-2">
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded-full bg-primary" />
-              <span className="text-muted-foreground">Depósitos</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} />
-              <span className="text-muted-foreground">Levantamentos</span>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -576,8 +542,8 @@ export const FinancialDashboard = () => {
       <div className="grid grid-cols-2 gap-3">
         <Card className="bg-card/50 backdrop-blur border-border/50">
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Levantamentos Pagos</p>
-            <p className="text-xl font-bold text-red-400">{(stats.levantamentosAprovados / 1000).toFixed(0)}k Kz</p>
+            <p className="text-xs text-muted-foreground">Bilhetes Hoje</p>
+            <p className="text-xl font-bold text-purple-400">{stats.bilhetesHoje}</p>
           </CardContent>
         </Card>
         <Card className="bg-card/50 backdrop-blur border-border/50">
