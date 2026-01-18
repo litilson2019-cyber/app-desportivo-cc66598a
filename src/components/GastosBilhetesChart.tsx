@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, parseISO, startOfDay } from "date-fns";
+import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval, parseISO, startOfDay } from "date-fns";
 import { pt } from "date-fns/locale";
 
 interface Bilhete {
@@ -11,16 +11,19 @@ interface Bilhete {
   created_at: string;
 }
 
+interface SystemConfig {
+  preco_modo_arriscado: number;
+  preco_modo_seguro: number;
+}
+
 interface GastosBilhetesChartProps {
   bilhetes: Bilhete[];
+  config: SystemConfig;
 }
 
 type PeriodoFiltro = "7dias" | "30dias" | "semana";
 
-const PRECO_ARRISCADO = 300;
-const PRECO_SEGURO = 500;
-
-export function GastosBilhetesChart({ bilhetes }: GastosBilhetesChartProps) {
+export function GastosBilhetesChart({ bilhetes, config }: GastosBilhetesChartProps) {
   const [periodo, setPeriodo] = useState<PeriodoFiltro>("7dias");
 
   const dadosGrafico = useMemo(() => {
@@ -61,13 +64,13 @@ export function GastosBilhetesChart({ bilhetes }: GastosBilhetesChartProps) {
       return {
         data: format(dia, periodo === "30dias" ? "dd/MM" : "EEE", { locale: pt }),
         dataCompleta: format(dia, "dd/MM/yyyy", { locale: pt }),
-        risco: modoRisco * PRECO_ARRISCADO,
-        seguro: modoSeguro * PRECO_SEGURO,
+        risco: modoRisco * config.preco_modo_arriscado,
+        seguro: modoSeguro * config.preco_modo_seguro,
         bilhetesRisco: modoRisco,
         bilhetesSeguro: modoSeguro,
       };
     });
-  }, [bilhetes, periodo]);
+  }, [bilhetes, periodo, config]);
 
   const totalPeriodo = useMemo(() => {
     return dadosGrafico.reduce(

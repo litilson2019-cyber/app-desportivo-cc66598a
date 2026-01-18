@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, X, Loader2, Sparkles, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSystemConfig } from "@/hooks/useSystemConfig";
 
 interface Jogo {
   id: string;
@@ -31,9 +32,6 @@ interface ResultadoAnalise {
   resumo: string;
 }
 
-const PRECO_RISCO = 300;
-const PRECO_SEGURO = 500;
-
 export default function Construcao() {
   const [jogos, setJogos] = useState<Jogo[]>([
     { id: "1", equipa_a: "", equipa_b: "", odd_a: "", odd_b: "" },
@@ -45,7 +43,11 @@ export default function Construcao() {
   const [loadingSaldo, setLoadingSaldo] = useState(true);
   const { toast } = useToast();
 
-  const precoAtual = modo === "risco" ? PRECO_RISCO : PRECO_SEGURO;
+  // Hook para buscar configurações do sistema
+  const { config, loading: configLoading } = useSystemConfig();
+
+  const precoAtual = modo === "risco" ? config.preco_modo_arriscado : config.preco_modo_seguro;
+  const limiteJogos = modo === "seguro" ? config.limite_jogos_seguro : config.limite_jogos_arriscado;
   const temSaldoSuficiente = saldo >= precoAtual;
 
   useEffect(() => {
@@ -74,8 +76,6 @@ export default function Construcao() {
   };
 
   const addJogo = () => {
-    const limiteJogos = modo === "seguro" ? 3 : modo === "risco" ? 5 : 12;
-    
     if (jogos.length >= limiteJogos) {
       toast({
         title: "Limite atingido",
@@ -237,7 +237,7 @@ export default function Construcao() {
           <div className="mt-4 p-3 bg-background rounded-xl flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Seu saldo:</span>
             <span className={`font-bold ${temSaldoSuficiente ? "text-success" : "text-destructive"}`}>
-              {loadingSaldo ? "..." : `${saldo.toFixed(2)} Kz`}
+              {loadingSaldo || configLoading ? "..." : `${saldo.toFixed(2)} Kz`}
             </span>
           </div>
             
@@ -247,9 +247,9 @@ export default function Construcao() {
                 {modo === "risco" ? "Modo Arriscado" : "Modo Seguro"}
               </h3>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• {modo === "risco" ? "Até 5 jogos" : "Até 3 jogos"}</li>
+                <li>• {modo === "risco" ? `Até ${config.limite_jogos_arriscado} jogos` : `Até ${config.limite_jogos_seguro} jogos`}</li>
                 <li>• {modo === "risco" ? "Alto potencial de retorno" : "Alta estabilidade"}</li>
-                <li>• Preço por análise: <span className="font-semibold text-foreground">{precoAtual} Kz</span></li>
+                <li>• Preço por análise: <span className="font-semibold text-foreground">{configLoading ? "..." : `${precoAtual} Kz`}</span></li>
               </ul>
             </div>
           )}
@@ -325,7 +325,7 @@ export default function Construcao() {
               </Card>
             ))}
 
-            {jogos.length < (modo === "seguro" ? 3 : modo === "risco" ? 5 : 12) && (
+            {jogos.length < limiteJogos && (
               <Button
                 onClick={addJogo}
                 variant="outline"
@@ -339,7 +339,7 @@ export default function Construcao() {
 
           <Button
             onClick={handleConstruirBilhete}
-            disabled={loading || loadingSaldo || !temSaldoSuficiente}
+            disabled={loading || loadingSaldo || configLoading || !temSaldoSuficiente}
             className={`w-full rounded-xl h-14 text-lg font-bold transition-all ${
               temSaldoSuficiente 
                 ? "bg-gradient-primary hover:opacity-90 text-white" 

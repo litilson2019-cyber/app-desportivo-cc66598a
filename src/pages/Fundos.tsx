@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { GastosBilhetesChart } from "@/components/GastosBilhetesChart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useSystemConfig } from "@/hooks/useSystemConfig";
 
 interface Transacao {
   id: string;
@@ -69,15 +70,13 @@ export default function Fundos() {
   const [avisoAberto, setAvisoAberto] = useState(false);
   const { toast } = useToast();
 
+  // Hook para buscar configurações do sistema (preços e métodos de depósito)
+  const { config, metodosDeposito, loading: configLoading } = useSystemConfig();
+
   const depositosVisiveis = showAllDeposits ? transacoes : transacoes.slice(0, 5);
 
-  const bancoIBANs: Record<string, string> = {
-    "BFA": "AO06 0055 0000 1234 5678 9012 3",
-    "BIC": "AO06 0040 0000 1234 5678 9012 3",
-    "BAI": "AO06 0010 0000 1234 5678 9012 3",
-    "ATLANTICO": "AO06 0050 0000 1234 5678 9012 3",
-    "Multicaixa Express": "923 456 789"
-  };
+  // Método selecionado para mostrar dados de pagamento
+  const metodoSelecionado = metodosDeposito.find((m) => m.nome === banco);
 
   useEffect(() => {
     loadData();
@@ -180,6 +179,29 @@ export default function Fundos() {
     };
   }, [toast]);
 
+  // Recalcular resumo quando config ou bilhetes mudarem
+  useEffect(() => {
+    if (bilhetes.length > 0 && !configLoading) {
+      const normalizarModo = (m: string | null) => (m ?? "").trim().toLowerCase();
+      const isSeguro = (m: string | null) => normalizarModo(m) === "seguro";
+
+      const modoSeguro = bilhetes.filter((b) => isSeguro(b.modo)).length;
+      const modoRisco = bilhetes.length - modoSeguro;
+
+      const gastoRisco = modoRisco * config.preco_modo_arriscado;
+      const gastoSeguro = modoSeguro * config.preco_modo_seguro;
+
+      setResumo({
+        modoRisco,
+        modoSeguro,
+        total: modoRisco + modoSeguro,
+        gastoRisco,
+        gastoSeguro,
+        gastoTotal: gastoRisco + gastoSeguro,
+      });
+    }
+  }, [bilhetes, config, configLoading]);
+
   const loadData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -213,13 +235,7 @@ export default function Fundos() {
 
       setAjustes(ajustesData || []);
 
-      // Carregar resumo de gastos
-      const PRECO_ARRISCADO = 300;
-      const PRECO_SEGURO = 500;
-
-      const normalizarModo = (m: string | null) => (m ?? "").trim().toLowerCase();
-      const isSeguro = (m: string | null) => normalizarModo(m) === "seguro";
-
+      // Carregar bilhetes
       const { data: bilhetesData } = await supabase
         .from("bilhetes")
         .select("id, modo, created_at")
@@ -228,22 +244,6 @@ export default function Fundos() {
 
       if (bilhetesData) {
         setBilhetes(bilhetesData);
-
-        // Regra robusta: tudo que NÃO for "seguro" conta como "risco"
-        // (cobre null, "arriscado", "risco", variações de maiúsculas/espacos, etc.)
-        const modoSeguro = bilhetesData.filter((b) => isSeguro(b.modo)).length;
-        const modoRisco = bilhetesData.length - modoSeguro;
-
-        const gastoRisco = modoRisco * PRECO_ARRISCADO;
-        const gastoSeguro = modoSeguro * PRECO_SEGURO;
-        setResumo({
-          modoRisco,
-          modoSeguro,
-          total: modoRisco + modoSeguro,
-          gastoRisco,
-          gastoSeguro,
-          gastoTotal: gastoRisco + gastoSeguro,
-        });
       }
     } catch (error: any) {
       toast({
@@ -283,8 +283,8 @@ export default function Fundos() {
 
     if (!banco) {
       toast({
-        title: "Selecione um banco",
-        description: "Por favor, selecione o banco do depósito.",
+        title: "Selecione um método",
+        description: "Por favor, selecione o método de depósito.",
         variant: "destructive",
       });
       return;
@@ -508,28 +508,44 @@ export default function Fundos() {
               </div>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="banco">Banco</Label>
+                  <Label htmlFor="banco">Método de Pagamento</Label>
                   <Select value={banco} onValueChange={setBanco}>
                     <SelectTrigger className="rounded-xl mt-1.5">
-                      <SelectValue placeholder="Selecione o banco" />
+                      <SelectValue placeholder="Selecione o método" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="BFA">BFA</SelectItem>
-                      <SelectItem value="BIC">BIC</SelectItem>
-                      <SelectItem value="BAI">BAI</SelectItem>
-                      <SelectItem value="ATLANTICO">ATLANTICO</SelectItem>
-                      <SelectItem value="Multicaixa Express">Multicaixa Express</SelectItem>
+                      {configLoading ? (
+                        <SelectItem value="" disabled>Carregando...</SelectItem>
+                      ) : metodosDeposito.length === 0 ? (
+                        <SelectItem value="" disabled>Nenhum método disponível</SelectItem>
+                      ) : (
+                        metodosDeposito.map((metodo) => (
+                          <SelectItem key={metodo.id} value={metodo.nome}>
+                            {metodo.nome}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {banco && (
+                {metodoSelecionado && (
                   <div className="p-3 bg-muted/50 rounded-xl border border-border">
+                    {metodoSelecionado.titular_conta && (
+                      <div className="mb-2">
+                        <Label className="text-xs text-muted-foreground">Titular</Label>
+                        <p className="font-semibold text-foreground text-sm">
+                          {metodoSelecionado.titular_conta}
+                        </p>
+                      </div>
+                    )}
                     <Label className="text-xs text-muted-foreground">
-                      {banco === "Multicaixa Express" ? "Número Express" : "IBAN"}
+                      {metodoSelecionado.tipo === "express" ? "Número Express" : "IBAN"}
                     </Label>
                     <p className="font-mono font-semibold text-foreground mt-1">
-                      {bancoIBANs[banco]}
+                      {metodoSelecionado.tipo === "express"
+                        ? metodoSelecionado.numero_express
+                        : metodoSelecionado.iban}
                     </p>
                   </div>
                 )}
@@ -821,7 +837,7 @@ export default function Fundos() {
                       </div>
                       <div>
                         <span className="font-medium text-foreground text-sm block">Modo Arriscado</span>
-                        <span className="text-xs text-muted-foreground">{resumo.modoRisco} bilhetes × 300 Kz</span>
+                        <span className="text-xs text-muted-foreground">{resumo.modoRisco} bilhetes × {config.preco_modo_arriscado} Kz</span>
                       </div>
                     </div>
                     <span className="font-bold text-foreground text-sm">{resumo.gastoRisco.toLocaleString()} Kz</span>
@@ -833,7 +849,7 @@ export default function Fundos() {
                       </div>
                       <div>
                         <span className="font-medium text-foreground text-sm block">Modo Seguro</span>
-                        <span className="text-xs text-muted-foreground">{resumo.modoSeguro} bilhetes × 500 Kz</span>
+                        <span className="text-xs text-muted-foreground">{resumo.modoSeguro} bilhetes × {config.preco_modo_seguro} Kz</span>
                       </div>
                     </div>
                     <span className="font-bold text-foreground text-sm">{resumo.gastoSeguro.toLocaleString()} Kz</span>
@@ -849,7 +865,7 @@ export default function Fundos() {
               </Card>
               
               {/* Gráfico de Gastos por Período */}
-              <GastosBilhetesChart bilhetes={bilhetes} />
+              <GastosBilhetesChart bilhetes={bilhetes} config={config} />
             </>
           )}
         </div>
