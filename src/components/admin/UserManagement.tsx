@@ -117,6 +117,23 @@ export const UserManagement = () => {
     }
   };
 
+  // Função para registrar log de ação administrativa
+  const logAdminAction = async (acao: string, detalhes: Record<string, string | number | boolean | null | undefined>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from('admin_logs').insert as any)([{
+        admin_id: user.id,
+        acao,
+        detalhes
+      }]);
+    } catch (error) {
+      console.error('Erro ao registrar log:', error);
+    }
+  };
+
   const handleBlockUser = async (user: Profile) => {
     try {
       const newStatus = !user.bloqueado;
@@ -126,6 +143,13 @@ export const UserManagement = () => {
         .eq('id', user.id);
 
       if (error) throw error;
+
+      // Registrar log de bloqueio/desbloqueio
+      await logAdminAction(newStatus ? 'bloquear_usuario' : 'desbloquear_usuario', {
+        user_id: user.id,
+        user_nome: user.nome_completo,
+        novo_status: newStatus
+      });
 
       toast.success(newStatus ? 'Usuário bloqueado' : 'Usuário desbloqueado');
       fetchUsers();
@@ -169,6 +193,16 @@ export const UserManagement = () => {
         });
 
       if (logError) throw logError;
+
+      // Registrar log de ajuste de saldo
+      await logAdminAction(adjustType === 'adicionar' ? 'creditar_bonus' : 'debitar_saldo', {
+        user_id: selectedUser.id,
+        user_nome: selectedUser.nome_completo,
+        valor,
+        saldo_anterior: saldoAnterior,
+        saldo_novo: saldoNovo,
+        motivo: adjustMotivo || null
+      });
 
       toast.success(`Saldo ${adjustType === 'adicionar' ? 'adicionado' : 'removido'} com sucesso`);
       setShowAdjustModal(false);
