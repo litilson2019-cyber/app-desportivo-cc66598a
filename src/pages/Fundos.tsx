@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock, ChevronDown, ChevronUp, AlertTriangle, Gift, Plus, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,6 +24,16 @@ interface Transacao {
   banco?: string;
   comprovativo_url?: string;
   motivo_rejeicao?: string;
+}
+
+interface AjusteSaldo {
+  id: string;
+  valor: number;
+  tipo: string;
+  motivo: string | null;
+  saldo_anterior: number;
+  saldo_novo: number;
+  created_at: string;
 }
 
 interface Bilhete {
@@ -44,6 +54,7 @@ interface ResumoGastos {
 export default function Fundos() {
   const [saldo, setSaldo] = useState(0);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
+  const [ajustes, setAjustes] = useState<AjusteSaldo[]>([]);
   const [valor, setValor] = useState("");
   const [banco, setBanco] = useState("");
   const [comprovativo, setComprovativo] = useState<File | null>(null);
@@ -52,6 +63,7 @@ export default function Fundos() {
   const [resumo, setResumo] = useState<ResumoGastos>({ modoRisco: 0, modoSeguro: 0, total: 0, gastoRisco: 0, gastoSeguro: 0, gastoTotal: 0 });
   const [bilhetes, setBilhetes] = useState<Bilhete[]>([]);
   const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
+  const [historyTab, setHistoryTab] = useState<"depositos" | "bonus">("depositos");
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [showAllDeposits, setShowAllDeposits] = useState(false);
   const [avisoAberto, setAvisoAberto] = useState(false);
@@ -129,9 +141,35 @@ export default function Fundos() {
         )
         .subscribe();
 
+      // Subscrição para ajustes de saldo (bónus)
+      const ajustesChannel = supabase
+        .channel('ajustes-user')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'ajustes_saldo',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('Ajuste de saldo recebido:', payload);
+            loadData();
+            const newAjuste = payload.new as AjusteSaldo;
+            if (newAjuste.tipo === 'adicionar') {
+              toast({
+                title: "🎁 Bónus Creditado!",
+                description: `Foi creditado ${Number(newAjuste.valor).toLocaleString()} Kz na sua conta. ${newAjuste.motivo || ''}`,
+              });
+            }
+          }
+        )
+        .subscribe();
+
       return () => {
         supabase.removeChannel(transacoesChannel);
         supabase.removeChannel(profileChannel);
+        supabase.removeChannel(ajustesChannel);
       };
     };
 
@@ -165,6 +203,15 @@ export default function Fundos() {
         .order("created_at", { ascending: false });
 
       setTransacoes(transacoesData || []);
+
+      // Carregar ajustes de saldo (bónus)
+      const { data: ajustesData } = await supabase
+        .from("ajustes_saldo")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      setAjustes(ajustesData || []);
 
       // Carregar resumo de gastos
       const PRECO_ARRISCADO = 300;
@@ -551,127 +598,213 @@ export default function Fundos() {
             <Card className="p-5 shadow-soft rounded-xl">
               <h2 className="text-lg font-bold mb-4 text-foreground">Históricos</h2>
               
-              {/* Pendentes */}
-              <div className="mb-5">
-                <h3 className="font-semibold text-warning mb-2 text-sm">Pendentes</h3>
-                <div className="space-y-2">
-                  {transacoesPendentes.length === 0 ? (
-                    <p className="text-xs text-muted-foreground py-3 text-center">
-                      Nenhum depósito pendente
-                    </p>
-                  ) : (
-                    transacoesPendentes.map((t) => (
-                      <div key={t.id} className="p-2.5 bg-warning/10 rounded-lg border border-warning/20">
-                        <div className="flex justify-between items-start mb-1.5">
-                          <div>
-                            <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
-                            <p className="text-xs text-muted-foreground">
-                              {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
-                            </p>
-                          </div>
-                          <span className="text-xs font-medium text-warning bg-warning/20 px-2 py-0.5 rounded">
-                            {t.status}
-                          </span>
-                        </div>
-                        {t.comprovativo_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full mt-1.5 h-8 text-xs"
-                            onClick={() => window.open(t.comprovativo_url, "_blank")}
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Ver Comprovativo
-                          </Button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
+              {/* Abas de navegação */}
+              <div className="flex gap-2 mb-4">
+                <Button
+                  variant={historyTab === "depositos" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHistoryTab("depositos")}
+                  className="flex-1"
+                >
+                  Depósitos
+                </Button>
+                <Button
+                  variant={historyTab === "bonus" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHistoryTab("bonus")}
+                  className="flex-1"
+                >
+                  <Gift className="w-3 h-3 mr-1" />
+                  Bónus
+                </Button>
               </div>
 
-              {/* Aprovados */}
-              <div className="mb-5">
-                <h3 className="font-semibold text-success mb-2 text-sm">Aprovados</h3>
-                <div className="space-y-2">
-                  {transacoesAprovadas.length === 0 ? (
-                    <p className="text-xs text-muted-foreground py-3 text-center">
-                      Nenhum depósito aprovado
-                    </p>
-                  ) : (
-                    transacoesAprovadas.map((t) => (
-                      <div key={t.id} className="p-2.5 bg-success/10 rounded-lg border border-success/20">
-                        <div className="flex justify-between items-start mb-1.5">
-                          <div>
-                            <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
-                            <p className="text-xs text-muted-foreground">
-                              {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
-                            </p>
+              {historyTab === "depositos" && (
+                <>
+                  {/* Pendentes */}
+                  <div className="mb-5">
+                    <h3 className="font-semibold text-warning mb-2 text-sm">Pendentes</h3>
+                    <div className="space-y-2">
+                      {transacoesPendentes.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-3 text-center">
+                          Nenhum depósito pendente
+                        </p>
+                      ) : (
+                        transacoesPendentes.map((t) => (
+                          <div key={t.id} className="p-2.5 bg-warning/10 rounded-lg border border-warning/20">
+                            <div className="flex justify-between items-start mb-1.5">
+                              <div>
+                                <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
+                                </p>
+                              </div>
+                              <span className="text-xs font-medium text-warning bg-warning/20 px-2 py-0.5 rounded">
+                                {t.status}
+                              </span>
+                            </div>
+                            {t.comprovativo_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full mt-1.5 h-8 text-xs"
+                                onClick={() => window.open(t.comprovativo_url, "_blank")}
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                Ver Comprovativo
+                              </Button>
+                            )}
                           </div>
-                          <span className="text-xs font-medium text-success bg-success/20 px-2 py-0.5 rounded">
-                            {t.status}
-                          </span>
-                        </div>
-                        {t.comprovativo_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full mt-1.5 h-8 text-xs"
-                            onClick={() => window.open(t.comprovativo_url, "_blank")}
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Ver Comprovativo
-                          </Button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
 
-              {/* Rejeitados */}
-              <div>
-                <h3 className="font-semibold text-destructive mb-2 text-sm">Rejeitados</h3>
+                  {/* Aprovados */}
+                  <div className="mb-5">
+                    <h3 className="font-semibold text-success mb-2 text-sm">Aprovados</h3>
+                    <div className="space-y-2">
+                      {transacoesAprovadas.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-3 text-center">
+                          Nenhum depósito aprovado
+                        </p>
+                      ) : (
+                        transacoesAprovadas.map((t) => (
+                          <div key={t.id} className="p-2.5 bg-success/10 rounded-lg border border-success/20">
+                            <div className="flex justify-between items-start mb-1.5">
+                              <div>
+                                <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
+                                </p>
+                              </div>
+                              <span className="text-xs font-medium text-success bg-success/20 px-2 py-0.5 rounded">
+                                {t.status}
+                              </span>
+                            </div>
+                            {t.comprovativo_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full mt-1.5 h-8 text-xs"
+                                onClick={() => window.open(t.comprovativo_url, "_blank")}
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                Ver Comprovativo
+                              </Button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Rejeitados */}
+                  <div>
+                    <h3 className="font-semibold text-destructive mb-2 text-sm">Rejeitados</h3>
+                    <div className="space-y-2">
+                      {transacoesRejeitadas.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-3 text-center">
+                          Nenhum depósito rejeitado
+                        </p>
+                      ) : (
+                        transacoesRejeitadas.map((t) => (
+                          <div key={t.id} className="p-2.5 bg-destructive/10 rounded-lg border border-destructive/20">
+                            <div className="flex justify-between items-start mb-1.5">
+                              <div>
+                                <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
+                                </p>
+                              </div>
+                              <span className="text-xs font-medium text-destructive bg-destructive/20 px-2 py-0.5 rounded">
+                                {t.status}
+                              </span>
+                            </div>
+                            {t.motivo_rejeicao && (
+                              <p className="text-xs text-destructive mt-1.5 p-2 bg-destructive/5 rounded">
+                                Motivo: {t.motivo_rejeicao}
+                              </p>
+                            )}
+                            {t.comprovativo_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full mt-1.5 h-8 text-xs"
+                                onClick={() => window.open(t.comprovativo_url, "_blank")}
+                              >
+                                <Eye className="w-3 h-3 mr-1" />
+                                Ver Comprovativo
+                              </Button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {historyTab === "bonus" && (
                 <div className="space-y-2">
-                  {transacoesRejeitadas.length === 0 ? (
-                    <p className="text-xs text-muted-foreground py-3 text-center">
-                      Nenhum depósito rejeitado
+                  {ajustes.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-8 text-center">
+                      Nenhum bónus ou ajuste de saldo encontrado
                     </p>
                   ) : (
-                    transacoesRejeitadas.map((t) => (
-                      <div key={t.id} className="p-2.5 bg-destructive/10 rounded-lg border border-destructive/20">
+                    ajustes.map((a) => (
+                      <div 
+                        key={a.id} 
+                        className={`p-2.5 rounded-lg border ${
+                          a.tipo === 'adicionar' 
+                            ? 'bg-success/10 border-success/20' 
+                            : 'bg-destructive/10 border-destructive/20'
+                        }`}
+                      >
                         <div className="flex justify-between items-start mb-1.5">
-                          <div>
-                            <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
-                            <p className="text-xs text-muted-foreground">
-                              {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
-                            </p>
+                          <div className="flex items-center gap-2">
+                            {a.tipo === 'adicionar' ? (
+                              <Plus className="w-4 h-4 text-success" />
+                            ) : (
+                              <Minus className="w-4 h-4 text-destructive" />
+                            )}
+                            <div>
+                              <p className={`font-medium text-sm ${a.tipo === 'adicionar' ? 'text-success' : 'text-destructive'}`}>
+                                {a.tipo === 'adicionar' ? '+' : '-'}{a.valor.toLocaleString()} Kzs
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(a.created_at).toLocaleDateString("pt-PT", {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
                           </div>
-                          <span className="text-xs font-medium text-destructive bg-destructive/20 px-2 py-0.5 rounded">
-                            {t.status}
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                            a.tipo === 'adicionar' 
+                              ? 'bg-success/20 text-success' 
+                              : 'bg-destructive/20 text-destructive'
+                          }`}>
+                            {a.tipo === 'adicionar' ? 'Bónus' : 'Dedução'}
                           </span>
                         </div>
-                        {t.motivo_rejeicao && (
-                          <p className="text-xs text-destructive mt-1.5 p-2 bg-destructive/5 rounded">
-                            Motivo: {t.motivo_rejeicao}
+                        {a.motivo && (
+                          <p className="text-xs text-muted-foreground mt-1.5 p-2 bg-background/50 rounded">
+                            {a.motivo}
                           </p>
                         )}
-                        {t.comprovativo_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full mt-1.5 h-8 text-xs"
-                            onClick={() => window.open(t.comprovativo_url, "_blank")}
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Ver Comprovativo
-                          </Button>
-                        )}
+                        <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t border-border/30">
+                          <span>Saldo anterior: {a.saldo_anterior.toLocaleString()} Kz</span>
+                          <span>Novo saldo: {a.saldo_novo.toLocaleString()} Kz</span>
+                        </div>
                       </div>
                     ))
                   )}
                 </div>
-              </div>
+              )}
             </Card>
           )}
 
