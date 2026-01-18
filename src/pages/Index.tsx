@@ -3,12 +3,14 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Loader2, TrendingUp, Shield, Zap, Eye, Wallet, FileText, Target } from "lucide-react";
+import { Loader2, TrendingUp, Shield, Zap, Eye, Wallet, FileText, Target, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useNavigate } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function Index() {
+  const [avisoAberto, setAvisoAberto] = useState(false);
   const [nome, setNome] = useState("Investidor");
   const navigate = useNavigate();
   const autoplayPlugin = useRef(
@@ -55,12 +57,27 @@ export default function Index() {
             </p>
           </div>
 
-          {/* Aviso Fixo */}
-          <Card className="p-3 bg-amber-500/10 border-amber-500/30 rounded-xl">
-            <p className="text-xs text-amber-300 text-center">
-              ⚠️ Este aplicativo não possui planos nem permite levantamentos. Todo o saldo, incluindo bónus, é apenas para uso interno.
-            </p>
-          </Card>
+          {/* Aviso Fixo Recolhível */}
+          <Collapsible open={avisoAberto} onOpenChange={setAvisoAberto}>
+            <Card className="bg-amber-500/10 border-amber-500/30 rounded-xl overflow-hidden">
+              <CollapsibleTrigger className="w-full p-2 flex items-center justify-center gap-2 hover:bg-amber-500/5 transition-colors">
+                <AlertTriangle className="w-3 h-3 text-amber-400" />
+                <span className="text-xs text-amber-300 font-medium">Aviso Importante</span>
+                {avisoAberto ? (
+                  <ChevronUp className="w-3 h-3 text-amber-400" />
+                ) : (
+                  <ChevronDown className="w-3 h-3 text-amber-400" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-3 pb-3">
+                  <p className="text-xs text-amber-300/80 text-center">
+                    Este aplicativo não possui planos nem permite levantamentos. Todo o saldo, incluindo bónus, é apenas para uso interno.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           <Carousel
             opts={{ loop: true }}

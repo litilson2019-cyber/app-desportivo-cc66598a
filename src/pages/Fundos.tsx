@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock } from "lucide-react";
+import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { GastosBilhetesChart } from "@/components/GastosBilhetesChart";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Transacao {
   id: string;
@@ -53,6 +54,7 @@ export default function Fundos() {
   const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [showAllDeposits, setShowAllDeposits] = useState(false);
+  const [avisoAberto, setAvisoAberto] = useState(false);
   const { toast } = useToast();
 
   const depositosVisiveis = showAllDeposits ? transacoes : transacoes.slice(0, 5);
@@ -311,12 +313,27 @@ export default function Fundos() {
         <div className="max-w-2xl mx-auto pt-6 space-y-6">
           <h1 className="text-3xl font-bold text-foreground">Fundos</h1>
 
-          {/* Aviso de Saldo Interno */}
-          <Card className="p-3 bg-amber-500/10 border-amber-500/30 rounded-xl">
-            <p className="text-xs text-amber-300 text-center">
-              ⚠️ Este aplicativo não possui planos nem permite levantamentos. Todo o saldo, incluindo bónus, é apenas para uso interno.
-            </p>
-          </Card>
+          {/* Aviso de Saldo Interno Recolhível */}
+          <Collapsible open={avisoAberto} onOpenChange={setAvisoAberto}>
+            <Card className="bg-amber-500/10 border-amber-500/30 rounded-xl overflow-hidden">
+              <CollapsibleTrigger className="w-full p-2 flex items-center justify-center gap-2 hover:bg-amber-500/5 transition-colors">
+                <AlertTriangle className="w-3 h-3 text-amber-400" />
+                <span className="text-xs text-amber-300 font-medium">Aviso Importante</span>
+                {avisoAberto ? (
+                  <ChevronUp className="w-3 h-3 text-amber-400" />
+                ) : (
+                  <ChevronDown className="w-3 h-3 text-amber-400" />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-3 pb-3">
+                  <p className="text-xs text-amber-300/80 text-center">
+                    Este aplicativo não possui planos nem permite levantamentos. Todo o saldo, incluindo bónus, é apenas para uso interno.
+                  </p>
+                </div>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
 
           <Card className="p-6 bg-gradient-primary shadow-strong rounded-2xl">
             <div className="flex items-center gap-3 mb-2">
