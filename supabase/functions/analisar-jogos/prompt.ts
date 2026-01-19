@@ -36,124 +36,147 @@ export function normalizeJogos(jogos: unknown): JogoInput[] {
     );
 }
 
-function getFavorita(j: JogoInput) {
+function analisarEquilibrio(j: JogoInput) {
+  const diffOdds = Math.abs(j.odd_a - j.odd_b);
   const favorita = j.odd_a <= j.odd_b ? j.equipa_a : j.equipa_b;
   const naoFavorita = j.odd_a <= j.odd_b ? j.equipa_b : j.equipa_a;
   const oddFavorita = Math.min(j.odd_a, j.odd_b);
   const oddNaoFavorita = Math.max(j.odd_a, j.odd_b);
-  return { favorita, naoFavorita, oddFavorita, oddNaoFavorita };
+  
+  // Classificar equilíbrio do jogo
+  let equilibrio: "muito_desequilibrado" | "desequilibrado" | "equilibrado";
+  if (diffOdds > 1.5) {
+    equilibrio = "muito_desequilibrado";
+  } else if (diffOdds > 0.5) {
+    equilibrio = "desequilibrado";
+  } else {
+    equilibrio = "equilibrado";
+  }
+  
+  return { favorita, naoFavorita, oddFavorita, oddNaoFavorita, equilibrio, diffOdds };
 }
 
 export function buildPrompt(jogos: JogoInput[], modo: Modo) {
   const jogosTexto = jogos
     .map((j, i) => {
-      const { favorita, naoFavorita, oddFavorita, oddNaoFavorita } = getFavorita(j);
-      return `${i + 1}. ${j.equipa_a} (${j.odd_a}) vs ${j.equipa_b} (${j.odd_b}) | favorita: ${favorita} (${oddFavorita}) | não favorita: ${naoFavorita} (${oddNaoFavorita})`;
+      const analise = analisarEquilibrio(j);
+      return `${i + 1}. ${j.equipa_a} (odd: ${j.odd_a}) vs ${j.equipa_b} (odd: ${j.odd_b})
+   → Favorita: ${analise.favorita} (${analise.oddFavorita})
+   → Equilíbrio: ${analise.equilibrio} (diferença de odds: ${analise.diffOdds.toFixed(2)})`;
     })
-    .join("\n");
+    .join("\n\n");
 
   const modoTexto =
     modo === "seguro"
-      ? "Sugestão – Modo Seguro (Mercado estatístico estável)"
-      : "Sugestão – Modo Risco (Mercado de alto retorno)";
+      ? "Modo Seguro (Máxima Consistência)"
+      : "Modo Risco (Retorno Moderado)";
 
-  const regrasModo =
-    modo === "seguro"
-      ? `MODO SEGURO (máxima estabilidade, menor risco) – REGRAS OBRIGATÓRIAS:
+  return `És um analista de apostas desportivas profissional com acesso a dados estatísticos globais.
 
-⚠️ IMPORTANTE: Apenas sugerir mercados UNIVERSAIS que existem em 100% dos jogos.
-
-🚫 MERCADOS PROIBIDOS (NUNCA sugerir no Modo Seguro):
-- Resultado Final (1X2 / Vitória Casa / Vitória Fora / Empate)
-- Ambas Marcam (Sim/Não)
-- Empate Anula Aposta
-- Primeira Equipa a Marcar
-- Total de Golos Exato
-- Parte com Mais Golos
-- Mercados específicos de jogador
-- Mercados de handicap
-
-✅ MERCADOS PERMITIDOS (garantidos em todos os jogos):
-1️⃣ Total de Golos do Jogo (PRIORIDADE MÁXIMA):
-   - "Mais de 1.5 golos no jogo" (Over 1.5) – odd ~1.20-1.40
-   - "Mais de 2.5 golos no jogo" (Over 2.5) – odd ~1.50-1.80
-   
-2️⃣ Golos por Parte (sempre disponível):
-   - "Golo na 2ª parte" – odd ~1.10-1.30
-   - "Mais de 0.5 golos na 2ª parte" – odd ~1.10-1.25
-
-3️⃣ Resultado Dupla Hipótese (sempre disponível):
-   - "Favorita não perde (1X ou X2)" – odd ~1.15-1.35
-
-CRITÉRIOS FINAIS:
-- Priorizar "Mais de 1.5 golos no jogo" como sugestão padrão (existe SEMPRE).
-- Selecionar SEMPRE a ODD MAIS BAIXA dentro dos mercados permitidos.
-- Faixa alvo de odds: 1.15–1.50 (evitar odds abaixo de 1.15 por margem de erro).
-- NÃO sugerir "Over 0.5" pois muitas casas não oferecem este mercado.`
-      : `MODO RISCO (maior retorno com risco controlado) – REGRAS OBRIGATÓRIAS:
-
-⚠️ IMPORTANTE: Apenas sugerir mercados UNIVERSAIS que existem em 100% dos jogos.
-
-✅ MERCADOS PERMITIDOS (garantidos em todos os jogos):
-- Resultado Final (1X2) – Vitória da equipa FAVORITA
-- Ambas Equipas Marcam (Sim ou Não)
-- Mais de 2.5 golos no jogo
-- Mais de 3.5 golos no jogo
-- Resultado ao Intervalo (favorita a ganhar)
-
-🚫 MERCADOS PROIBIDOS no Modo Risco:
-- Mercados usados no Modo Seguro (Over 1.5, golo na 2ª parte, dupla hipótese)
-- Mercados específicos de jogador
-- Mercados de handicap asiático
-- Primeira equipa a marcar
-
-CRITÉRIOS FINAIS:
-- Selecionar ODD MÉDIA do mercado (nunca a mais baixa, nunca a mais alta).
-- PROIBIDO repetir qualquer mercado que seria usado no Modo Seguro.
-- Priorizar "Vitória da Favorita" ou "Ambas Marcam" como sugestões principais.
-- Faixa alvo de odds: 1.50–2.50 (priorizar odds médias).
-- Se sugerires mercado por equipa, TEM de ser a EQUIPA FAVORITA.`;
-
-  return `És um analista de apostas desportivas especializado. NÃO mostres cálculos internos.
-
-⚠️ REGRA CRÍTICA: Sugere APENAS mercados que existem em TODOS os jogos de futebol.
-Não inventes mercados. Usa apenas os mercados universais listados abaixo.
-
-REGRAS GERAIS (ambos os modos):
-- Sugerir APENAS mercados que existem em 100% das casas de apostas.
-- Calcular probabilidade estimada para cada mercado.
-- Apenas sugerir mercados com probabilidade >= 70%.
-- Mostrar apenas UMA sugestão por jogo.
-- NUNCA repetir o mesmo mercado nos dois modos.
-- Se não houver mercado válido, usar motivo: "Sem sugestão segura para este jogo".
-
-${regrasModo}
-
-CONTROLO DE ERROS (validar antes de responder):
-- Se Modo Seguro sugerir Resultado Final (1X2), INVALIDAR e escolher outro.
-- Se Modo Seguro sugerir odd maior que outra disponível no mesmo mercado, INVALIDAR.
-- Se os dois modos retornarem a mesma sugestão, INVALIDAR o Modo Risco e escolher outro.
-- Se sugerires mercado que NÃO está na lista de permitidos, INVALIDAR.
-
-JOGOS:
+=== DADOS DOS JOGOS FORNECIDOS ===
 ${jogosTexto}
 
-RESPOSTA: devolve APENAS JSON válido (sem texto extra, sem markdown), com esta estrutura exata:
+=== TUA MISSÃO ===
+Analisar cada jogo e sugerir UMA aposta por jogo para o ${modoTexto}.
+
+=== METODOLOGIA DE ANÁLISE ===
+Para cada jogo, deves simular uma análise baseada em:
+1. Tendências médias do mercado internacional
+2. Consenso estatístico entre casas de apostas
+3. Histórico de jogos semelhantes entre equipas do mesmo nível
+4. Força relativa das equipas baseada nas odds fornecidas
+5. Padrões estatísticos mais comuns em jogos com este perfil
+
+=== REGRAS DO ${modo === "seguro" ? "MODO SEGURO" : "MODO RISCO"} ===
+
+${modo === "seguro" ? `
+OBJECTIVO: Ganhar pouco mas de forma CONSISTENTE. Segurança máxima.
+
+PROCESSO DE SELEÇÃO:
+1. Pesquisar TODOS os mercados possíveis do jogo
+2. Identificar qual mercado tem a ODD MAIS BAIXA disponível
+3. Selecionar a opção com MAIOR CONSENSO estatístico
+4. Priorizar eventos que ocorrem na MAIORIA dos jogos
+
+MERCADOS A CONSIDERAR (sem limites, explorar todos):
+- Totais de golos (qualquer linha: 0.5, 1.5, 2.5, etc.)
+- Golos por equipa
+- Golos por parte
+- Cantos totais ou por equipa
+- Cartões
+- Dupla hipótese
+- Qualquer mercado estatístico estável
+
+CRITÉRIOS OBRIGATÓRIOS:
+- Escolher SEMPRE a odd mais baixa possível do mercado
+- Probabilidade estimada deve ser >= 75%
+- Priorizar mercados com alta taxa de sucesso histórico
+- Se existir odd mais baixa no mesmo mercado, é PROIBIDO sugerir a mais alta
+- Faixa de odds: 1.05 - 1.60 (quanto mais baixo, melhor)
+
+NOTA: Ganho baixo é totalmente aceitável. A prioridade é NÃO PERDER.
+` : `
+OBJECTIVO: Maior retorno com risco MODERADO e controlado.
+
+PROCESSO DE SELEÇÃO:
+1. Usar a mesma análise global do modo seguro
+2. Identificar mercados com VALOR (odds acima da média mas viáveis)
+3. Selecionar odds MAIORES que a média do mercado
+4. Evitar odds extremas ou altamente improváveis
+
+MERCADOS A CONSIDERAR:
+- Resultado final (1X2) - especialmente vitória da favorita
+- Ambas marcam (Sim/Não)
+- Totais de golos linhas mais altas
+- Resultado ao intervalo
+- Handicaps moderados
+- Qualquer mercado com valor identificado
+
+CRITÉRIOS OBRIGATÓRIOS:
+- Odds devem ser SUPERIORES às do modo seguro
+- Probabilidade estimada deve ser >= 55%
+- Risco controlado, não extremo
+- NUNCA usar a odd mais baixa do mercado
+- NUNCA repetir o mesmo mercado que seria usado no modo seguro
+- Faixa de odds: 1.50 - 3.00 (equilíbrio entre retorno e viabilidade)
+
+NOTA: Procurar VALOR, não segurança absoluta.
+`}
+
+=== CONTROLO DE QUALIDADE ===
+ANTES de responder, verificar:
+1. Se o mercado sugerido tem lógica estatística para este jogo
+2. Se a odd está dentro da faixa correcta para o modo
+3. Se a probabilidade estimada é realista
+4. Se a sugestão seria diferente do outro modo
+
+Se alguma verificação falhar, escolher outro mercado.
+
+=== FORMATO DE RESPOSTA ===
+Devolve APENAS JSON válido (sem texto, sem markdown), com esta estrutura:
+
 {
   "modo": "${modoTexto}",
   "jogos": [
     {
-      "equipa_a": "...",
-      "equipa_b": "...",
-      "aposta_final": "...",
+      "equipa_a": "Nome da equipa A",
+      "equipa_b": "Nome da equipa B",
+      "aposta_final": "Descrição clara do mercado sugerido",
       "odd": 1.00,
-      "probabilidade": 70,
-      "score_confianca": 70,
-      "motivo": "..."
+      "probabilidade": 75,
+      "score_confianca": 80,
+      "grau_risco": "${modo === "seguro" ? "Seguro" : "Moderado"}",
+      "motivo": "Justificação curta baseada em consenso de mercado e estatísticas"
     }
   ],
   "odd_total": 1.00,
   "probabilidade_total": 70,
-  "resumo": "..."
-}`;
+  "resumo": "Análise geral do bilhete com base no consenso de mercado"
+}
+
+IMPORTANTE:
+- "aposta_final" deve ser clara e específica (ex: "Mais de 1.5 golos no jogo", "Vitória do Benfica")
+- "motivo" deve mencionar consenso de mercado ou padrão estatístico
+- "score_confianca" é baseado na consistência histórica do mercado sugerido
+- Todas as odds devem ser números decimais (ex: 1.45, não "1,45")`;
 }
