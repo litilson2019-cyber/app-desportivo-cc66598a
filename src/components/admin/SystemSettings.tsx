@@ -17,7 +17,10 @@ import {
   Plus,
   Trash2,
   Edit2,
-  GripVertical
+  GripVertical,
+  Gift,
+  Percent,
+  Users
 } from 'lucide-react';
 
 interface Configuracao {
@@ -235,10 +238,14 @@ export const SystemSettings = () => {
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-3 mb-4">
+        <TabsList className="w-full grid grid-cols-4 mb-4">
           <TabsTrigger value="precos" className="text-xs">
             <DollarSign className="w-3.5 h-3.5 mr-1" />
             Preços
+          </TabsTrigger>
+          <TabsTrigger value="bonus" className="text-xs">
+            <Gift className="w-3.5 h-3.5 mr-1" />
+            Bónus
           </TabsTrigger>
           <TabsTrigger value="banners" className="text-xs">
             <Image className="w-3.5 h-3.5 mr-1" />
@@ -279,6 +286,110 @@ export const SystemSettings = () => {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Bónus Tab */}
+        <TabsContent value="bonus" className="space-y-4">
+          <Card className="bg-card/50 backdrop-blur border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Gift className="w-4 h-4" />
+                Bónus de Depósito
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Ativar Bónus de Depósito</p>
+                  <p className="text-xs text-muted-foreground">Creditado ao usuário ao aprovar depósito</p>
+                </div>
+                <Switch
+                  checked={editedConfigs['bonus_deposito_ativo'] === 'true'}
+                  onCheckedChange={(checked) => setEditedConfigs({ ...editedConfigs, bonus_deposito_ativo: checked ? 'true' : 'false' })}
+                />
+              </div>
+              
+              {editedConfigs['bonus_deposito_ativo'] === 'true' && (
+                <>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Tipo de Bónus</label>
+                    <select
+                      value={editedConfigs['bonus_deposito_tipo'] || 'percentagem'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_deposito_tipo: e.target.value })}
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                    >
+                      <option value="percentagem">Percentagem (%)</option>
+                      <option value="valor_fixo">Valor Fixo (Kz)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">
+                      Valor do Bónus {editedConfigs['bonus_deposito_tipo'] === 'percentagem' ? '(%)' : '(Kz)'}
+                    </label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editedConfigs['bonus_deposito_valor'] || '0'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_deposito_valor: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 backdrop-blur border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Bónus de Indicação
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Ativar Bónus de Indicação</p>
+                  <p className="text-xs text-muted-foreground">Creditado ao indicador ao aprovar depósito do indicado</p>
+                </div>
+                <Switch
+                  checked={editedConfigs['bonus_indicacao_ativo'] === 'true'}
+                  onCheckedChange={(checked) => setEditedConfigs({ ...editedConfigs, bonus_indicacao_ativo: checked ? 'true' : 'false' })}
+                />
+              </div>
+              
+              {editedConfigs['bonus_indicacao_ativo'] === 'true' && (
+                <>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">Tipo de Bónus</label>
+                    <select
+                      value={editedConfigs['bonus_indicacao_tipo'] || 'percentagem'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_indicacao_tipo: e.target.value })}
+                      className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                    >
+                      <option value="percentagem">Percentagem (%)</option>
+                      <option value="valor_fixo">Valor Fixo (Kz)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">
+                      Valor do Bónus {editedConfigs['bonus_indicacao_tipo'] === 'percentagem' ? '(%)' : '(Kz)'}
+                    </label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editedConfigs['bonus_indicacao_valor'] || '0'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_indicacao_valor: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Button onClick={handleSaveConfigs} disabled={saving} className="w-full">
+            {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+            Salvar Configurações de Bónus
+          </Button>
         </TabsContent>
 
         {/* Banners Tab */}
