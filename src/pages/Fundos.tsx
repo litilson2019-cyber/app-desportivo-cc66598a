@@ -519,11 +519,13 @@ export default function Fundos() {
                       ) : metodosDeposito.length === 0 ? (
                         <SelectItem value="__none__" disabled>Nenhum método disponível</SelectItem>
                       ) : (
-                        metodosDeposito.map((metodo) => (
-                          <SelectItem key={metodo.id} value={metodo.nome}>
-                            {metodo.nome}
-                          </SelectItem>
-                        ))
+                        metodosDeposito
+                          .filter((metodo) => metodo.nome && metodo.nome.trim() !== "")
+                          .map((metodo) => (
+                            <SelectItem key={metodo.id} value={metodo.nome}>
+                              {metodo.nome}
+                            </SelectItem>
+                          ))
                       )}
                     </SelectContent>
                   </Select>
