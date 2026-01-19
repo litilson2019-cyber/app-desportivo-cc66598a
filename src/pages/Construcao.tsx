@@ -6,7 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, Loader2, Sparkles, TrendingUp } from "lucide-react";
+import { Plus, X, Loader2, Sparkles, TrendingUp, Shield } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useSystemConfig } from "@/hooks/useSystemConfig";
 
@@ -394,35 +395,78 @@ export default function Construcao() {
               </div>
 
               <div className="space-y-3">
-                {resultado.jogos.map((jogo, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-background rounded-xl space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-foreground">
-                        {jogo.equipa_a} vs {jogo.equipa_b}
-                      </h4>
-                      <span className="text-xs px-2 py-1 bg-success/20 text-success rounded-full font-bold">
-                        {jogo.probabilidade}%
-                      </span>
+                {resultado.jogos.map((jogo, index) => {
+                  // Determinar cor baseada no score de confiança
+                  const getConfidenceColor = (prob: number) => {
+                    if (prob >= 85) return "bg-success"; // Verde - Alta confiança
+                    if (prob >= 75) return "bg-primary"; // Azul - Boa confiança
+                    if (prob >= 70) return "bg-warning"; // Amarelo - Confiança moderada
+                    return "bg-destructive"; // Vermelho - Baixa confiança
+                  };
+                  
+                  const getConfidenceLabel = (prob: number) => {
+                    if (prob >= 85) return "Muito Alta";
+                    if (prob >= 75) return "Alta";
+                    if (prob >= 70) return "Moderada";
+                    return "Baixa";
+                  };
+                  
+                  const getConfidenceBadgeColor = (prob: number) => {
+                    if (prob >= 85) return "bg-success/20 text-success";
+                    if (prob >= 75) return "bg-primary/20 text-primary";
+                    if (prob >= 70) return "bg-warning/20 text-warning";
+                    return "bg-destructive/20 text-destructive";
+                  };
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="p-4 bg-background rounded-xl space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-foreground">
+                          {jogo.equipa_a} vs {jogo.equipa_b}
+                        </h4>
+                        <span className={`text-xs px-2 py-1 rounded-full font-bold ${getConfidenceBadgeColor(jogo.probabilidade)}`}>
+                          {jogo.probabilidade}%
+                        </span>
+                      </div>
+                      
+                      {/* Barra de progresso do Score de Confiança */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="flex items-center gap-1 text-muted-foreground">
+                            <Shield className="h-3 w-3" />
+                            Score de Confiança
+                          </span>
+                          <span className={`font-medium ${getConfidenceBadgeColor(jogo.probabilidade).split(' ')[1]}`}>
+                            {getConfidenceLabel(jogo.probabilidade)}
+                          </span>
+                        </div>
+                        <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                          <div 
+                            className={`h-full transition-all duration-500 ease-out ${getConfidenceColor(jogo.probabilidade)}`}
+                            style={{ width: `${Math.min(jogo.probabilidade, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* UMA aposta final por jogo */}
+                      <div className="flex items-center justify-between p-3 bg-primary/10 rounded-xl">
+                        <span className="text-base font-bold text-primary">
+                          🎯 {jogo.aposta_final}
+                        </span>
+                        <span className="text-lg font-bold text-foreground">
+                          @ {jogo.odd.toFixed(2)}
+                        </span>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground italic">
+                        💡 {jogo.motivo}
+                      </p>
                     </div>
-                    
-                    {/* UMA aposta final por jogo */}
-                    <div className="flex items-center justify-between p-3 bg-primary/10 rounded-xl">
-                      <span className="text-base font-bold text-primary">
-                        🎯 {jogo.aposta_final}
-                      </span>
-                      <span className="text-lg font-bold text-foreground">
-                        @ {jogo.odd.toFixed(2)}
-                      </span>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground italic">
-                      💡 {jogo.motivo}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="p-4 bg-muted/30 rounded-xl">
