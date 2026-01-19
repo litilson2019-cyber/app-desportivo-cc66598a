@@ -421,7 +421,8 @@ export default function Construcao() {
                   return (
                     <div
                       key={index}
-                      className="p-4 bg-background rounded-xl space-y-3"
+                      className="p-4 bg-background rounded-xl space-y-3 animate-fade-in"
+                      style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'both' }}
                     >
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold text-foreground">
@@ -432,7 +433,7 @@ export default function Construcao() {
                         </span>
                       </div>
                       
-                      {/* Barra de progresso do Score de Confiança */}
+                      {/* Barra de progresso do Score de Confiança com animação */}
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-xs">
                           <span className="flex items-center gap-1 text-muted-foreground">
@@ -445,8 +446,11 @@ export default function Construcao() {
                         </div>
                         <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
                           <div 
-                            className={`h-full transition-all duration-500 ease-out ${getConfidenceColor(jogo.probabilidade)}`}
-                            style={{ width: `${Math.min(jogo.probabilidade, 100)}%` }}
+                            className={`h-full ${getConfidenceColor(jogo.probabilidade)} animate-[progress-fill_0.8s_ease-out_forwards]`}
+                            style={{ 
+                              '--progress-width': `${Math.min(jogo.probabilidade, 100)}%`,
+                              animationDelay: `${index * 150 + 200}ms`
+                            } as React.CSSProperties}
                           />
                         </div>
                       </div>

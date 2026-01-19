@@ -127,3 +127,13 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom keyframes for progress bar animation */
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
