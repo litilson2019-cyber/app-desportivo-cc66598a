@@ -515,9 +515,9 @@ export default function Fundos() {
                     </SelectTrigger>
                     <SelectContent>
                       {configLoading ? (
-                        <SelectItem value="" disabled>Carregando...</SelectItem>
+                        <SelectItem value="__loading__" disabled>Carregando...</SelectItem>
                       ) : metodosDeposito.length === 0 ? (
-                        <SelectItem value="" disabled>Nenhum método disponível</SelectItem>
+                        <SelectItem value="__none__" disabled>Nenhum método disponível</SelectItem>
                       ) : (
                         metodosDeposito.map((metodo) => (
                           <SelectItem key={metodo.id} value={metodo.nome}>
