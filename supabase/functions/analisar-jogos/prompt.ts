@@ -54,39 +54,75 @@ export function buildPrompt(jogos: JogoInput[], modo: Modo) {
 
   const modoTexto =
     modo === "seguro"
-      ? "Sugestão – Modo Seguro (Odd mais baixa)"
-      : "Sugestão – Modo Risco (Odd média)";
+      ? "Sugestão – Modo Seguro (Mercado estatístico estável)"
+      : "Sugestão – Modo Risco (Mercado de alto retorno)";
 
   const regrasModo =
     modo === "seguro"
-      ? `MODO SEGURO (ultra conservador) – REGRA FINAL OBRIGATÓRIA:
-- Considerar APENAS mercados com probabilidade estimada >= 70% e dados suficientes.
-- Criar lista de mercados elegíveis e ORDENAR por ODD crescente.
-- Escolher SEMPRE a ODD MAIS BAIXA elegível (o score é apenas filtro mínimo, não critério principal).
-- PROIBIDO sugerir uma odd superior se existir odd mais baixa válida.
-- Se sugerires mercado por equipa, TEM de ser a EQUIPA FAVORITA (odd mais baixa). Nunca sugerir a favor da não favorita.
-- Se sugerires Over/Under, assume SEMPRE "Total do jogo" (ex: "Total do jogo - Over 0.5 golos"), nunca "equipa X marca +0.5".
-- Faixa alvo: 1.01–1.50 (priorizar as mais baixas).`
-      : `MODO RISCO (agressivo controlado) – REGRA FINAL OBRIGATÓRIA:
-- Considerar APENAS mercados com probabilidade estimada >= 70% e dados suficientes.
-- Criar lista de mercados elegíveis e ORDENAR por ODD crescente.
-- EXCLUIR a odd mais baixa (essa é para o Modo Seguro).
-- EXCLUIR odds extremas (remover a mais alta e ignorar odds > 3.00).
-- Selecionar a ODD MÉDIA do conjunto restante.
-  - Se sobrarem 0 mercados após exclusões, escolher a 2ª odd mais baixa (para garantir diferença do Seguro).
-- PROIBIDO repetir a mesma sugestão/odd do Modo Seguro para o mesmo jogo.
-- Se sugerires mercado por equipa, TEM de ser a EQUIPA FAVORITA (odd mais baixa). Nunca sugerir a favor da não favorita.
-- Se sugerires Over/Under, assume SEMPRE "Total do jogo".
-- Faixa alvo: 1.40–2.50 (priorizar odds médias).`;
+      ? `MODO SEGURO (máxima estabilidade, menor risco) – REGRAS OBRIGATÓRIAS:
 
-  return `És um analista de apostas desportivas. NÃO mostres cálculos internos.
+🚫 MERCADOS PROIBIDOS (NUNCA sugerir no Modo Seguro):
+- Resultado Final (1X2 / Vitória Casa / Vitória Fora / Empate)
+- Ambas Marcam (Sim/Não)
+- Empate Anula Aposta
+- Primeira Equipa a Marcar
+- Total de Golos Exato
+- Parte com Mais Golos
 
-REGRAS GERAIS (para ambos):
-- Analisar mercados disponíveis.
-- Estimar probabilidade e filtrar APENAS >= 70%.
-- Excluir mercados com dados insuficientes ou odds instáveis.
+✅ PRIORIDADE DE SELEÇÃO (seguir esta ordem obrigatória):
+
+1️⃣ MERCADOS CONJUNTOS (prioridade máxima):
+   - Total de golos do jogo (Over 0.5, Over 1.5)
+   - Total de cantos do jogo
+   - Total de cartões (amarelos/vermelhos)
+   - Golos na 1ª parte ou 2ª parte
+   - Remates totais
+   - Fora de jogo totais
+   - Minuto do primeiro golo
+
+2️⃣ APENAS se nenhum mercado conjunto for válido (>=70%):
+   - Total de golos da equipa FAVORITA (ex: "Team A - Over 0.5")
+   - Resultado da 1ª parte (favorita a ganhar)
+   - Resultado da 2ª parte (favorita a ganhar)
+
+CRITÉRIOS FINAIS:
+- Selecionar SEMPRE a ODD MAIS BAIXA disponível dentro dos mercados permitidos.
+- Priorizar Over 0.5 ou Over 1.5 (Total do jogo).
+- O modo seguro favorece ESTABILIDADE ESTATÍSTICA, não o vencedor.
+- Faixa alvo de odds: 1.01–1.50 (priorizar as mais baixas).`
+      : `MODO RISCO (maior retorno com risco controlado) – REGRAS OBRIGATÓRIAS:
+
+✅ MERCADOS PERMITIDOS (usar APENAS estes):
+- Ambas Equipas Marcam (Sim ou Não)
+- Empate Anula Aposta
+- Parte com Mais Golos
+- Primeira Equipa a Marcar
+- Resultado do Jogo (1X2)
+- Total de Golos Exato
+
+CRITÉRIOS FINAIS:
+- Selecionar ODD MÉDIA do mercado (nunca a mais baixa, nunca a mais alta).
+- PROIBIDO repetir qualquer mercado que seria usado no Modo Seguro.
+- Priorizar jogos equilibrados ou de alta intensidade ofensiva.
+- Faixa alvo de odds: 1.40–3.00 (priorizar odds médias).
+- Se sugerires mercado por equipa, TEM de ser a EQUIPA FAVORITA.`;
+
+  return `És um analista de apostas desportivas especializado. NÃO mostres cálculos internos.
+
+REGRAS GERAIS (ambos os modos):
+- Analisar TODOS os mercados disponíveis do jogo.
+- Calcular probabilidade estimada para cada mercado.
+- Apenas sugerir mercados com probabilidade >= 70%.
+- Mostrar apenas UMA sugestão por jogo.
+- NUNCA repetir o mesmo mercado nos dois modos.
+- Se não houver mercado válido, usar motivo: "Sem sugestão segura para este jogo".
 
 ${regrasModo}
+
+CONTROLO DE ERROS (validar antes de responder):
+- Se Modo Seguro sugerir Resultado Final (1X2), INVALIDAR e escolher outro.
+- Se Modo Seguro sugerir odd maior que outra disponível no mesmo mercado, INVALIDAR.
+- Se os dois modos retornarem a mesma sugestão, INVALIDAR o Modo Risco e escolher outro.
 
 JOGOS:
 ${jogosTexto}
