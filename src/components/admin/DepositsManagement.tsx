@@ -174,6 +174,36 @@ export const DepositsManagement = () => {
     }
   };
 
+  // Função para buscar configurações de bónus
+  const fetchBonusConfigs = async () => {
+    const { data } = await supabase
+      .from('configuracoes_sistema')
+      .select('chave, valor')
+      .in('chave', [
+        'bonus_deposito_ativo',
+        'bonus_deposito_tipo',
+        'bonus_deposito_valor',
+        'bonus_indicacao_ativo',
+        'bonus_indicacao_tipo',
+        'bonus_indicacao_valor'
+      ]);
+    
+    const configs: Record<string, string> = {};
+    data?.forEach(c => {
+      configs[c.chave] = c.valor || '';
+    });
+    return configs;
+  };
+
+  // Função para calcular bónus
+  const calcularBonus = (valor: number, tipo: string, bonusValor: string): number => {
+    const valorBonus = parseFloat(bonusValor) || 0;
+    if (tipo === 'percentagem') {
+      return (valor * valorBonus) / 100;
+    }
+    return valorBonus;
+  };
+
   const handleAction = async () => {
     if (!selectedTransacao || !actionType) return;
 
@@ -183,6 +213,23 @@ export const DepositsManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (actionType === 'aprovar') {
+        // Verificar se já foi aprovado (prevenir duplicação)
+        const { data: transacaoAtual } = await supabase
+          .from('transacoes')
+          .select('status')
+          .eq('id', selectedTransacao.id)
+          .single();
+        
+        if (transacaoAtual?.status === 'aprovado') {
+          toast.error('Este depósito já foi aprovado anteriormente');
+          setProcessing(false);
+          return;
+        }
+
+        // Buscar configurações de bónus
+        const bonusConfigs = await fetchBonusConfigs();
+        
+        // Atualizar transação para aprovado
         const { error: transacaoError } = await supabase
           .from('transacoes')
           .update({
@@ -194,24 +241,84 @@ export const DepositsManagement = () => {
 
         if (transacaoError) throw transacaoError;
 
-        const { error: profileError } = await supabase.rpc('increment_saldo', {
+        // 1. Transferir 100% do valor depositado
+        const valorDeposito = selectedTransacao.valor;
+        await supabase.rpc('increment_saldo', {
           user_id: selectedTransacao.user_id,
-          amount: selectedTransacao.valor
+          amount: valorDeposito
         });
 
-        if (profileError) throw profileError;
+        let bonusDepositoValor = 0;
+        let bonusIndicacaoValor = 0;
+        let indicadorId: string | null = null;
 
-        // Registrar log de aprovação
+        // 2. Calcular e transferir bónus de depósito (se ativo)
+        if (bonusConfigs['bonus_deposito_ativo'] === 'true') {
+          bonusDepositoValor = calcularBonus(
+            valorDeposito,
+            bonusConfigs['bonus_deposito_tipo'],
+            bonusConfigs['bonus_deposito_valor']
+          );
+          
+          if (bonusDepositoValor > 0) {
+            await supabase.rpc('increment_saldo', {
+              user_id: selectedTransacao.user_id,
+              amount: bonusDepositoValor
+            });
+          }
+        }
+
+        // 3. Verificar indicação e transferir bónus ao indicador (se ativo)
+        if (bonusConfigs['bonus_indicacao_ativo'] === 'true') {
+          const { data: indicacao } = await supabase
+            .from('invited_users')
+            .select('referrer_id')
+            .eq('invited_user_id', selectedTransacao.user_id)
+            .maybeSingle();
+          
+          if (indicacao?.referrer_id) {
+            indicadorId = indicacao.referrer_id;
+            bonusIndicacaoValor = calcularBonus(
+              valorDeposito,
+              bonusConfigs['bonus_indicacao_tipo'],
+              bonusConfigs['bonus_indicacao_valor']
+            );
+            
+            if (bonusIndicacaoValor > 0) {
+              await supabase.rpc('increment_saldo', {
+                user_id: indicadorId,
+                amount: bonusIndicacaoValor
+              });
+            }
+          }
+        }
+
+        // Calcular total creditado
+        const totalCreditado = valorDeposito + bonusDepositoValor;
+
+        // Registrar log completo de aprovação
         await logAdminAction('aprovar_deposito', {
           transacao_id: selectedTransacao.id,
           user_id: selectedTransacao.user_id,
           user_nome: selectedTransacao.profiles?.nome_completo,
-          valor: selectedTransacao.valor,
+          valor_depositado: valorDeposito,
+          bonus_deposito: bonusDepositoValor,
+          total_creditado: totalCreditado,
+          bonus_indicacao: bonusIndicacaoValor,
+          indicador_id: indicadorId,
           banco: selectedTransacao.banco,
           status_final: 'aprovado'
         });
 
-        toast.success('Depósito aprovado com sucesso!');
+        // Mensagem de sucesso detalhada
+        let mensagem = `Depósito aprovado! ${valorDeposito.toLocaleString()} Kz creditado`;
+        if (bonusDepositoValor > 0) {
+          mensagem += ` + ${bonusDepositoValor.toLocaleString()} Kz de bónus`;
+        }
+        if (bonusIndicacaoValor > 0) {
+          mensagem += `. Indicador recebeu ${bonusIndicacaoValor.toLocaleString()} Kz`;
+        }
+        toast.success(mensagem);
       } else {
         const { error } = await supabase
           .from('transacoes')
