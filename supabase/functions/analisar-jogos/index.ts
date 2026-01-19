@@ -37,69 +37,85 @@ serve(async (req) => {
       );
     }
 
-    // Prompt otimizado com lógica de SCORE DE CONFIANÇA multi-filtro
+    // Prompt otimizado com DIFERENCIAÇÃO OBRIGATÓRIA entre modos
     const modoDescricao = modo === "seguro"
-      ? `MODO SEGURO - PERFIL CONSERVADOR:
-         - Analisa TODOS os mercados disponíveis (1X2, Over/Under, BTTS, Dupla Chance, Handicap, Draw No Bet, etc.)
-         - APENAS considera mercados com probabilidade estimada >= 70%
-         - Calcula SCORE DE CONFIANÇA baseado em: forma recente (últimos 5 jogos), confrontos diretos, consistência estatística, estabilidade da odd
-         - Seleciona o mercado com MAIOR SCORE DE CONFIANÇA
-         - Dentro dos mercados com score elevado, prioriza a ODD MAIS BAIXA (1.10-1.50)
-         - Evita mercados de alto risco ou odds elevadas
-         - Resultado: odds baixas, alta probabilidade, maior garantia estatística`
+      ? `MODO SEGURO - PERFIL ULTRA CONSERVADOR:
+         REGRA OBRIGATÓRIA: Selecionar SEMPRE a ODD MAIS BAIXA disponível.
+         
+         PROCESSO DE SELEÇÃO:
+         1. Analisar TODOS os mercados disponíveis (1X2, Over/Under, BTTS, Dupla Chance, Handicap, etc.)
+         2. Filtrar APENAS mercados com probabilidade ≥ 70%
+         3. ORDENAR por odd em ordem CRESCENTE
+         4. SELECIONAR OBRIGATORIAMENTE a odd mais baixa (ex: 1.05, 1.10, 1.15)
+         5. O score de confiança é filtro mínimo, NÃO critério principal
+         
+         PROIBIDO:
+         - Sugerir odd superior se existir odd mais baixa válida
+         - Sugerir odds acima de 1.50
+         
+         FAIXA DE ODDS OBRIGATÓRIA: 1.01 - 1.50 (priorizar as mais baixas)`
       : `MODO RISCO - PERFIL AGRESSIVO CONTROLADO:
-         - Analisa TODOS os mercados disponíveis (1X2, Over/Under, BTTS, Dupla Chance, Handicap, Draw No Bet, etc.)
-         - APENAS considera mercados com probabilidade estimada >= 70%
-         - Calcula SCORE DE CONFIANÇA baseado em: forma recente (últimos 5 jogos), confrontos diretos, consistência estatística, estabilidade da odd
-         - Seleciona mercados com SCORE ALTO mas prioriza ODDS MÉDIAS (1.50-2.50)
-         - Maximiza potencial de retorno mantendo risco controlado
-         - Resultado: odds médias, probabilidade aceitável (>=70%), maior retorno potencial`;
+         REGRA OBRIGATÓRIA: Selecionar ODD MÉDIA (nunca a mais baixa, nunca a mais alta).
+         
+         PROCESSO DE SELEÇÃO:
+         1. Analisar TODOS os mercados disponíveis
+         2. Filtrar APENAS mercados com probabilidade ≥ 70%
+         3. ORDENAR por odd em ordem crescente
+         4. EXCLUIR a odd mais baixa (essa é para Modo Seguro)
+         5. EXCLUIR odds extremamente altas (acima de 3.00)
+         6. SELECIONAR uma odd MÉDIA do conjunto restante
+         
+         PROIBIDO:
+         - Repetir a mesma sugestão do Modo Seguro
+         - Selecionar a odd mais baixa disponível
+         
+         FAIXA DE ODDS OBRIGATÓRIA: 1.40 - 2.50 (priorizar odds médias)`;
 
     const jogosTexto = jogos
       .map((j: any, i: number) => `${i + 1}. ${j.equipa_a} (odd: ${j.odd_a}) vs ${j.equipa_b} (odd: ${j.odd_b})`)
       .join("\n");
 
-    const prompt = `És um analista de apostas desportivas ESPECIALIZADO com sistema de pontuação multi-filtro.
+    const prompt = `És um analista de apostas desportivas ESPECIALIZADO com sistema de seleção DIFERENCIADA por modo.
 
 ${modoDescricao}
 
 JOGOS PARA ANALISAR:
 ${jogosTexto}
 
-SISTEMA DE ANÁLISE MULTI-FILTRO (aplicar internamente, NÃO mostrar ao utilizador):
-Para cada jogo, calcula um SCORE DE CONFIANÇA (0-100) baseado em:
-1. FORMA RECENTE (25 pontos): Últimos 5 jogos de cada equipa
-2. CONFRONTOS DIRETOS (25 pontos): Histórico head-to-head
-3. CONSISTÊNCIA ESTATÍSTICA (25 pontos): Padrões de golos, clean sheets, etc.
-4. ESTABILIDADE DA ODD (25 pontos): Odd estável = maior confiança
+SISTEMA DE ANÁLISE (aplicar internamente):
+1. Para cada jogo, identifica TODOS os mercados possíveis
+2. Calcula probabilidade estimada de cada mercado
+3. Filtra mercados com probabilidade ≥ 70%
+4. Ordena por odd (crescente)
+5. Aplica regra do MODO selecionado para escolha final
 
-REGRAS CRÍTICAS:
-- Analisa TODOS os mercados: 1X2, Dupla Chance, Over/Under (0.5 a 4.5), BTTS, Handicap, Draw No Bet, Intervalo/Final, Mercados de Golos
-- EXCLUI mercados com probabilidade < 70%
-- EXCLUI mercados com dados estatísticos insuficientes
-- Seleciona UMA ÚNICA aposta por jogo baseada no MELHOR SCORE
-- O utilizador vê APENAS a sugestão final, sem cálculos internos
+DIFERENCIAÇÃO OBRIGATÓRIA:
+- MODO SEGURO → Sempre a ODD MAIS BAIXA (ex: 1.10, 1.15, 1.20)
+- MODO RISCO → Sempre ODD MÉDIA, DIFERENTE do Modo Seguro (ex: 1.45, 1.60, 1.80)
+
+EXEMPLO PRÁTICO:
+Se odds disponíveis são: 1.10 (Under 0.5), 1.25 (Dupla Chance), 1.55 (Under 2.5), 1.90 (Vitória)
+- Modo Seguro → Under 0.5 @ 1.10
+- Modo Risco → Under 2.5 @ 1.55
 
 ESTRUTURA DA RESPOSTA (OBRIGATÓRIA):
-- aposta_final: A aposta escolhida (ex: "Under 1.5", "Vitória Porto", "Dupla Chance 1X")
-- odd: Odd aproximada desta aposta específica
-- probabilidade: Percentagem de sucesso estimada (número inteiro, mínimo 70)
-- score_confianca: Score calculado (0-100)
-- motivo: UMA frase curta justificando a escolha
-
-RESPONDE APENAS com este JSON válido:
 {
-  "modo": "${modo === "seguro" ? "Sugestão – Modo Seguro" : "Sugestão – Modo Risco"}",
+  "modo": "${modo === "seguro" ? "Sugestão – Modo Seguro (Odd mais baixa)" : "Sugestão – Modo Risco (Odd média)"}",
   "jogos": [
     {
       "equipa_a": "Nome",
       "equipa_b": "Nome",
-      "aposta_final": "Under 1.5",
-      "odd": 1.35,
-      "probabilidade": 78,
-      "score_confianca": 85,
-      "motivo": "Frase curta baseada na análise"
+      "aposta_final": "Mercado selecionado",
+      "odd": 1.XX,
+      "probabilidade": 75,
+      "score_confianca": 80,
+      "motivo": "Justificação curta"
     }
+  ],
+  "odd_total": X.XX,
+  "probabilidade_total": XX,
+  "resumo": "Frase sobre o bilhete"
+}
   ],
   "odd_total": 2.15,
   "probabilidade_total": 68,
