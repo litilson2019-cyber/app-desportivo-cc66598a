@@ -37,36 +37,59 @@ serve(async (req) => {
       );
     }
 
-    // Prompt otimizado para UMA aposta final por jogo
+    // Prompt otimizado com lógica de SCORE DE CONFIANÇA multi-filtro
     const modoDescricao = modo === "seguro"
-      ? "MODO SEGURO: Escolhe APENAS o mercado MAIS SEGURO com a odd mais BAIXA (entre 1.10-1.50). Prioriza Under (Under 0.5, Under 1.5), empates ou dupla chance. Probabilidade mínima de 70%."
-      : "MODO RISCO: Escolhe mercados com odds moderadas (1.50-2.50). Pode incluir Over 2.5, vitórias claras ou ambas marcam. Aceita probabilidades entre 50-70%.";
+      ? `MODO SEGURO - PERFIL CONSERVADOR:
+         - Analisa TODOS os mercados disponíveis (1X2, Over/Under, BTTS, Dupla Chance, Handicap, Draw No Bet, etc.)
+         - APENAS considera mercados com probabilidade estimada >= 70%
+         - Calcula SCORE DE CONFIANÇA baseado em: forma recente (últimos 5 jogos), confrontos diretos, consistência estatística, estabilidade da odd
+         - Seleciona o mercado com MAIOR SCORE DE CONFIANÇA
+         - Dentro dos mercados com score elevado, prioriza a ODD MAIS BAIXA (1.10-1.50)
+         - Evita mercados de alto risco ou odds elevadas
+         - Resultado: odds baixas, alta probabilidade, maior garantia estatística`
+      : `MODO RISCO - PERFIL AGRESSIVO CONTROLADO:
+         - Analisa TODOS os mercados disponíveis (1X2, Over/Under, BTTS, Dupla Chance, Handicap, Draw No Bet, etc.)
+         - APENAS considera mercados com probabilidade estimada >= 70%
+         - Calcula SCORE DE CONFIANÇA baseado em: forma recente (últimos 5 jogos), confrontos diretos, consistência estatística, estabilidade da odd
+         - Seleciona mercados com SCORE ALTO mas prioriza ODDS MÉDIAS (1.50-2.50)
+         - Maximiza potencial de retorno mantendo risco controlado
+         - Resultado: odds médias, probabilidade aceitável (>=70%), maior retorno potencial`;
 
     const jogosTexto = jogos
       .map((j: any, i: number) => `${i + 1}. ${j.equipa_a} (odd: ${j.odd_a}) vs ${j.equipa_b} (odd: ${j.odd_b})`)
       .join("\n");
 
-    const prompt = `És um analista de apostas desportivas especializado. ${modoDescricao}
+    const prompt = `És um analista de apostas desportivas ESPECIALIZADO com sistema de pontuação multi-filtro.
+
+${modoDescricao}
 
 JOGOS PARA ANALISAR:
 ${jogosTexto}
 
-REGRA CRÍTICA - UMA APOSTA POR JOGO:
-Para cada jogo, escolhe APENAS UMA aposta final. Não combines múltiplos mercados.
-Escolhe O mercado mais adequado ao modo (seguro ou risco).
+SISTEMA DE ANÁLISE MULTI-FILTRO (aplicar internamente, NÃO mostrar ao utilizador):
+Para cada jogo, calcula um SCORE DE CONFIANÇA (0-100) baseado em:
+1. FORMA RECENTE (25 pontos): Últimos 5 jogos de cada equipa
+2. CONFRONTOS DIRETOS (25 pontos): Histórico head-to-head
+3. CONSISTÊNCIA ESTATÍSTICA (25 pontos): Padrões de golos, clean sheets, etc.
+4. ESTABILIDADE DA ODD (25 pontos): Odd estável = maior confiança
 
-ESTRUTURA DA RESPOSTA:
-- aposta_final: A aposta escolhida (ex: "Under 1.5", "Vitória Porto", "Ambas Marcam Não", "Dupla Chance 1X")
+REGRAS CRÍTICAS:
+- Analisa TODOS os mercados: 1X2, Dupla Chance, Over/Under (0.5 a 4.5), BTTS, Handicap, Draw No Bet, Intervalo/Final, Mercados de Golos
+- EXCLUI mercados com probabilidade < 70%
+- EXCLUI mercados com dados estatísticos insuficientes
+- Seleciona UMA ÚNICA aposta por jogo baseada no MELHOR SCORE
+- O utilizador vê APENAS a sugestão final, sem cálculos internos
+
+ESTRUTURA DA RESPOSTA (OBRIGATÓRIA):
+- aposta_final: A aposta escolhida (ex: "Under 1.5", "Vitória Porto", "Dupla Chance 1X")
 - odd: Odd aproximada desta aposta específica
-- probabilidade: Percentagem de sucesso (número inteiro)
-- motivo: UMA frase curta justificando
+- probabilidade: Percentagem de sucesso estimada (número inteiro, mínimo 70)
+- score_confianca: Score calculado (0-100)
+- motivo: UMA frase curta justificando a escolha
 
-EXEMPLOS DE APOSTAS VÁLIDAS:
-- Modo Seguro: "Under 0.5", "Under 1.5", "Dupla Chance 1X", "Empate ou Vitória Casa"
-- Modo Risco: "Over 2.5", "Vitória Benfica", "Ambas Marcam Sim", "Handicap -1"
-
-RESPONDE APENAS com este JSON:
+RESPONDE APENAS com este JSON válido:
 {
+  "modo": "${modo === "seguro" ? "Sugestão – Modo Seguro" : "Sugestão – Modo Risco"}",
   "jogos": [
     {
       "equipa_a": "Nome",
@@ -74,7 +97,8 @@ RESPONDE APENAS com este JSON:
       "aposta_final": "Under 1.5",
       "odd": 1.35,
       "probabilidade": 78,
-      "motivo": "Frase curta"
+      "score_confianca": 85,
+      "motivo": "Frase curta baseada na análise"
     }
   ],
   "odd_total": 2.15,
