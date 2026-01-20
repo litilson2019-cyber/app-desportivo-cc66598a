@@ -13,6 +13,7 @@ export type MarketType =
   | "minuto_golo"
   | "remates"
   | "faltas"
+  | "cantos"
   | "resultado_exato";
 
 interface Market {
@@ -66,6 +67,11 @@ const MARKETS: Market[] = [
     id: "faltas", 
     label: "Faltas", 
     description: "Faltas por equipa e totais" 
+  },
+  { 
+    id: "cantos", 
+    label: "Cantos", 
+    description: "Cantos por equipa e totais" 
   },
   { 
     id: "resultado_exato", 
