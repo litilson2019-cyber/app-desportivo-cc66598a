@@ -7,6 +7,7 @@ export type MarketType =
   | "nenhum"
   | "resultado"
   | "total_golos"
+  | "golos_equipa"
   | "btts"
   | "handicap"
   | "partes"
@@ -38,6 +39,11 @@ const MARKETS: Market[] = [
     id: "total_golos", 
     label: "Total de Golos", 
     description: "Mais/Menos de 0.5 a 4.5+" 
+  },
+  { 
+    id: "golos_equipa", 
+    label: "Golos por Equipa", 
+    description: "Quantos golos cada equipa marca" 
   },
   { 
     id: "btts", 
