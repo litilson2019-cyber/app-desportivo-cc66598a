@@ -13,6 +13,7 @@ export type MarketType =
   | "intervalo_final"
   | "partes"
   | "minuto_golo"
+  | "marcador"
   | "remates"
   | "faltas"
   | "cantos"
@@ -70,6 +71,11 @@ const MARKETS: Market[] = [
     id: "minuto_golo", 
     label: "Minuto do 1º Golo", 
     description: "Quando será o primeiro golo" 
+  },
+  { 
+    id: "marcador", 
+    label: "Jogador a Marcar", 
+    description: "Artilheiros e probabilidades" 
   },
   { 
     id: "remates", 

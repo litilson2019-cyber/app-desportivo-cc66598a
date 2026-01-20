@@ -8,6 +8,7 @@ export type MarketType =
   | "intervalo_final"
   | "partes"
   | "minuto_golo"
+  | "marcador"
   | "remates"
   | "faltas"
   | "cantos"
@@ -17,7 +18,7 @@ export type MarketType =
 export function normalizeMarket(market: unknown): MarketType {
   const validMarkets: MarketType[] = [
     "nenhum", "resultado", "total_golos", "golos_equipa", "btts", "handicap",
-    "intervalo_final", "partes", "minuto_golo", "remates", "faltas", "cantos", "cartoes", "resultado_exato"
+    "intervalo_final", "partes", "minuto_golo", "marcador", "remates", "faltas", "cantos", "cartoes", "resultado_exato"
   ];
   
   if (typeof market === "string" && validMarkets.includes(market as MarketType)) {
@@ -191,6 +192,46 @@ Intervalos a considerar:
 
 REGRA: Mostrar apenas previsões com alta confiança (≥ 75%).
 Indicar o intervalo mais provável para ${modoLabel}.`;
+
+    case "marcador":
+      return `
+=== MERCADO: JOGADOR A MARCAR (GOALSCORER) ===
+Analisar EXCLUSIVAMENTE probabilidades de marcadores para ${modoLabel}.
+
+📊 TIPOS DE APOSTA:
+- A Qualquer Momento: Jogador marca pelo menos 1 golo
+- Primeiro Marcador: Jogador marca o primeiro golo do jogo
+- Último Marcador: Jogador marca o último golo do jogo
+- Marcar 2+ Golos: Jogador marca pelo menos 2 golos
+- Hat-trick: Jogador marca 3+ golos
+
+📊 ANÁLISE DA EQUIPA 1 (Casa):
+- Identificar os principais artilheiros da equipa
+- Analisar golos na temporada e últimos 5 jogos
+- Considerar quem cobra penáltis e livres diretos
+- Verificar se o jogador é titular regular
+- Top 3 marcadores mais prováveis com percentagem
+
+📊 ANÁLISE DA EQUIPA 2 (Fora):
+- Identificar os principais artilheiros da equipa
+- Analisar desempenho em jogos fora
+- Considerar quem cobra penáltis e livres diretos
+- Verificar se o jogador é titular regular
+- Top 3 marcadores mais prováveis com percentagem
+
+📊 FATORES DE ANÁLISE:
+- Forma recente do jogador (últimos 5 jogos)
+- Minutos jogados (titularidade)
+- Histórico contra o adversário
+- Posição em campo (avançados têm prioridade)
+- Penáltis e bolas paradas
+
+REGRA CRÍTICA:
+- Para ${modoLabel === "Modo Seguro" ? "Modo Seguro: sugerir 'A Qualquer Momento' com artilheiros principais" : "Modo Risco: considerar 'Primeiro Marcador' ou '2+ Golos' para odds maiores"}
+- Indicar NOME DO JOGADOR + TIPO DE APOSTA + PROBABILIDADE
+- Formato: "Jogador X - A Qualquer Momento (Y%)"
+- Apenas sugerir jogadores com probabilidade ≥ 60%
+- Máximo 2-3 sugestões por jogo`;
 
     case "remates":
       return `
