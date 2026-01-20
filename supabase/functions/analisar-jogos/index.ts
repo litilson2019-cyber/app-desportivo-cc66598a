@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { buildPrompt, normalizeJogos, normalizeModo } from "./prompt.ts";
+import { normalizeMarket } from "./markets.ts";
 import { buildRepairPrompt, parseFirstJsonObject } from "./json.ts";
 import { buildFallbackResultado, postProcessResultado } from "./postprocess.ts";
 
@@ -19,6 +20,7 @@ serve(async (req) => {
     const body = await req.json();
     const modo = normalizeModo(body?.modo);
     const jogos = normalizeJogos(body?.jogos);
+    const market = normalizeMarket(body?.market);
 
     if (!jogos || jogos.length === 0) {
       return new Response(JSON.stringify({ error: "Nenhum jogo fornecido" }), {
@@ -36,8 +38,8 @@ serve(async (req) => {
       });
     }
 
-    const prompt = buildPrompt(jogos, modo);
-    console.log("Enviando request para Lovable AI...");
+    const prompt = buildPrompt(jogos, modo, market);
+    console.log("Enviando request para Lovable AI com mercado:", market);
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -49,7 +51,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash-lite",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
-        max_tokens: 900,
+        max_tokens: 1200,
       }),
     });
 

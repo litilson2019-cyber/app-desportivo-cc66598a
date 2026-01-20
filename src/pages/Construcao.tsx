@@ -10,6 +10,7 @@ import { Plus, X, Loader2, Sparkles, TrendingUp, Shield } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useSystemConfig } from "@/hooks/useSystemConfig";
+import { MarketSelector, MarketType } from "@/components/MarketSelector";
 
 interface Jogo {
   id: string;
@@ -23,11 +24,13 @@ interface ResultadoAnalise {
   jogos: Array<{
     equipa_a: string;
     equipa_b: string;
+    mercado?: string;
     aposta_final: string;
     odd: number;
     probabilidade: number;
     motivo: string;
   }>;
+  mercado_analisado?: string;
   odd_total: number;
   probabilidade_total: number;
   resumo: string;
@@ -40,6 +43,7 @@ export default function Construcao() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
   const [modo, setModo] = useState<"risco" | "seguro">("risco");
+  const [selectedMarket, setSelectedMarket] = useState<MarketType>("nenhum");
   const [saldo, setSaldo] = useState<number>(0);
   const [loadingSaldo, setLoadingSaldo] = useState(true);
   const { toast } = useToast();
@@ -147,7 +151,7 @@ export default function Construcao() {
           .update({ saldo: novoSaldo })
           .eq("id", user.id),
         supabase.functions.invoke("analisar-jogos", {
-          body: { jogos: jogosValidos, modo },
+          body: { jogos: jogosValidos, modo, market: selectedMarket },
         }),
       ]);
 
@@ -338,6 +342,12 @@ export default function Construcao() {
             )}
           </div>
 
+          {/* Seletor de Mercado */}
+          <MarketSelector 
+            selectedMarket={selectedMarket} 
+            onMarketChange={setSelectedMarket} 
+          />
+
           <Button
             onClick={handleConstruirBilhete}
             disabled={loading || loadingSaldo || configLoading || !temSaldoSuficiente}
@@ -370,7 +380,9 @@ export default function Construcao() {
                     Análise da IA
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    Bilhete otimizado automaticamente
+                    {resultado.mercado_analisado && resultado.mercado_analisado !== "Pesquisa Geral" 
+                      ? `Mercado: ${resultado.mercado_analisado}` 
+                      : "Pesquisa geral automática"}
                   </p>
                 </div>
               </div>
@@ -454,6 +466,15 @@ export default function Construcao() {
                           />
                         </div>
                       </div>
+                      
+                      {/* Mercado utilizado */}
+                      {jogo.mercado && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
+                            📊 {jogo.mercado}
+                          </span>
+                        </div>
+                      )}
                       
                       {/* UMA aposta final por jogo */}
                       <div className="flex items-center justify-between p-3 bg-primary/10 rounded-xl">
