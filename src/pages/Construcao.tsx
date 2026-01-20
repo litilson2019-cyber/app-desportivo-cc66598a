@@ -13,6 +13,7 @@ import { useSystemConfig } from "@/hooks/useSystemConfig";
 import { MarketSelector, MarketType } from "@/components/MarketSelector";
 import { ConfidenceFilter, ConfidenceLevel } from "@/components/ConfidenceFilter";
 import { ModeComparison } from "@/components/ModeComparison";
+import { AnalysisLoadingOverlay } from "@/components/AnalysisLoadingOverlay";
 
 interface Jogo {
   id: string;
@@ -307,6 +308,9 @@ export default function Construcao() {
 
   return (
     <AuthGuard>
+      {/* Loading Overlay */}
+      <AnalysisLoadingOverlay isLoading={loading} modo={modo} />
+      
       <div className="min-h-screen bg-gradient-subtle pb-20 p-4">
         <div className="max-w-2xl mx-auto pt-6 space-y-6">
           <div>
