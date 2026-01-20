@@ -8,12 +8,13 @@ export type MarketType =
   | "minuto_golo"
   | "remates"
   | "faltas"
+  | "cantos"
   | "resultado_exato";
 
 export function normalizeMarket(market: unknown): MarketType {
   const validMarkets: MarketType[] = [
     "nenhum", "resultado", "total_golos", "btts", "handicap",
-    "partes", "minuto_golo", "remates", "faltas", "resultado_exato"
+    "partes", "minuto_golo", "remates", "faltas", "cantos", "resultado_exato"
   ];
   
   if (typeof market === "string" && validMarkets.includes(market as MarketType)) {
@@ -169,6 +170,42 @@ REGRA CRÍTICA:
 - Considerar importância do jogo (jogos decisivos = mais intensidade)
 - Apresentar valores estimados com probabilidade ≥ 70%
 - Formato sugestão: "Total Mais de X.5 faltas" ou "Equipa X Mais de Y.5 faltas"`;
+
+    case "cantos":
+      return `
+=== MERCADO: CANTOS (CORNERS) ===
+Analisar EXCLUSIVAMENTE estatísticas de cantos para ${modoLabel}.
+
+📊 CANTOS DA EQUIPA 1 (Casa):
+- Analisar média de cantos por jogo em casa
+- Considerar estilo ofensivo (equipas atacantes = mais cantos)
+- Linhas: Mais/Menos de 3.5, 4.5, 5.5, 6.5 cantos
+- Indicar a linha mais provável com percentagem
+
+📊 CANTOS DA EQUIPA 2 (Fora):
+- Analisar média de cantos por jogo fora
+- Equipas visitantes geralmente têm menos cantos
+- Linhas: Mais/Menos de 2.5, 3.5, 4.5, 5.5 cantos
+- Indicar a linha mais provável com percentagem
+
+📊 TOTAL DE CANTOS DO JOGO:
+- Somar expectativa de cantos das duas equipas
+- Considerar ritmo de jogo esperado (jogo aberto = mais cantos)
+- Linhas: Mais/Menos de 8.5, 9.5, 10.5, 11.5, 12.5 cantos totais
+- Indicar a linha mais provável com percentagem
+
+📊 CANTOS POR PARTE:
+- Primeira parte geralmente tem menos cantos
+- Segunda parte costuma ter mais intensidade
+- Linhas 1ª Parte: Mais/Menos de 4.5, 5.5 cantos
+- Linhas 2ª Parte: Mais/Menos de 5.5, 6.5 cantos
+
+REGRA CRÍTICA:
+- Basear análise no estilo de jogo (ofensivo/defensivo)
+- Equipas que jogam nas laterais = mais cantos
+- Equipas que jogam pelo meio = menos cantos
+- Apresentar valores estimados com probabilidade ≥ 70%
+- Formato sugestão: "Total Mais de X.5 cantos" ou "Equipa X Mais de Y.5 cantos"`;
 
     case "resultado_exato":
       return `
