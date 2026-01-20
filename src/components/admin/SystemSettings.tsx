@@ -267,7 +267,7 @@ export const SystemSettings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {configuracoes.map((config) => (
+              {configuracoes.filter(c => c.chave !== 'desconto_apenas_com_resultados' && !c.chave.startsWith('bonus_')).map((config) => (
                 <div key={config.id}>
                   <label className="text-sm text-muted-foreground mb-1 block">
                     {config.descricao}
@@ -279,6 +279,20 @@ export const SystemSettings = () => {
                   />
                 </div>
               ))}
+              
+              {/* Toggle para desconto condicional */}
+              <div className="pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Descontar saldo apenas com resultados</p>
+                    <p className="text-xs text-muted-foreground">Se ativo, o saldo só é descontado quando a análise retorna resultados</p>
+                  </div>
+                  <Switch
+                    checked={editedConfigs['desconto_apenas_com_resultados'] === 'true'}
+                    onCheckedChange={(checked) => setEditedConfigs({ ...editedConfigs, desconto_apenas_com_resultados: checked ? 'true' : 'false' })}
+                  />
+                </div>
+              </div>
               
               <Button onClick={handleSaveConfigs} disabled={saving} className="w-full">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}

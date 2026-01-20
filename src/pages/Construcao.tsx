@@ -180,14 +180,11 @@ export default function Construcao() {
 
       const saldoAnterior = saldo;
       const novoSaldo = saldoAnterior - precoAtual;
+      const descontarApenasComResultados = config.desconto_apenas_com_resultados;
 
       if (modo === "comparar") {
-        // Modo comparação: chamar ambos os modos em paralelo
-        const [saldoResult, riscoResult, seguroResult] = await Promise.all([
-          supabase
-            .from("profiles")
-            .update({ saldo: novoSaldo })
-            .eq("id", user.id),
+        // Modo comparação: primeiro fazer a análise, depois decidir sobre o saldo
+        const [riscoResult, seguroResult] = await Promise.all([
           supabase.functions.invoke("analisar-jogos", {
             body: { jogos: jogosValidos, modo: "risco", market: selectedMarket },
           }),
@@ -196,64 +193,98 @@ export default function Construcao() {
           }),
         ]);
 
-        if (saldoResult.error) throw saldoResult.error;
         if (riscoResult.error) throw riscoResult.error;
         if (seguroResult.error) throw seguroResult.error;
 
-        setSaldo(novoSaldo);
-        setResultadoComparacao({
-          risco: riscoResult.data,
-          seguro: seguroResult.data,
-        });
+        const riscoData = riscoResult.data;
+        const seguroData = seguroResult.data;
+        
+        // Verificar se há resultados
+        const temResultados = (riscoData?.jogos?.length > 0) || (seguroData?.jogos?.length > 0);
 
-        toast({
-          title: "Comparação concluída!",
-          description: `Análise de ambos os modos. ${precoAtual} Kz descontados.`,
-        });
-      } else {
-        // Modo normal (risco ou seguro)
-        const [saldoResult, iaResult] = await Promise.all([
-          supabase
+        // Só descontar saldo se houver resultados OU se a configuração permitir desconto sempre
+        if (!descontarApenasComResultados || temResultados) {
+          const { error: saldoError } = await supabase
             .from("profiles")
             .update({ saldo: novoSaldo })
-            .eq("id", user.id),
-          supabase.functions.invoke("analisar-jogos", {
-            body: { jogos: jogosValidos, modo, market: selectedMarket },
-          }),
-        ]);
-
-        if (saldoResult.error) throw saldoResult.error;
-        if (iaResult.error) throw iaResult.error;
-
-        setSaldo(novoSaldo);
-        const data = iaResult.data;
-        setResultado(data);
-
-        // Inserir bilhete após termos os resultados
-        const { error: bilheteError } = await supabase.from("bilhetes").insert({
-          user_id: user.id,
-          jogos: jogosValidos as any,
-          mercados_recomendados: data.jogos as any,
-          odds_totais: data.odd_total,
-          analise_ia: data.resumo,
-          probabilidade_estimada: data.probabilidade_total,
-          modo,
-        });
-
-        if (bilheteError) {
-          // Repor saldo caso falhe o registo do bilhete
-          await supabase
-            .from("profiles")
-            .update({ saldo: saldoAnterior })
             .eq("id", user.id);
-          setSaldo(saldoAnterior);
-          throw bilheteError;
+          
+          if (saldoError) throw saldoError;
+          setSaldo(novoSaldo);
+
+          toast({
+            title: "Comparação concluída!",
+            description: `Análise de ambos os modos. ${precoAtual} Kz descontados.`,
+          });
+        } else {
+          toast({
+            title: "Sem resultados",
+            description: "Nenhum resultado encontrado. Saldo não foi descontado.",
+            variant: "default",
+          });
         }
 
-        toast({
-          title: "Bilhete construído!",
-          description: `Análise completa. ${precoAtual} Kz descontados.`,
+        setResultadoComparacao({
+          risco: riscoData,
+          seguro: seguroData,
         });
+      } else {
+        // Modo normal (risco ou seguro): primeiro fazer análise
+        const iaResult = await supabase.functions.invoke("analisar-jogos", {
+          body: { jogos: jogosValidos, modo, market: selectedMarket },
+        });
+
+        if (iaResult.error) throw iaResult.error;
+
+        const data = iaResult.data;
+        
+        // Verificar se há resultados
+        const temResultados = data?.jogos?.length > 0;
+
+        // Só descontar saldo se houver resultados OU se a configuração permitir desconto sempre
+        if (!descontarApenasComResultados || temResultados) {
+          const { error: saldoError } = await supabase
+            .from("profiles")
+            .update({ saldo: novoSaldo })
+            .eq("id", user.id);
+          
+          if (saldoError) throw saldoError;
+          setSaldo(novoSaldo);
+
+          // Inserir bilhete após termos os resultados e o saldo descontado
+          const { error: bilheteError } = await supabase.from("bilhetes").insert({
+            user_id: user.id,
+            jogos: jogosValidos as any,
+            mercados_recomendados: data.jogos as any,
+            odds_totais: data.odd_total,
+            analise_ia: data.resumo,
+            probabilidade_estimada: data.probabilidade_total,
+            modo,
+          });
+
+          if (bilheteError) {
+            // Repor saldo caso falhe o registo do bilhete
+            await supabase
+              .from("profiles")
+              .update({ saldo: saldoAnterior })
+              .eq("id", user.id);
+            setSaldo(saldoAnterior);
+            throw bilheteError;
+          }
+
+          toast({
+            title: "Bilhete construído!",
+            description: `Análise completa. ${precoAtual} Kz descontados.`,
+          });
+        } else {
+          toast({
+            title: "Sem resultados",
+            description: "Nenhum resultado encontrado para este mercado. Saldo não foi descontado.",
+            variant: "default",
+          });
+        }
+
+        setResultado(data);
       }
     } catch (error: any) {
       toast({

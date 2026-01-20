@@ -8,6 +8,7 @@ interface SystemConfig {
   deposito_maximo: number;
   limite_jogos_arriscado: number;
   limite_jogos_seguro: number;
+  desconto_apenas_com_resultados: boolean;
 }
 
 interface MetodoDeposito {
@@ -35,6 +36,7 @@ const defaultConfig: SystemConfig = {
   deposito_maximo: 500000,
   limite_jogos_arriscado: 5,
   limite_jogos_seguro: 3,
+  desconto_apenas_com_resultados: true,
 };
 
 export function useSystemConfig(): UseSystemConfigReturn {
@@ -68,6 +70,7 @@ export function useSystemConfig(): UseSystemConfigReturn {
           deposito_maximo: Number(configMap.deposito_maximo) || defaultConfig.deposito_maximo,
           limite_jogos_arriscado: Number(configMap.limite_jogos_arriscado) || defaultConfig.limite_jogos_arriscado,
           limite_jogos_seguro: Number(configMap.limite_jogos_seguro) || defaultConfig.limite_jogos_seguro,
+          desconto_apenas_com_resultados: configMap.desconto_apenas_com_resultados !== 'false',
         });
       }
 
