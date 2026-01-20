@@ -10,6 +10,7 @@ export type MarketType =
   | "golos_equipa"
   | "btts"
   | "handicap"
+  | "intervalo_final"
   | "partes"
   | "minuto_golo"
   | "remates"
@@ -54,6 +55,11 @@ const MARKETS: Market[] = [
     id: "handicap", 
     label: "Handicap", 
     description: "Handicap positivo e negativo" 
+  },
+  { 
+    id: "intervalo_final", 
+    label: "Intervalo/Final", 
+    description: "Combinação HT/FT (9 opções)" 
   },
   { 
     id: "partes", 
