@@ -2,6 +2,7 @@ export type MarketType =
   | "nenhum"
   | "resultado"
   | "total_golos"
+  | "golos_equipa"
   | "btts"
   | "handicap"
   | "partes"
@@ -14,7 +15,7 @@ export type MarketType =
 
 export function normalizeMarket(market: unknown): MarketType {
   const validMarkets: MarketType[] = [
-    "nenhum", "resultado", "total_golos", "btts", "handicap",
+    "nenhum", "resultado", "total_golos", "golos_equipa", "btts", "handicap",
     "partes", "minuto_golo", "remates", "faltas", "cantos", "cartoes", "resultado_exato"
   ];
   
@@ -63,6 +64,41 @@ Linhas a considerar (Mais e Menos para cada):
 
 REGRA: Calcular probabilidade para cada linha. Mostrar apenas as linhas com ≥ 70%.
 Sugerir a linha mais confiável para ${modoLabel}.`;
+
+    case "golos_equipa":
+      return `
+=== MERCADO: GOLOS POR EQUIPA (TEAM GOALS) ===
+Analisar EXCLUSIVAMENTE quantos golos cada equipa irá marcar para ${modoLabel}.
+
+📊 GOLOS DA EQUIPA 1 (Casa):
+- Analisar média de golos marcados em casa (últimos 5-10 jogos)
+- Considerar força ofensiva da equipa
+- Analisar golos sofridos pela defesa adversária fora
+- Linhas: Mais/Menos de 0.5, 1.5, 2.5, 3.5 golos
+- Indicar a linha mais provável com percentagem
+
+📊 GOLOS DA EQUIPA 2 (Fora):
+- Analisar média de golos marcados fora (últimos 5-10 jogos)
+- Equipas visitantes geralmente marcam menos
+- Analisar golos sofridos pela defesa adversária em casa
+- Linhas: Mais/Menos de 0.5, 1.5, 2.5 golos
+- Indicar a linha mais provável com percentagem
+
+📊 ANÁLISE CRUZADA:
+- Comparar força ofensiva vs força defensiva adversária
+- Considerar motivação e importância do jogo
+- Analisar tendências recentes de golos
+
+📊 OPÇÕES ADICIONAIS:
+- Equipa a marcar primeiro (Casa/Fora/Nenhuma)
+- Equipa a marcar último (Casa/Fora)
+- Ambas marcam em cada parte (1ª/2ª parte)
+
+REGRA CRÍTICA:
+- Focar na capacidade individual de cada equipa marcar
+- Apresentar valores estimados com probabilidade ≥ 70%
+- Formato sugestão: "Equipa X Mais de Y.5 golos" ou "Equipa X Menos de Y.5 golos"
+- Indicar claramente qual equipa tem maior probabilidade de marcar mais`;
 
     case "btts":
       return `
