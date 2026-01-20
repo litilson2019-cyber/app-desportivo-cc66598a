@@ -147,6 +147,12 @@ export default function Construcao() {
     );
   };
 
+  // Função auxiliar para verificar se há resultados que atingem a confiança mínima
+  const temResultadosComConfianca = (jogosResult: Array<{ probabilidade: number }> | undefined, minConf: number): boolean => {
+    if (!jogosResult || jogosResult.length === 0) return false;
+    return jogosResult.some(j => j.probabilidade >= minConf);
+  };
+
   const handleConstruirBilhete = async () => {
     const jogosValidos = jogos.filter(
       (j) => j.equipa_a && j.equipa_b && j.odd_a && j.odd_b
@@ -199,10 +205,12 @@ export default function Construcao() {
         const riscoData = riscoResult.data;
         const seguroData = seguroResult.data;
         
-        // Verificar se há resultados
-        const temResultados = (riscoData?.jogos?.length > 0) || (seguroData?.jogos?.length > 0);
+        // Verificar se há resultados QUE ATINGEM a confiança mínima
+        const temResultadosRisco = temResultadosComConfianca(riscoData?.jogos, minConfidence);
+        const temResultadosSeguro = temResultadosComConfianca(seguroData?.jogos, minConfidence);
+        const temResultados = temResultadosRisco || temResultadosSeguro;
 
-        // Só descontar saldo se houver resultados OU se a configuração permitir desconto sempre
+        // Só descontar saldo se houver resultados que atingem a confiança OU se a configuração permitir desconto sempre
         if (!descontarApenasComResultados || temResultados) {
           const { error: saldoError } = await supabase
             .from("profiles")
@@ -218,8 +226,8 @@ export default function Construcao() {
           });
         } else {
           toast({
-            title: "Sem resultados",
-            description: "Nenhum resultado encontrado. Saldo não foi descontado.",
+            title: "Sem resultados válidos",
+            description: `Nenhum resultado atingiu a confiança mínima de ${minConfidence}%. Saldo não foi descontado.`,
             variant: "default",
           });
         }
@@ -238,10 +246,10 @@ export default function Construcao() {
 
         const data = iaResult.data;
         
-        // Verificar se há resultados
-        const temResultados = data?.jogos?.length > 0;
+        // Verificar se há resultados QUE ATINGEM a confiança mínima
+        const temResultados = temResultadosComConfianca(data?.jogos, minConfidence);
 
-        // Só descontar saldo se houver resultados OU se a configuração permitir desconto sempre
+        // Só descontar saldo se houver resultados que atingem a confiança OU se a configuração permitir desconto sempre
         if (!descontarApenasComResultados || temResultados) {
           const { error: saldoError } = await supabase
             .from("profiles")
@@ -278,8 +286,8 @@ export default function Construcao() {
           });
         } else {
           toast({
-            title: "Sem resultados",
-            description: "Nenhum resultado encontrado para este mercado. Saldo não foi descontado.",
+            title: "Sem resultados válidos",
+            description: `Nenhum resultado atingiu a confiança mínima de ${minConfidence}%. Saldo não foi descontado.`,
             variant: "default",
           });
         }
