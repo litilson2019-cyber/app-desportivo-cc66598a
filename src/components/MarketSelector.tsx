@@ -152,10 +152,10 @@ export function MarketSelector({ selectedMarket, onMarketChange }: MarketSelecto
       <div
         className={cn(
           "overflow-hidden transition-all duration-300 ease-in-out",
-          isExpanded ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0"
+          isExpanded ? "max-h-[800px] opacity-100 mt-4" : "max-h-0 opacity-0"
         )}
       >
-        <div className="space-y-2 pt-2 border-t border-border">
+        <div className="space-y-2 pt-2 border-t border-border max-h-[600px] overflow-y-auto">
           {MARKETS.map((market) => (
             <button
               key={market.id}
