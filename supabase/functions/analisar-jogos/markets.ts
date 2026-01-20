@@ -5,6 +5,7 @@ export type MarketType =
   | "golos_equipa"
   | "btts"
   | "handicap"
+  | "intervalo_final"
   | "partes"
   | "minuto_golo"
   | "remates"
@@ -16,7 +17,7 @@ export type MarketType =
 export function normalizeMarket(market: unknown): MarketType {
   const validMarkets: MarketType[] = [
     "nenhum", "resultado", "total_golos", "golos_equipa", "btts", "handicap",
-    "partes", "minuto_golo", "remates", "faltas", "cantos", "cartoes", "resultado_exato"
+    "intervalo_final", "partes", "minuto_golo", "remates", "faltas", "cantos", "cartoes", "resultado_exato"
   ];
   
   if (typeof market === "string" && validMarkets.includes(market as MarketType)) {
@@ -125,6 +126,44 @@ REGRA: Indicar claramente:
 - A equipa afetada
 - O valor do handicap (ex: Porto -1, Benfica +1.5)
 - Mostrar apenas handicaps com probabilidade ≥ 70%`;
+
+    case "intervalo_final":
+      return `
+=== MERCADO: INTERVALO/FINAL (HT/FT) ===
+Analisar EXCLUSIVAMENTE combinações de resultado ao intervalo e final para ${modoLabel}.
+
+📊 COMBINAÇÕES POSSÍVEIS (9 opções):
+- 1/1: Equipa 1 vence ao intervalo E vence no final
+- 1/X: Equipa 1 vence ao intervalo, Empate no final
+- 1/2: Equipa 1 vence ao intervalo, Equipa 2 vence no final
+- X/1: Empate ao intervalo, Equipa 1 vence no final
+- X/X: Empate ao intervalo E empate no final
+- X/2: Empate ao intervalo, Equipa 2 vence no final
+- 2/1: Equipa 2 vence ao intervalo, Equipa 1 vence no final
+- 2/X: Equipa 2 vence ao intervalo, Empate no final
+- 2/2: Equipa 2 vence ao intervalo E vence no final
+
+📊 ANÁLISE ESTATÍSTICA:
+- Analisar tendência de golos por parte (1ª vs 2ª parte)
+- Considerar força nos primeiros 45 minutos
+- Analisar capacidade de recuperação/manutenção de resultados
+- Verificar histórico de reviravoltas
+
+📊 COMBINAÇÕES MAIS COMUNS:
+- 1/1 e 2/2: Favoritos que dominam desde o início
+- X/1 e X/2: Equipas que começam devagar mas vencem
+- X/X: Jogos equilibrados e fechados
+
+📊 COMBINAÇÕES DE VALOR:
+- 1/2 e 2/1: Reviravoltas (odds altas, probabilidade baixa)
+- 1/X e 2/X: Equipas que cedem vantagem
+
+REGRA CRÍTICA:
+- Analisar padrões de golos por parte de cada equipa
+- Para ${modoLabel === "Modo Seguro" ? "Modo Seguro: focar em 1/1, 2/2 ou X/X" : "Modo Risco: considerar X/1, X/2 para valor"}
+- Apresentar apenas combinações com probabilidade ≥ 65%
+- Formato sugestão: "Intervalo/Final: X/Y" com probabilidade
+- Indicar a combinação mais provável e justificar`;
 
     case "partes":
       return `
