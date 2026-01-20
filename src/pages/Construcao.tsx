@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,11 +6,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, Loader2, Sparkles, TrendingUp, Shield } from "lucide-react";
+import { Plus, X, Loader2, Sparkles, TrendingUp, Shield, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useSystemConfig } from "@/hooks/useSystemConfig";
 import { MarketSelector, MarketType } from "@/components/MarketSelector";
+import { ConfidenceFilter, ConfidenceLevel } from "@/components/ConfidenceFilter";
 
 interface Jogo {
   id: string;
@@ -44,6 +45,7 @@ export default function Construcao() {
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
   const [modo, setModo] = useState<"risco" | "seguro">("risco");
   const [selectedMarket, setSelectedMarket] = useState<MarketType>("nenhum");
+  const [minConfidence, setMinConfidence] = useState<ConfidenceLevel>(70);
   const [saldo, setSaldo] = useState<number>(0);
   const [loadingSaldo, setLoadingSaldo] = useState(true);
   const { toast } = useToast();
@@ -54,6 +56,28 @@ export default function Construcao() {
   const precoAtual = modo === "risco" ? config.preco_modo_arriscado : config.preco_modo_seguro;
   const limiteJogos = modo === "seguro" ? config.limite_jogos_seguro : config.limite_jogos_arriscado;
   const temSaldoSuficiente = saldo >= precoAtual;
+
+  // Filtrar jogos por confiança mínima
+  const filteredResultado = useMemo(() => {
+    if (!resultado) return null;
+    
+    const jogosFiltrados = resultado.jogos.filter(j => j.probabilidade >= minConfidence);
+    
+    if (jogosFiltrados.length === 0) return { ...resultado, jogos: [], odd_total: 0, probabilidade_total: 0 };
+    
+    // Recalcular odd total e probabilidade média
+    const oddTotal = jogosFiltrados.reduce((acc, j) => acc * j.odd, 1);
+    const probMedia = jogosFiltrados.reduce((acc, j) => acc + j.probabilidade, 0) / jogosFiltrados.length;
+    
+    return {
+      ...resultado,
+      jogos: jogosFiltrados,
+      odd_total: oddTotal,
+      probabilidade_total: probMedia
+    };
+  }, [resultado, minConfidence]);
+
+  const hiddenCount = resultado ? resultado.jogos.length - (filteredResultado?.jogos.length || 0) : 0;
 
   useEffect(() => {
     fetchSaldo();
@@ -348,6 +372,12 @@ export default function Construcao() {
             onMarketChange={setSelectedMarket} 
           />
 
+          {/* Filtro de Confiança */}
+          <ConfidenceFilter
+            minConfidence={minConfidence}
+            onConfidenceChange={setMinConfidence}
+          />
+
           <Button
             onClick={handleConstruirBilhete}
             disabled={loading || loadingSaldo || configLoading || !temSaldoSuficiente}
@@ -369,7 +399,7 @@ export default function Construcao() {
             )}
           </Button>
 
-          {resultado && (
+          {filteredResultado && (
             <Card className="p-6 shadow-medium rounded-2xl space-y-4 bg-gradient-card">
               <div className="flex items-center gap-3 pb-4 border-b border-border">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-primary flex items-center justify-center">
@@ -380,34 +410,50 @@ export default function Construcao() {
                     Análise da IA
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    {resultado.mercado_analisado && resultado.mercado_analisado !== "Pesquisa Geral" 
-                      ? `Mercado: ${resultado.mercado_analisado}` 
+                    {filteredResultado.mercado_analisado && filteredResultado.mercado_analisado !== "Pesquisa Geral" 
+                      ? `Mercado: ${filteredResultado.mercado_analisado}` 
                       : "Pesquisa geral automática"}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-muted/30 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Odd Total
-                  </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    {resultado.odd_total.toFixed(2)}
-                  </p>
+              {/* Aviso de jogos ocultos */}
+              {hiddenCount > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-warning/10 rounded-xl text-warning text-sm">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>{hiddenCount} jogo(s) oculto(s) por estarem abaixo de {minConfidence}% de confiança</span>
                 </div>
-                <div className="text-center p-4 bg-muted/30 rounded-xl">
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Probabilidade
-                  </p>
-                  <p className="text-2xl font-bold text-success">
-                    {resultado.probabilidade_total.toFixed(0)}%
-                  </p>
-                </div>
-              </div>
+              )}
 
-              <div className="space-y-3">
-                {resultado.jogos.map((jogo, index) => {
+              {filteredResultado.jogos.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-warning" />
+                  <p className="font-medium">Nenhum resultado atinge a confiança mínima de {minConfidence}%</p>
+                  <p className="text-sm mt-1">Reduza o filtro de confiança para ver mais resultados.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Odd Total
+                      </p>
+                      <p className="text-2xl font-bold text-foreground">
+                        {filteredResultado.odd_total.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="text-center p-4 bg-muted/30 rounded-xl">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Probabilidade
+                      </p>
+                      <p className="text-2xl font-bold text-success">
+                        {filteredResultado.probabilidade_total.toFixed(0)}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {filteredResultado.jogos.map((jogo, index) => {
                   // Determinar cor baseada no score de confiança
                   const getConfidenceColor = (prob: number) => {
                     if (prob >= 85) return "bg-success"; // Verde - Alta confiança
@@ -492,16 +538,18 @@ export default function Construcao() {
                     </div>
                   );
                 })}
-              </div>
+                  </div>
 
-              <div className="p-4 bg-muted/30 rounded-xl">
-                <h3 className="font-semibold text-foreground mb-2">
-                  Resumo
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {resultado.resumo}
-                </p>
-              </div>
+                  <div className="p-4 bg-muted/30 rounded-xl">
+                    <h3 className="font-semibold text-foreground mb-2">
+                      Resumo
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {filteredResultado.resumo}
+                    </p>
+                  </div>
+                </>
+              )}
             </Card>
           )}
         </div>
