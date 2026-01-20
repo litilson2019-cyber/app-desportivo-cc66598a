@@ -6,12 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, Loader2, Sparkles, TrendingUp, Shield, AlertTriangle } from "lucide-react";
+import { Plus, X, Loader2, Sparkles, TrendingUp, Shield, AlertTriangle, GitCompare } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useSystemConfig } from "@/hooks/useSystemConfig";
 import { MarketSelector, MarketType } from "@/components/MarketSelector";
 import { ConfidenceFilter, ConfidenceLevel } from "@/components/ConfidenceFilter";
+import { ModeComparison } from "@/components/ModeComparison";
 
 interface Jogo {
   id: string;
@@ -43,7 +44,11 @@ export default function Construcao() {
   ]);
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<ResultadoAnalise | null>(null);
-  const [modo, setModo] = useState<"risco" | "seguro">("risco");
+  const [resultadoComparacao, setResultadoComparacao] = useState<{
+    risco: ResultadoAnalise | null;
+    seguro: ResultadoAnalise | null;
+  } | null>(null);
+  const [modo, setModo] = useState<"risco" | "seguro" | "comparar">("risco");
   const [selectedMarket, setSelectedMarket] = useState<MarketType>("nenhum");
   const [minConfidence, setMinConfidence] = useState<ConfidenceLevel>(70);
   const [saldo, setSaldo] = useState<number>(0);
@@ -53,7 +58,12 @@ export default function Construcao() {
   // Hook para buscar configurações do sistema
   const { config, loading: configLoading } = useSystemConfig();
 
-  const precoAtual = modo === "risco" ? config.preco_modo_arriscado : config.preco_modo_seguro;
+  // Preço para comparação é o dobro (ambos os modos)
+  const precoRisco = config.preco_modo_arriscado;
+  const precoSeguro = config.preco_modo_seguro;
+  const precoComparacao = precoRisco + precoSeguro;
+  
+  const precoAtual = modo === "comparar" ? precoComparacao : modo === "risco" ? precoRisco : precoSeguro;
   const limiteJogos = modo === "seguro" ? config.limite_jogos_seguro : config.limite_jogos_arriscado;
   const temSaldoSuficiente = saldo >= precoAtual;
 
@@ -154,13 +164,16 @@ export default function Construcao() {
     if (!temSaldoSuficiente) {
       toast({
         title: "Saldo insuficiente",
-        description: `Você precisa de ${precoAtual} Kz para construir um bilhete no modo ${modo === "risco" ? "arriscado" : "seguro"}. Saldo atual: ${saldo.toFixed(2)} Kz`,
+        description: `Você precisa de ${precoAtual} Kz para ${modo === "comparar" ? "comparar os modos" : `construir um bilhete no modo ${modo === "risco" ? "arriscado" : "seguro"}`}. Saldo atual: ${saldo.toFixed(2)} Kz`,
         variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
+    setResultado(null);
+    setResultadoComparacao(null);
+    
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
@@ -168,49 +181,80 @@ export default function Construcao() {
       const saldoAnterior = saldo;
       const novoSaldo = saldoAnterior - precoAtual;
 
-      // Executar dedução de saldo e chamada à IA em PARALELO para máxima velocidade
-      const [saldoResult, iaResult] = await Promise.all([
-        supabase
-          .from("profiles")
-          .update({ saldo: novoSaldo })
-          .eq("id", user.id),
-        supabase.functions.invoke("analisar-jogos", {
-          body: { jogos: jogosValidos, modo, market: selectedMarket },
-        }),
-      ]);
+      if (modo === "comparar") {
+        // Modo comparação: chamar ambos os modos em paralelo
+        const [saldoResult, riscoResult, seguroResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .update({ saldo: novoSaldo })
+            .eq("id", user.id),
+          supabase.functions.invoke("analisar-jogos", {
+            body: { jogos: jogosValidos, modo: "risco", market: selectedMarket },
+          }),
+          supabase.functions.invoke("analisar-jogos", {
+            body: { jogos: jogosValidos, modo: "seguro", market: selectedMarket },
+          }),
+        ]);
 
-      if (saldoResult.error) throw saldoResult.error;
-      if (iaResult.error) throw iaResult.error;
+        if (saldoResult.error) throw saldoResult.error;
+        if (riscoResult.error) throw riscoResult.error;
+        if (seguroResult.error) throw seguroResult.error;
 
-      setSaldo(novoSaldo);
-      const data = iaResult.data;
-      setResultado(data);
+        setSaldo(novoSaldo);
+        setResultadoComparacao({
+          risco: riscoResult.data,
+          seguro: seguroResult.data,
+        });
 
-      // Inserir bilhete após termos os resultados
-      const { error: bilheteError } = await supabase.from("bilhetes").insert({
-        user_id: user.id,
-        jogos: jogosValidos as any,
-        mercados_recomendados: data.jogos as any,
-        odds_totais: data.odd_total,
-        analise_ia: data.resumo,
-        probabilidade_estimada: data.probabilidade_total,
-        modo,
-      });
+        toast({
+          title: "Comparação concluída!",
+          description: `Análise de ambos os modos. ${precoAtual} Kz descontados.`,
+        });
+      } else {
+        // Modo normal (risco ou seguro)
+        const [saldoResult, iaResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .update({ saldo: novoSaldo })
+            .eq("id", user.id),
+          supabase.functions.invoke("analisar-jogos", {
+            body: { jogos: jogosValidos, modo, market: selectedMarket },
+          }),
+        ]);
 
-      if (bilheteError) {
-        // Repor saldo caso falhe o registo do bilhete
-        await supabase
-          .from("profiles")
-          .update({ saldo: saldoAnterior })
-          .eq("id", user.id);
-        setSaldo(saldoAnterior);
-        throw bilheteError;
+        if (saldoResult.error) throw saldoResult.error;
+        if (iaResult.error) throw iaResult.error;
+
+        setSaldo(novoSaldo);
+        const data = iaResult.data;
+        setResultado(data);
+
+        // Inserir bilhete após termos os resultados
+        const { error: bilheteError } = await supabase.from("bilhetes").insert({
+          user_id: user.id,
+          jogos: jogosValidos as any,
+          mercados_recomendados: data.jogos as any,
+          odds_totais: data.odd_total,
+          analise_ia: data.resumo,
+          probabilidade_estimada: data.probabilidade_total,
+          modo,
+        });
+
+        if (bilheteError) {
+          // Repor saldo caso falhe o registo do bilhete
+          await supabase
+            .from("profiles")
+            .update({ saldo: saldoAnterior })
+            .eq("id", user.id);
+          setSaldo(saldoAnterior);
+          throw bilheteError;
+        }
+
+        toast({
+          title: "Bilhete construído!",
+          description: `Análise completa. ${precoAtual} Kz descontados.`,
+        });
       }
-
-      toast({
-        title: "Bilhete construído!",
-        description: `Análise completa. ${precoAtual} Kz descontados.`,
-      });
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -237,28 +281,40 @@ export default function Construcao() {
 
           {/* Modo de Análise */}
           <Card className="p-4 shadow-soft rounded-2xl">
-            <div className="flex gap-3">
+            <div className="flex gap-2 flex-wrap">
               <Button
                 onClick={() => setModo("risco")}
                 variant={modo === "risco" ? "default" : "outline"}
-                className={`flex-1 h-12 font-semibold ${
+                className={`flex-1 min-w-[100px] h-12 font-semibold ${
                   modo === "risco"
                     ? "bg-gradient-primary text-white"
                     : "border-primary/30 text-foreground hover:bg-primary/10"
                 }`}
               >
-                🔵 Modo Risco
+                🔵 Risco
               </Button>
               <Button
                 onClick={() => setModo("seguro")}
                 variant={modo === "seguro" ? "default" : "outline"}
-                className={`flex-1 h-12 font-semibold ${
+                className={`flex-1 min-w-[100px] h-12 font-semibold ${
                   modo === "seguro"
                     ? "bg-emerald-500 text-white hover:bg-emerald-600"
                     : "border-emerald-500/30 text-foreground hover:bg-emerald-500/10"
                 }`}
               >
-                🟢 Modo Seguro
+                🟢 Seguro
+              </Button>
+              <Button
+                onClick={() => setModo("comparar")}
+                variant={modo === "comparar" ? "default" : "outline"}
+                className={`flex-1 min-w-[100px] h-12 font-semibold ${
+                  modo === "comparar"
+                    ? "bg-gradient-to-r from-primary to-emerald-500 text-white"
+                    : "border-purple-500/30 text-foreground hover:bg-purple-500/10"
+                }`}
+              >
+                <GitCompare className="w-4 h-4 mr-1" />
+                Comparar
               </Button>
             </div>
             
@@ -273,12 +329,22 @@ export default function Construcao() {
           {modo && (
             <div className="mt-4 p-4 bg-muted/30 rounded-xl space-y-2">
               <h3 className="font-semibold text-foreground">
-                {modo === "risco" ? "Modo Arriscado" : "Modo Seguro"}
+                {modo === "comparar" ? "Modo Comparação" : modo === "risco" ? "Modo Arriscado" : "Modo Seguro"}
               </h3>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• {modo === "risco" ? `Até ${config.limite_jogos_arriscado} jogos` : `Até ${config.limite_jogos_seguro} jogos`}</li>
-                <li>• {modo === "risco" ? "Alto potencial de retorno" : "Alta estabilidade"}</li>
-                <li>• Preço por análise: <span className="font-semibold text-foreground">{configLoading ? "..." : `${precoAtual} Kz`}</span></li>
+                {modo === "comparar" ? (
+                  <>
+                    <li>• Analisa ambos os modos lado a lado</li>
+                    <li>• Até {Math.min(config.limite_jogos_arriscado, config.limite_jogos_seguro)} jogos</li>
+                    <li>• Preço: <span className="font-semibold text-foreground">{configLoading ? "..." : `${precoAtual} Kz`}</span> (Risco + Seguro)</li>
+                  </>
+                ) : (
+                  <>
+                    <li>• {modo === "risco" ? `Até ${config.limite_jogos_arriscado} jogos` : `Até ${config.limite_jogos_seguro} jogos`}</li>
+                    <li>• {modo === "risco" ? "Alto potencial de retorno" : "Alta estabilidade"}</li>
+                    <li>• Preço por análise: <span className="font-semibold text-foreground">{configLoading ? "..." : `${precoAtual} Kz`}</span></li>
+                  </>
+                )}
               </ul>
             </div>
           )}
@@ -391,6 +457,11 @@ export default function Construcao() {
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : !temSaldoSuficiente ? (
               <>Saldo Insuficiente ({precoAtual} Kz)</>
+            ) : modo === "comparar" ? (
+              <>
+                <GitCompare className="w-6 h-6 mr-2" />
+                Comparar Modos ({precoAtual} Kz)
+              </>
             ) : (
               <>
                 <Sparkles className="w-6 h-6 mr-2" />
@@ -398,6 +469,15 @@ export default function Construcao() {
               </>
             )}
           </Button>
+
+          {/* Resultado da Comparação */}
+          {resultadoComparacao && (
+            <ModeComparison
+              resultadoRisco={resultadoComparacao.risco}
+              resultadoSeguro={resultadoComparacao.seguro}
+              minConfidence={minConfidence}
+            />
+          )}
 
           {filteredResultado && (
             <Card className="p-6 shadow-medium rounded-2xl space-y-4 bg-gradient-card">
