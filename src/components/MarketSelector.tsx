@@ -35,12 +35,12 @@ const MARKETS: Market[] = [
   { 
     id: "resultado", 
     label: "Resultado do Jogo", 
-    description: "1X2 e Dupla Chance" 
+    description: "1X2 e Dupla Chance (1X, X2)" 
   },
   { 
     id: "total_golos", 
     label: "Total de Golos", 
-    description: "Mais/Menos de 0.5 a 4.5+" 
+    description: "Mais/Menos 0.5 a 4.5+" 
   },
   { 
     id: "golos_equipa", 
@@ -50,12 +50,47 @@ const MARKETS: Market[] = [
   { 
     id: "btts", 
     label: "Ambas Marcam", 
-    description: "Sim ou Não (BTTS)" 
+    description: "BTTS - Sim/Não" 
   },
   { 
     id: "handicap", 
     label: "Handicap", 
-    description: "Handicap positivo e negativo" 
+    description: "Positivo ou negativo" 
+  },
+  { 
+    id: "partes", 
+    label: "Partes do Jogo", 
+    description: "Primeira e Segunda Parte" 
+  },
+  { 
+    id: "minuto_golo", 
+    label: "Minuto do 1º Golo", 
+    description: "Intervalo de minutos do primeiro golo" 
+  },
+  { 
+    id: "remates", 
+    label: "Remates", 
+    description: "Equipa 1, Equipa 2, Totais" 
+  },
+  { 
+    id: "faltas", 
+    label: "Faltas", 
+    description: "Equipa 1, Equipa 2, Total" 
+  },
+  { 
+    id: "resultado_exato", 
+    label: "Resultado Exacto", 
+    description: "Análise profunda do placar" 
+  },
+  { 
+    id: "marcador", 
+    label: "Jogador a Marcar", 
+    description: "Artilheiros e probabilidade de marcar" 
+  },
+  { 
+    id: "cartoes", 
+    label: "Cartões", 
+    description: "Amarelos/vermelhos por equipa e total" 
   },
   { 
     id: "intervalo_final", 
@@ -63,44 +98,9 @@ const MARKETS: Market[] = [
     description: "Combinação HT/FT (9 opções)" 
   },
   { 
-    id: "partes", 
-    label: "Partes do Jogo", 
-    description: "1ª e 2ª parte separadas" 
-  },
-  { 
-    id: "minuto_golo", 
-    label: "Minuto do 1º Golo", 
-    description: "Quando será o primeiro golo" 
-  },
-  { 
-    id: "marcador", 
-    label: "Jogador a Marcar", 
-    description: "Artilheiros e probabilidades" 
-  },
-  { 
-    id: "remates", 
-    label: "Remates", 
-    description: "Remates por equipa e totais" 
-  },
-  { 
-    id: "faltas", 
-    label: "Faltas", 
-    description: "Faltas por equipa e totais" 
-  },
-  { 
     id: "cantos", 
     label: "Cantos", 
     description: "Cantos por equipa e totais" 
-  },
-  { 
-    id: "cartoes", 
-    label: "Cartões", 
-    description: "Amarelos e vermelhos por equipa" 
-  },
-  { 
-    id: "resultado_exato", 
-    label: "Resultado Exacto", 
-    description: "Análise profunda do placar" 
   },
 ];
 
