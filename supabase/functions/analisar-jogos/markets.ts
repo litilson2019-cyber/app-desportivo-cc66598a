@@ -118,45 +118,90 @@ Indicar o intervalo mais provável para ${modoLabel}.`;
     case "remates":
       return `
 === MERCADO: REMATES ===
-Analisar EXCLUSIVAMENTE estatísticas de remates.
+Analisar EXCLUSIVAMENTE estatísticas de remates para ${modoLabel}.
 
-Mercados:
-- Remates Totais da Equipa 1 (Mais/Menos de X)
-- Remates Totais da Equipa 2 (Mais/Menos de X)
-- Remates Totais do Jogo (Mais/Menos de X)
-- Remates à Baliza
+📊 REMATES DA EQUIPA 1 (Casa):
+- Analisar média de remates por jogo em casa
+- Linhas: Mais/Menos de 3.5, 4.5, 5.5, 6.5 remates
+- Indicar a linha mais provável com percentagem
 
-REGRA: Apresentar valores estimados com percentagem.
-Sugerir as linhas mais confiáveis para ${modoLabel}.`;
+📊 REMATES DA EQUIPA 2 (Fora):
+- Analisar média de remates por jogo fora
+- Linhas: Mais/Menos de 3.5, 4.5, 5.5, 6.5 remates
+- Indicar a linha mais provável com percentagem
+
+📊 REMATES TOTAIS DO JOGO:
+- Somar expectativa de remates das duas equipas
+- Linhas: Mais/Menos de 18.5, 20.5, 22.5, 24.5 remates totais
+- Indicar a linha mais provável com percentagem
+
+REGRA CRÍTICA:
+- Basear análise no estilo de jogo (ofensivo/defensivo)
+- Considerar a qualidade das defesas adversárias
+- Apresentar valores estimados com probabilidade ≥ 70%
+- Formato sugestão: "Equipa X Mais de Y.5 remates" ou "Total Mais de X.5 remates"`;
 
     case "faltas":
       return `
 === MERCADO: FALTAS ===
-Analisar EXCLUSIVAMENTE estatísticas de faltas.
+Analisar EXCLUSIVAMENTE estatísticas de faltas para ${modoLabel}.
 
-Mercados:
-- Faltas da Equipa 1 (Mais/Menos de X)
-- Faltas da Equipa 2 (Mais/Menos de X)
-- Total de Faltas do Jogo (Mais/Menos de X)
+📊 FALTAS DA EQUIPA 1 (Casa):
+- Analisar média de faltas cometidas por jogo
+- Considerar estilo de jogo e agressividade
+- Linhas: Mais/Menos de 10.5, 12.5, 14.5, 16.5 faltas
+- Indicar a linha mais provável com percentagem
 
-REGRA: Considerar estilo de jogo e intensidade da partida.
-Apresentar valores estimados com percentagem para ${modoLabel}.`;
+📊 FALTAS DA EQUIPA 2 (Fora):
+- Analisar média de faltas cometidas fora
+- Equipas visitantes geralmente cometem mais faltas
+- Linhas: Mais/Menos de 10.5, 12.5, 14.5, 16.5 faltas
+- Indicar a linha mais provável com percentagem
+
+📊 TOTAL DE FALTAS DO JOGO:
+- Somar expectativa de faltas das duas equipas
+- Considerar intensidade esperada (derby, rivalidade, posição na tabela)
+- Linhas: Mais/Menos de 20.5, 22.5, 24.5, 26.5, 28.5 faltas totais
+- Indicar a linha mais provável com percentagem
+
+REGRA CRÍTICA:
+- Analisar o árbitro designado (se disponível) - árbitros rigorosos = mais faltas
+- Considerar importância do jogo (jogos decisivos = mais intensidade)
+- Apresentar valores estimados com probabilidade ≥ 70%
+- Formato sugestão: "Total Mais de X.5 faltas" ou "Equipa X Mais de Y.5 faltas"`;
 
     case "resultado_exato":
       return `
 === MERCADO: RESULTADO EXACTO (ANÁLISE PROFUNDA) ===
-Mercado avançado que requer análise profunda.
+Mercado avançado que requer análise estatística profunda para ${modoLabel}.
 
-Processo:
-1. Analisar quantos golos terá o jogo no total
-2. Analisar quantos golos marcará cada equipa
-3. Determinar os resultados exatos mais prováveis
+📊 PASSO 1 - QUANTOS GOLOS TERÁ O JOGO:
+- Analisar média de golos por jogo de cada equipa
+- Considerar força ofensiva e defensiva
+- Estimar total de golos esperado no jogo
 
-REGRA: 
+📊 PASSO 2 - GOLOS DA EQUIPA 1 (Casa):
+- Analisar golos marcados em casa (últimos 5 jogos)
+- Analisar golos sofridos pela Equipa 2 fora (últimos 5 jogos)
+- Estimar quantos golos a Equipa 1 marcará
+
+📊 PASSO 3 - GOLOS DA EQUIPA 2 (Fora):
+- Analisar golos marcados fora (últimos 5 jogos)
+- Analisar golos sofridos pela Equipa 1 em casa (últimos 5 jogos)
+- Estimar quantos golos a Equipa 2 marcará
+
+📊 PASSO 4 - RESULTADO EXACTO:
+- Combinar as estimativas para determinar placares prováveis
+- Calcular probabilidade para cada placar
+- Selecionar os 1-2 resultados mais prováveis
+
+REGRA CRÍTICA:
 - Sugerir NO MÁXIMO 2 resultados exatos
-- Apenas se a percentagem for alta (≥ 65%)
-- Indicar claramente a melhor aposta baseada na análise para ${modoLabel}
-- Formato: "Resultado Exacto: X-Y" com probabilidade`;
+- Apenas resultados com probabilidade ≥ 65%
+- Mostrar a análise que justifica cada sugestão
+- Formato: "Resultado Exacto: X-Y (Equipa1 X - Equipa2 Y)" com probabilidade
+- Exemplos: "1-0", "2-1", "1-1", "2-0", "0-0"
+- Indicar claramente qual é a MELHOR APOSTA`;
 
     default:
       return "";
