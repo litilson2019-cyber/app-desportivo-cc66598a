@@ -9,12 +9,13 @@ export type MarketType =
   | "remates"
   | "faltas"
   | "cantos"
+  | "cartoes"
   | "resultado_exato";
 
 export function normalizeMarket(market: unknown): MarketType {
   const validMarkets: MarketType[] = [
     "nenhum", "resultado", "total_golos", "btts", "handicap",
-    "partes", "minuto_golo", "remates", "faltas", "cantos", "resultado_exato"
+    "partes", "minuto_golo", "remates", "faltas", "cantos", "cartoes", "resultado_exato"
   ];
   
   if (typeof market === "string" && validMarkets.includes(market as MarketType)) {
@@ -206,6 +207,46 @@ REGRA CRÍTICA:
 - Equipas que jogam pelo meio = menos cantos
 - Apresentar valores estimados com probabilidade ≥ 70%
 - Formato sugestão: "Total Mais de X.5 cantos" ou "Equipa X Mais de Y.5 cantos"`;
+
+    case "cartoes":
+      return `
+=== MERCADO: CARTÕES (AMARELOS E VERMELHOS) ===
+Analisar EXCLUSIVAMENTE estatísticas de cartões para ${modoLabel}.
+
+📊 CARTÕES DA EQUIPA 1 (Casa):
+- Analisar média de cartões amarelos recebidos por jogo em casa
+- Considerar estilo de jogo (agressivo = mais cartões)
+- Linhas Amarelos: Mais/Menos de 1.5, 2.5, 3.5 cartões
+- Indicar a linha mais provável com percentagem
+
+📊 CARTÕES DA EQUIPA 2 (Fora):
+- Analisar média de cartões amarelos recebidos fora
+- Equipas visitantes geralmente recebem mais cartões
+- Linhas Amarelos: Mais/Menos de 1.5, 2.5, 3.5, 4.5 cartões
+- Indicar a linha mais provável com percentagem
+
+📊 TOTAL DE CARTÕES DO JOGO:
+- Somar expectativa de cartões das duas equipas
+- Considerar intensidade do jogo (derby, rivalidade)
+- Linhas Amarelos: Mais/Menos de 3.5, 4.5, 5.5, 6.5 cartões totais
+- Indicar a linha mais provável com percentagem
+
+📊 CARTÕES VERMELHOS:
+- Analisar histórico de expulsões das equipas
+- Considerar jogos de alta tensão
+- Opções: Haverá cartão vermelho (Sim/Não)
+- Apenas sugerir se probabilidade ≥ 60%
+
+📊 PONTOS DE CARTÃO (1 ponto = amarelo, 2 pontos = vermelho):
+- Calcular pontuação total esperada
+- Linhas: Mais/Menos de 4.5, 5.5, 6.5, 7.5 pontos
+- Indicar a linha mais provável com percentagem
+
+REGRA CRÍTICA:
+- Analisar o árbitro designado (se disponível) - árbitros rigorosos = mais cartões
+- Considerar importância e tensão do jogo
+- Apresentar valores estimados com probabilidade ≥ 70%
+- Formato sugestão: "Total Mais de X.5 cartões" ou "Equipa X Mais de Y.5 cartões"`;
 
     case "resultado_exato":
       return `

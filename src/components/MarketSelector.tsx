@@ -14,6 +14,7 @@ export type MarketType =
   | "remates"
   | "faltas"
   | "cantos"
+  | "cartoes"
   | "resultado_exato";
 
 interface Market {
@@ -72,6 +73,11 @@ const MARKETS: Market[] = [
     id: "cantos", 
     label: "Cantos", 
     description: "Cantos por equipa e totais" 
+  },
+  { 
+    id: "cartoes", 
+    label: "Cartões", 
+    description: "Amarelos e vermelhos por equipa" 
   },
   { 
     id: "resultado_exato", 
