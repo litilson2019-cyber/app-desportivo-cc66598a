@@ -18,11 +18,9 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
     // Set a timeout to prevent infinite loading
     timeoutRef.current = setTimeout(() => {
       if (loading && !authenticated) {
-        // Clear any stale tokens and redirect to login
-        localStorage.removeItem('sb-ipitxugsxcupaexhgcim-auth-token');
         navigate("/login", { replace: true });
       }
-    }, 5000); // 5 second timeout
+    }, 15000); // 15 second timeout for slow connections
 
     const checkSession = async () => {
       if (checkedRef.current) return;
@@ -32,10 +30,6 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error || !session) {
-          // Clear potentially corrupted tokens
-          if (error) {
-            localStorage.removeItem('sb-ipitxugsxcupaexhgcim-auth-token');
-          }
           navigate("/login", { replace: true });
           return;
         }
@@ -43,8 +37,17 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
         setAuthenticated(true);
         setLoading(false);
       } catch (err) {
-        // On network error, redirect to login
-        localStorage.removeItem('sb-ipitxugsxcupaexhgcim-auth-token');
+        // On network error, retry once before redirecting
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            setAuthenticated(true);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          // Still failing
+        }
         navigate("/login", { replace: true });
       }
     };
