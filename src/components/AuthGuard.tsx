@@ -16,28 +16,33 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
   const mountedRef = useRef(true);
   const initRef = useRef(false);
 
-  const checkSession = async (isRetry = false) => {
+  const retryCountRef = useRef(0);
+  const maxAutoRetries = 3;
+
+  const checkSession = async (isManualRetry = false) => {
     if (!mountedRef.current) return;
     
-    if (isRetry) {
+    if (isManualRetry) {
+      retryCountRef.current = 0;
       setNetworkError(false);
       setLoading(true);
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       const { data: { session }, error } = await supabase.auth.getSession();
+
+      clearTimeout(timeoutId);
 
       if (!mountedRef.current) return;
 
       if (error) {
-        // Check if it's a network error vs auth error
         const isNetwork = error.message?.includes("fetch") || error.message?.includes("network") || error.message?.includes("Failed");
         if (isNetwork) {
-          setNetworkError(true);
-          setLoading(false);
-          return;
+          return handleNetworkError();
         }
-        // Auth error — session is invalid, go to login
         navigate("/login", { replace: true });
         return;
       }
@@ -47,12 +52,26 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
         return;
       }
 
+      retryCountRef.current = 0;
       setAuthenticated(true);
       setNetworkError(false);
       setLoading(false);
     } catch (err: any) {
       if (!mountedRef.current) return;
-      // Network failure — show retry UI instead of redirecting
+      handleNetworkError();
+    }
+  };
+
+  const handleNetworkError = () => {
+    if (!mountedRef.current) return;
+    
+    if (retryCountRef.current < maxAutoRetries) {
+      retryCountRef.current += 1;
+      const delay = Math.min(Math.pow(2, retryCountRef.current) * 1000, 10000);
+      setTimeout(() => {
+        if (mountedRef.current) checkSession();
+      }, delay);
+    } else {
       setNetworkError(true);
       setLoading(false);
     }
@@ -96,7 +115,7 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
         <p className="text-sm text-muted-foreground max-w-xs">
           Não foi possível conectar ao servidor. Verifique a sua internet e tente novamente.
         </p>
-        <Button onClick={() => checkSession(true)} className="mt-2">
+        <Button onClick={() => checkSession(true)} className="mt-2 bg-gradient-primary hover:opacity-90 text-white">
           <RefreshCw className="w-4 h-4 mr-2" />
           Tentar Novamente
         </Button>

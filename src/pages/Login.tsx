@@ -77,74 +77,61 @@ export default function Login() {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          if (error.message.includes("fetch") || error.message.includes("network")) {
-            setConnectionError(true);
-            throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
+        const attemptLogin = async (retries = 3): Promise<void> => {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            const isNetwork = error.message.includes("fetch") || error.message.includes("network") || error.message.includes("Failed");
+            if (isNetwork && retries > 0) {
+              await new Promise(r => setTimeout(r, Math.pow(2, 3 - retries) * 1000));
+              return attemptLogin(retries - 1);
+            }
+            if (isNetwork) {
+              setConnectionError(true);
+              throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
+            }
+            throw error;
           }
-          throw error;
-        }
-
-        toast({
-          title: "Bem-vindo de volta!",
-          description: "Login realizado com sucesso.",
-        });
+        };
+        await attemptLogin();
+        toast({ title: "Bem-vindo de volta!", description: "Login realizado com sucesso." });
         navigate("/");
       } else {
         if (password.length < 6) {
           throw new Error("A senha deve ter pelo menos 6 caracteres.");
         }
 
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              nome_completo: nome,
-            },
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        if (error) {
-          if (error.message.includes("fetch") || error.message.includes("network")) {
-            setConnectionError(true);
-            throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
+        const attemptSignup = async (retries = 3): Promise<void> => {
+          const { error } = await supabase.auth.signUp({
+            email, password,
+            options: { data: { nome_completo: nome }, emailRedirectTo: `${window.location.origin}/` },
+          });
+          if (error) {
+            const isNetwork = error.message.includes("fetch") || error.message.includes("network") || error.message.includes("Failed");
+            if (isNetwork && retries > 0) {
+              await new Promise(r => setTimeout(r, Math.pow(2, 3 - retries) * 1000));
+              return attemptSignup(retries - 1);
+            }
+            if (isNetwork) {
+              setConnectionError(true);
+              throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
+            }
+            if (error.message.includes("already registered")) {
+              throw new Error("Este email já está cadastrado. Tente fazer login.");
+            }
+            throw error;
           }
-          if (error.message.includes("already registered")) {
-            throw new Error("Este email já está cadastrado. Tente fazer login.");
-          }
-          throw error;
-        }
-
-        toast({
-          title: "Conta criada!",
-          description: "Bem-vindo à plataforma.",
-        });
+        };
+        await attemptSignup();
+        toast({ title: "Conta criada!", description: "Bem-vindo à plataforma." });
         navigate("/");
       }
     } catch (error: any) {
       const errorMessage = error.message || "Ocorreu um erro. Tente novamente.";
-      
-      // Check if it's a network error
       if (errorMessage.includes("Failed to fetch") || errorMessage.includes("fetch")) {
         setConnectionError(true);
-        toast({
-          title: "Erro de Conexão",
-          description: "Não foi possível conectar ao servidor. Verifique sua internet.",
-          variant: "destructive",
-        });
+        toast({ title: "Erro de Conexão", description: "Não foi possível conectar ao servidor. Verifique sua internet.", variant: "destructive" });
       } else {
-        toast({
-          title: "Erro",
-          description: errorMessage,
-          variant: "destructive",
-        });
+        toast({ title: "Erro", description: errorMessage, variant: "destructive" });
       }
     } finally {
       setLoading(false);
