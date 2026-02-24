@@ -52,8 +52,7 @@ interface ResumoGastos {
   gastoTotal: number;
 }
 
-const formatKz = (valor: number) =>
-  new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(valor) + ' Kz';
+import { formatKz } from '@/lib/formatKz';
 
 export default function Fundos() {
   const [saldo, setSaldo] = useState(0);

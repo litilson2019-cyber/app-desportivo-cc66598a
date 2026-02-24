@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatKz } from '@/lib/formatKz';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -358,7 +359,7 @@ export const UserManagement = () => {
                     <div className="bg-background/50 rounded p-2">
                       <span className="text-muted-foreground">Saldo:</span>
                       <span className="ml-1 font-medium text-primary">
-                        {(user.saldo || 0).toLocaleString()} Kz
+                        {formatKz(user.saldo || 0)}
                       </span>
                     </div>
                     <div className="bg-background/50 rounded p-2">
@@ -433,7 +434,7 @@ export const UserManagement = () => {
                 Usuário: <span className="text-foreground">{selectedUser.nome_completo}</span>
               </p>
               <p className="text-sm text-muted-foreground">
-                Saldo atual: <span className="text-primary font-medium">{(selectedUser.saldo || 0).toLocaleString()} Kz</span>
+                Saldo atual: <span className="text-primary font-medium">{formatKz(selectedUser.saldo || 0)}</span>
               </p>
               
               <Select value={adjustType} onValueChange={(v) => setAdjustType(v as 'adicionar' | 'remover')}>
@@ -533,7 +534,7 @@ export const UserManagement = () => {
                     <CardContent className="p-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium text-primary">{t.valor.toLocaleString()} Kz</p>
+                          <p className="font-medium text-primary">{formatKz(t.valor)}</p>
                           <p className="text-xs text-muted-foreground">{t.banco} • {formatDate(t.created_at)}</p>
                         </div>
                         <Badge className={
@@ -586,10 +587,10 @@ export const UserManagement = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <p className={`font-medium ${a.tipo === 'adicionar' ? 'text-green-400' : 'text-red-400'}`}>
-                            {a.tipo === 'adicionar' ? '+' : '-'}{a.valor.toLocaleString()} Kz
+                            {a.tipo === 'adicionar' ? '+' : '-'}{formatKz(a.valor)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {a.saldo_anterior.toLocaleString()} → {a.saldo_novo.toLocaleString()} Kz
+                            {formatKz(a.saldo_anterior)} → {formatKz(a.saldo_novo)}
                           </p>
                           {a.motivo && <p className="text-xs text-muted-foreground mt-1">{a.motivo}</p>}
                         </div>

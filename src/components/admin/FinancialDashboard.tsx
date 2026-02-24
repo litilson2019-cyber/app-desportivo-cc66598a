@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatKz } from '@/lib/formatKz';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -332,7 +333,7 @@ export const FinancialDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-green-300/70">Depósitos Aprovados</p>
-                <p className="text-2xl font-bold text-green-300">{(stats.depositosAprovados / 1000).toFixed(0)}k</p>
+                <p className="text-2xl font-bold text-green-300">{formatKz(stats.depositosAprovados)}</p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   {comparison.depositos.percentChange >= 0 ? (
                     <ArrowUpRight className="w-3 h-3 text-green-400" />
@@ -378,7 +379,7 @@ export const FinancialDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-amber-300/70">Saldo Total Interno</p>
-                <p className="text-2xl font-bold text-amber-300">{(stats.saldoTotal / 1000).toFixed(0)}k</p>
+                <p className="text-2xl font-bold text-amber-300">{formatKz(stats.saldoTotal)}</p>
                 <p className="text-xs text-muted-foreground">Kz (uso interno)</p>
               </div>
               <Wallet className="w-8 h-8 text-amber-400/50" />
@@ -488,7 +489,7 @@ export const FinancialDashboard = () => {
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px'
                   }}
-                  formatter={(value: number) => [`${value.toFixed(1)}k Kz`, 'Depósitos']}
+                  formatter={(value: number) => [formatKz(value * 1000), 'Depósitos']}
                 />
                 <Bar dataKey="depositos" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="depositos" />
               </BarChart>
@@ -549,7 +550,7 @@ export const FinancialDashboard = () => {
         <Card className="bg-card/50 backdrop-blur border-border/50">
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Hoje em Depósitos</p>
-            <p className="text-xl font-bold text-green-400">{(stats.depositosHoje / 1000).toFixed(1)}k Kz</p>
+            <p className="text-xl font-bold text-green-400">{formatKz(stats.depositosHoje)}</p>
           </CardContent>
         </Card>
       </div>
