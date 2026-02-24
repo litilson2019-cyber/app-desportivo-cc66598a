@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatKz } from '@/lib/formatKz';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -221,7 +222,7 @@ export const ReferralsManagement = () => {
                     <div className="bg-background/50 rounded p-2">
                       <span className="text-muted-foreground">Saldo:</span>
                       <span className="ml-1 font-medium text-primary">
-                        {(referral.profiles?.saldo || 0).toLocaleString()} Kz
+                        {formatKz(referral.profiles?.saldo || 0)}
                       </span>
                     </div>
                   </div>

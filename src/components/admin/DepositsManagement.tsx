@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatKz } from '@/lib/formatKz';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -311,12 +312,12 @@ export const DepositsManagement = () => {
         });
 
         // Mensagem de sucesso detalhada
-        let mensagem = `Depósito aprovado! ${valorDeposito.toLocaleString()} Kz creditado`;
+        let mensagem = `Depósito aprovado! ${formatKz(valorDeposito)} creditado`;
         if (bonusDepositoValor > 0) {
-          mensagem += ` + ${bonusDepositoValor.toLocaleString()} Kz de bónus`;
+          mensagem += ` + ${formatKz(bonusDepositoValor)} de bónus`;
         }
         if (bonusIndicacaoValor > 0) {
-          mensagem += `. Indicador recebeu ${bonusIndicacaoValor.toLocaleString()} Kz`;
+          mensagem += `. Indicador recebeu ${formatKz(bonusIndicacaoValor)}`;
         }
         toast.success(mensagem);
       } else {
@@ -430,7 +431,7 @@ export const DepositsManagement = () => {
             <DollarSign className="w-8 h-8 text-primary" />
             <div>
               <p className="text-xs text-primary/70">Total Aprovado</p>
-              <p className="text-lg font-bold text-primary">{stats.totalValor.toLocaleString()} Kz</p>
+              <p className="text-lg font-bold text-primary">{formatKz(stats.totalValor)}</p>
             </div>
           </CardContent>
         </Card>
@@ -586,7 +587,7 @@ export const DepositsManagement = () => {
                   <div className="grid grid-cols-2 gap-2 text-sm mb-3">
                     <div>
                       <span className="text-muted-foreground">Valor:</span>
-                      <span className="ml-2 font-medium text-primary">{Number(transacao.valor).toLocaleString()} Kz</span>
+                      <span className="ml-2 font-medium text-primary">{formatKz(Number(transacao.valor))}</span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Banco:</span>
@@ -676,7 +677,7 @@ export const DepositsManagement = () => {
           {selectedTransacao && (
             <div className="py-4">
               <p className="text-sm text-muted-foreground mb-2">
-                Valor: <span className="text-primary font-medium">{Number(selectedTransacao.valor).toLocaleString()} Kz</span>
+                Valor: <span className="text-primary font-medium">{formatKz(Number(selectedTransacao.valor))}</span>
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 Usuário: {selectedTransacao.profiles?.nome_completo || 'Usuário'}

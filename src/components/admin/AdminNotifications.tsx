@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatKz } from '@/lib/formatKz';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -94,7 +95,7 @@ export const AdminNotifications = ({ onNavigate }: AdminNotificationsProps) => {
           addNotification({
             type: 'deposito',
             title: 'Novo Depósito',
-            message: `${profile?.nome_completo || 'Usuário'} solicitou ${Number(transaction.valor).toLocaleString()} Kz`,
+            message: `${profile?.nome_completo || 'Usuário'} solicitou ${formatKz(Number(transaction.valor))}`,
             timestamp: new Date(),
             data: { transacao_id: transaction.id }
           });
