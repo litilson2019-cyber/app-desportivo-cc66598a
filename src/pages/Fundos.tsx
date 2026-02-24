@@ -52,6 +52,9 @@ interface ResumoGastos {
   gastoTotal: number;
 }
 
+const formatKz = (valor: number) =>
+  new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(valor) + ' Kz';
+
 export default function Fundos() {
   const [saldo, setSaldo] = useState(0);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
@@ -257,17 +260,32 @@ export default function Fundos() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Formato inválido",
+          description: "Envie apenas JPG, PNG ou PDF.",
+          variant: "destructive",
+        });
+        e.target.value = '';
+        return;
+      }
       if (file.size > 5 * 1024 * 1024) {
         toast({
           title: "Arquivo muito grande",
           description: "O comprovativo deve ter no máximo 5MB.",
           variant: "destructive",
         });
+        e.target.value = '';
         return;
       }
       setComprovativo(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+      try {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(file.type === 'application/pdf' ? null : url);
+      } catch {
+        setPreviewUrl(null);
+      }
     }
   };
 
@@ -340,9 +358,10 @@ export default function Fundos() {
       setPreviewUrl(null);
       loadData();
     } catch (error: any) {
+      console.error('Erro no depósito:', error);
       toast({
-        title: "Erro",
-        description: error.message,
+        title: "Erro ao enviar depósito",
+        description: error?.message || "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -388,7 +407,7 @@ export default function Fundos() {
               <span className="text-white/90 text-sm font-medium">Saldo de Uso Interno</span>
             </div>
             <p className="text-4xl font-bold text-white">
-              {saldo.toFixed(2)} <span className="text-xl">Kzs</span>
+              {formatKz(saldo)}
             </p>
             <p className="text-xs text-white/60 mt-2">Saldo não sacável – apenas para uso interno</p>
           </Card>
@@ -467,7 +486,7 @@ export default function Fundos() {
                                     })}
                                   </TableCell>
                                   <TableCell className="text-sm font-medium">
-                                    {t.valor.toFixed(2)} Kz
+                                    {formatKz(t.valor)}
                                   </TableCell>
                                   <TableCell>
                                     <span
@@ -553,7 +572,7 @@ export default function Fundos() {
                 )}
 
                 <div>
-                  <Label htmlFor="valor-deposito">Valor (Kzs)</Label>
+                  <Label htmlFor="valor-deposito">Valor (Kz)</Label>
                   <Input
                     id="valor-deposito"
                     type="number"
@@ -568,7 +587,7 @@ export default function Fundos() {
                   <Input
                     id="comprovativo"
                     type="file"
-                    accept="image/*,.pdf"
+                    accept="image/jpeg,image/png,application/pdf"
                     onChange={handleFileChange}
                     className="rounded-xl mt-1.5"
                   />
@@ -652,7 +671,7 @@ export default function Fundos() {
                           <div key={t.id} className="p-2.5 bg-warning/10 rounded-lg border border-warning/20">
                             <div className="flex justify-between items-start mb-1.5">
                               <div>
-                                <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                                <p className="font-medium text-foreground text-sm">{formatKz(t.valor)}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
                                 </p>
@@ -691,7 +710,7 @@ export default function Fundos() {
                           <div key={t.id} className="p-2.5 bg-success/10 rounded-lg border border-success/20">
                             <div className="flex justify-between items-start mb-1.5">
                               <div>
-                                <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                                <p className="font-medium text-foreground text-sm">{formatKz(t.valor)}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
                                 </p>
@@ -730,7 +749,7 @@ export default function Fundos() {
                           <div key={t.id} className="p-2.5 bg-destructive/10 rounded-lg border border-destructive/20">
                             <div className="flex justify-between items-start mb-1.5">
                               <div>
-                                <p className="font-medium text-foreground text-sm">{t.valor.toFixed(2)} Kzs</p>
+                                <p className="font-medium text-foreground text-sm">{formatKz(t.valor)}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {t.banco} • {new Date(t.created_at).toLocaleDateString("pt-PT")}
                                 </p>
@@ -788,7 +807,7 @@ export default function Fundos() {
                             )}
                             <div>
                               <p className={`font-medium text-sm ${a.tipo === 'adicionar' ? 'text-success' : 'text-destructive'}`}>
-                                {a.tipo === 'adicionar' ? '+' : '-'}{a.valor.toLocaleString()} Kzs
+                                {a.tipo === 'adicionar' ? '+' : '-'}{formatKz(a.valor)}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {new Date(a.created_at).toLocaleDateString("pt-PT", {
@@ -815,8 +834,8 @@ export default function Fundos() {
                           </p>
                         )}
                         <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t border-border/30">
-                          <span>Saldo anterior: {a.saldo_anterior.toLocaleString()} Kz</span>
-                          <span>Novo saldo: {a.saldo_novo.toLocaleString()} Kz</span>
+                          <span>Saldo anterior: {formatKz(a.saldo_anterior)}</span>
+                          <span>Novo saldo: {formatKz(a.saldo_novo)}</span>
                         </div>
                       </div>
                     ))
