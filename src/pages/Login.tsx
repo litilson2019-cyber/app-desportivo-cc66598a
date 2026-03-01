@@ -230,7 +230,7 @@ export default function Login() {
                 onChange={(e) => setNome(e.target.value)}
                 required={!isLogin}
                 className="rounded-xl"
-                placeholder="Seu nome primeiro nome "
+                placeholder="Seu primeiro nome "
               />
             </div>
           )}
@@ -259,7 +259,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="rounded-xl"
-              placeholder="seu@email.com ou 923450000"
+              placeholder="email ou 923450000"
             />
           </div>
 

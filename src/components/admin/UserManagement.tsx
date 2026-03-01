@@ -74,6 +74,8 @@ export const UserManagement = () => {
   const [adjustMotivo, setAdjustMotivo] = useState('');
   const [processing, setProcessing] = useState(false);
 
+  const generateSimplePassword = Math.floor(100000 + Math.random() * 900000);
+
   // History data
   const [userTransacoes, setUserTransacoes] = useState<Transacao[]>([]);
   const [userBilhetes, setUserBilhetes] = useState<Bilhete[]>([]);
@@ -169,8 +171,10 @@ export const UserManagement = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Sessão não encontrada');
 
+
+
       const response = await supabase.functions.invoke('reset-user-password', {
-        body: { userId: selectedUser.id, newPassword: 'luanda2026' },
+        body: { userId: selectedUser.id, newPassword: generateSimplePassword },
       });
 
       if (response.error) throw new Error(response.error.message || 'Erro ao resetar senha');
@@ -181,7 +185,7 @@ export const UserManagement = () => {
         user_nome: selectedUser.nome_completo
       });
 
-      toast.success('Senha resetada com sucesso');
+      toast.success('Senha resetada com sucesso:' + generateSimplePassword);
       setShowResetPasswordModal(false);
       setSelectedUser(null);
     } catch (error: any) {
@@ -550,6 +554,9 @@ export const UserManagement = () => {
           <div className="flex-1 overflow-y-auto space-y-2">
             <p className="text-sm text-muted-foreground">
               Tem certeza que deseja resetar a senha do usuário "{selectedUser?.nome_completo}"?
+            </p> <br />
+            <p>
+              A nova senha será: <span className="text-primary font-medium">"{generateSimplePassword}"</span>
             </p>
           </div>
 
