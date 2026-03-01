@@ -40,7 +40,7 @@ export default function Login() {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const response = await fetch(`https://ipitxugsxcupaexhgcim.supabase.co/rest/v1/`, {
         method: 'HEAD',
         headers: {
@@ -48,9 +48,9 @@ export default function Login() {
         },
         signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (response.ok) {
         setConnectionError(false);
         toast({
@@ -100,29 +100,59 @@ export default function Login() {
           throw new Error("A senha deve ter pelo menos 6 caracteres.");
         }
 
-        const attemptSignup = async (retries = 3): Promise<void> => {
-          const { error } = await supabase.auth.signUp({
-            email, password,
-            options: { data: { nome_completo: nome }, emailRedirectTo: `${window.location.origin}/` },
+        const attemptSignup = async (retries = 3) => {
+          const { error, data } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { nome_completo: nome },
+              emailRedirectTo: `${window.location.origin}/`,
+            },
           });
+
           if (error) {
-            const isNetwork = error.message.includes("fetch") || error.message.includes("network") || error.message.includes("Failed");
+            const isNetwork =
+              error.message.includes("fetch") ||
+              error.message.includes("network") ||
+              error.message.includes("Failed");
+
             if (isNetwork && retries > 0) {
-              await new Promise(r => setTimeout(r, Math.pow(2, 3 - retries) * 1000));
+              await new Promise((r) =>
+                setTimeout(r, Math.pow(2, 3 - retries) * 1000)
+              );
               return attemptSignup(retries - 1);
             }
+
             if (isNetwork) {
               setConnectionError(true);
-              throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
+              throw new Error(
+                "Erro de conexão. Verifique sua internet e tente novamente."
+              );
             }
+
             if (error.message.includes("already registered")) {
               throw new Error("Este email já está cadastrado. Tente fazer login.");
             }
+
             throw error;
           }
+
+          return data;
         };
-        await attemptSignup();
-        toast({ title: "Conta criada!", description: "Bem-vindo à plataforma." });
+
+        const data = await attemptSignup();
+
+        const userId = data.user.id;
+        const valor = parseFloat("500");
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ saldo: valor })
+          .eq('id', userId);
+
+        if (updateError) throw updateError;
+
+
+        toast({ title: "Conta criada!", description: "Bem-vindo à plataforma. - recebeste 500kz de Bónus de boas vindas" });
         navigate("/");
       }
     } catch (error: any) {
@@ -159,9 +189,9 @@ export default function Login() {
             <p className="text-sm text-muted-foreground mb-3">
               Não foi possível conectar ao servidor. Isso pode ser temporário.
             </p>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={testConnection}
               disabled={retrying}
               className="w-full"
