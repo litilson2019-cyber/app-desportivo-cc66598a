@@ -68,8 +68,8 @@ Deno.serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { error } = await adminClient.auth.admin.updateUserById(userId, {
-      password: newPassword,
+    const { error } = await adminClient.auth.admin.updateUserById(String(userId), {
+      password: String(newPassword),
     });
 
     if (error) {
