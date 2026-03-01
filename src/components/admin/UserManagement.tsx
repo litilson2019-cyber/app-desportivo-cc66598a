@@ -26,6 +26,7 @@ import {
 interface Profile {
   id: string;
   nome_completo: string | null;
+  email: string | null;
   saldo: number;
   bloqueado: boolean;
   created_at: string;
@@ -296,6 +297,7 @@ export const UserManagement = () => {
 
   const filteredUsers = users.filter(user =>
     user.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -375,6 +377,9 @@ export const UserManagement = () => {
                     <div>
                       <p className="font-medium text-foreground">
                         {user.nome_completo || 'Sem nome'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.email || 'Sem email'}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Cadastro: {formatDate(user.created_at)}

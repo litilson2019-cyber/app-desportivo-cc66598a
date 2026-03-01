@@ -329,6 +329,7 @@ export type Database = {
           avatar_url: string | null
           bloqueado: boolean | null
           created_at: string | null
+          email: string | null
           id: string
           nome_completo: string | null
           plano_id: string | null
@@ -340,6 +341,7 @@ export type Database = {
           avatar_url?: string | null
           bloqueado?: boolean | null
           created_at?: string | null
+          email?: string | null
           id: string
           nome_completo?: string | null
           plano_id?: string | null
@@ -351,6 +353,7 @@ export type Database = {
           avatar_url?: string | null
           bloqueado?: boolean | null
           created_at?: string | null
+          email?: string | null
           id?: string
           nome_completo?: string | null
           plano_id?: string | null
