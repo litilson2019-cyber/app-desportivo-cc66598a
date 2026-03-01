@@ -64,15 +64,16 @@ export const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
-  
+
   // Modal states
   const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [adjustType, setAdjustType] = useState<'adicionar' | 'remover'>('adicionar');
   const [adjustValue, setAdjustValue] = useState('');
   const [adjustMotivo, setAdjustMotivo] = useState('');
   const [processing, setProcessing] = useState(false);
-  
+
   // History data
   const [userTransacoes, setUserTransacoes] = useState<Transacao[]>([]);
   const [userBilhetes, setUserBilhetes] = useState<Bilhete[]>([]);
@@ -160,6 +161,34 @@ export const UserManagement = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!selectedUser) return;
+
+    setProcessing(true);
+    try {
+      const { error } = await supabase.auth.admin.updateUserById(selectedUser.id, {
+        password: 'luanda2026'
+      });
+
+      if (error) throw error;
+
+      // Registrar log de reset de senha
+      await logAdminAction('resetar_senha', {
+        user_id: selectedUser.id,
+        user_nome: selectedUser.nome_completo
+      });
+
+      toast.success('Senha resetada com sucesso');
+      setShowResetPasswordModal(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast.error('Erro ao resetar senha');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleAdjustBalance = async () => {
     if (!selectedUser || !adjustValue) return;
 
@@ -168,8 +197,8 @@ export const UserManagement = () => {
       const { data: { user: admin } } = await supabase.auth.getUser();
       const valor = parseFloat(adjustValue);
       const saldoAnterior = selectedUser.saldo || 0;
-      const saldoNovo = adjustType === 'adicionar' 
-        ? saldoAnterior + valor 
+      const saldoNovo = adjustType === 'adicionar'
+        ? saldoAnterior + valor
         : Math.max(0, saldoAnterior - valor);
 
       // Update user balance
@@ -258,7 +287,7 @@ export const UserManagement = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -391,6 +420,18 @@ export const UserManagement = () => {
                       Saldo
                     </Button>
                     <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setShowResetPasswordModal(true);
+                      }}
+                      className="flex-1"
+                    >
+                      <DollarSign className="w-3 h-3 mr-1" />
+                      Resetar Senha
+                    </Button>
+                    <Button
                       variant={user.bloqueado ? 'default' : 'destructive'}
                       size="sm"
                       onClick={() => handleBlockUser(user)}
@@ -427,7 +468,7 @@ export const UserManagement = () => {
           <DialogHeader>
             <DialogTitle>Ajustar Saldo</DialogTitle>
           </DialogHeader>
-          
+
           {selectedUser && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
@@ -436,7 +477,7 @@ export const UserManagement = () => {
               <p className="text-sm text-muted-foreground">
                 Saldo atual: <span className="text-primary font-medium">{formatKz(selectedUser.saldo || 0)}</span>
               </p>
-              
+
               <Select value={adjustType} onValueChange={(v) => setAdjustType(v as 'adicionar' | 'remover')}>
                 <SelectTrigger>
                   <SelectValue />
@@ -484,6 +525,45 @@ export const UserManagement = () => {
         </DialogContent>
       </Dialog>
 
+
+
+
+
+
+
+
+      {/* Reset Password Modal */}
+      <Dialog open={showResetPasswordModal} onOpenChange={() => {
+        setShowResetPasswordModal(false);
+        setSelectedUser(null);
+      }}>
+        <DialogContent className="bg-card border-border max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              Resetar Senha - {selectedUser?.nome_completo}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Tem certeza que deseja resetar a senha do usuário "{selectedUser?.nome_completo}"?
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetPasswordModal(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleResetPassword}
+              disabled={processing}
+            >
+              {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* History Modal */}
       <Dialog open={showHistoryModal} onOpenChange={() => {
         setShowHistoryModal(false);
@@ -495,7 +575,7 @@ export const UserManagement = () => {
               Histórico - {selectedUser?.nome_completo}
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="flex gap-2 mb-4">
             <Button
               variant={historyTab === 'depositos' ? 'default' : 'outline'}
@@ -539,8 +619,8 @@ export const UserManagement = () => {
                         </div>
                         <Badge className={
                           t.status === 'aprovado' ? 'bg-green-500/20 text-green-400' :
-                          t.status === 'rejeitado' ? 'bg-red-500/20 text-red-400' :
-                          'bg-yellow-500/20 text-yellow-400'
+                            t.status === 'rejeitado' ? 'bg-red-500/20 text-red-400' :
+                              'bg-yellow-500/20 text-yellow-400'
                         }>
                           {t.status}
                         </Badge>
@@ -567,8 +647,8 @@ export const UserManagement = () => {
                         </div>
                         <Badge className={
                           b.status === 'ganhou' ? 'bg-green-500/20 text-green-400' :
-                          b.status === 'perdeu' ? 'bg-red-500/20 text-red-400' :
-                          'bg-blue-500/20 text-blue-400'
+                            b.status === 'perdeu' ? 'bg-red-500/20 text-red-400' :
+                              'bg-blue-500/20 text-blue-400'
                         }>
                           {b.status || 'pendente'}
                         </Badge>
