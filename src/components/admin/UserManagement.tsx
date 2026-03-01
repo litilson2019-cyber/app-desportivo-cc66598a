@@ -166,11 +166,14 @@ export const UserManagement = () => {
 
     setProcessing(true);
     try {
-      const { error } = await supabase.auth.admin.updateUserById(selectedUser.id, {
-        password: 'luanda2026'
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Sessão não encontrada');
+
+      const response = await supabase.functions.invoke('reset-user-password', {
+        body: { userId: selectedUser.id, newPassword: 'luanda2026' },
       });
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error.message || 'Erro ao resetar senha');
 
       // Registrar log de reset de senha
       await logAdminAction('resetar_senha', {
@@ -181,9 +184,9 @@ export const UserManagement = () => {
       toast.success('Senha resetada com sucesso');
       setShowResetPasswordModal(false);
       setSelectedUser(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error resetting password:', error);
-      toast.error('Erro ao resetar senha');
+      toast.error(error.message || 'Erro ao resetar senha');
     } finally {
       setProcessing(false);
     }
