@@ -13,9 +13,10 @@ export default function Login() {
   const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  let [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
+  const [last_name, setLastName] = useState("");
   const [connectionError, setConnectionError] = useState(false);
   const [retrying, setRetrying] = useState(false);
 
@@ -76,6 +77,13 @@ export default function Login() {
     setConnectionError(false);
 
     try {
+      const isEmail = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/.test(email);
+      if (isEmail) {
+        email = `${email}`;
+      } else {
+        email = `${email}@gmail.com`;
+      }
+
       if (isLogin) {
         const attemptLogin = async (retries = 3): Promise<void> => {
           const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -105,7 +113,7 @@ export default function Login() {
             email,
             password,
             options: {
-              data: { nome_completo: nome },
+              data: { nome_completo: nome + " " + last_name },
               emailRedirectTo: `${window.location.origin}/`,
             },
           });
@@ -214,7 +222,7 @@ export default function Login() {
         <form onSubmit={handleAuth} className="space-y-4">
           {!isLogin && (
             <div className="space-y-2">
-              <Label htmlFor="nome">Nome Completo</Label>
+              <Label htmlFor="nome">Primeiro Nome</Label>
               <Input
                 id="nome"
                 type="text"
@@ -222,21 +230,36 @@ export default function Login() {
                 onChange={(e) => setNome(e.target.value)}
                 required={!isLogin}
                 className="rounded-xl"
-                placeholder="Seu nome"
+                placeholder="Seu nome primeiro nome "
+              />
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="last_name">Último nome</Label>
+              <Input
+                id="last_name"
+                type="text"
+                value={last_name}
+                onChange={(e) => setLastName(e.target.value)}
+                required={!isLogin}
+                className="rounded-xl"
+                placeholder="Seu último nome"
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email ou Telefone</Label>
             <Input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="rounded-xl"
-              placeholder="seu@email.com"
+              placeholder="seu@email.com ou 923450000"
             />
           </div>
 
