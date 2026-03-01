@@ -102,6 +102,8 @@ export default function Menu() {
       setShowConvitesDialog(true);
     } else if (action === "admin") {
       navigate("/admin");
+    } else if (action === "seguranca") {
+      navigate("/seguranca");
     } else {
       toast({
         title: "Em desenvolvimento",
