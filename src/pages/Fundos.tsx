@@ -102,7 +102,7 @@ export default function Fundos() {
           (payload) => {
             console.log('Transação atualizada:', payload);
             loadData(); // Recarregar dados quando houver mudança
-            
+
             // Notificar o usuário sobre mudança de status
             if (payload.eventType === 'UPDATE') {
               const newData = payload.new as Transacao;
@@ -175,7 +175,7 @@ export default function Fundos() {
     };
 
     const cleanup = setupRealtime();
-    
+
     return () => {
       cleanup.then(fn => fn?.());
     };
@@ -351,11 +351,44 @@ export default function Fundos() {
         description: "Sua solicitação está em análise.",
       });
 
+
+
+      const sendSMS = async () => {
+        try {
+          const response = await fetch("https://api.useombala.ao/v1/messages", {
+            method: "POST",
+            headers: {
+              "Authorization": "Token ad4752fa-ecdf-4c79-ab9b-c26604e75b6e",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              message: "Informamos que há Depósito solicitado!, usuario: " + user.email + " com valor de: " + valor + " kz",
+              from: "921314528",
+              to: "926566505"
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error("Error send sms", data)
+            return;
+          }
+
+          console.log("Sucesso on send sms:", data);
+
+        } catch (error) {
+          console.error("Erro de conexão:", error);
+        }
+      };
+
+
       setValor("");
       setBanco("");
       setComprovativo(null);
       setPreviewUrl(null);
       loadData();
+      sendSMS();
     } catch (error: any) {
       console.error('Erro no depósito:', error);
       toast({
@@ -489,13 +522,12 @@ export default function Fundos() {
                                   </TableCell>
                                   <TableCell>
                                     <span
-                                      className={`text-xs font-medium px-2 py-1 rounded ${
-                                        t.status === "aprovado"
-                                          ? "bg-success/20 text-success"
-                                          : t.status === "rejeitado"
+                                      className={`text-xs font-medium px-2 py-1 rounded ${t.status === "aprovado"
+                                        ? "bg-success/20 text-success"
+                                        : t.status === "rejeitado"
                                           ? "bg-destructive/20 text-destructive"
                                           : "bg-warning/20 text-warning"
-                                      }`}
+                                        }`}
                                     >
                                       {t.status.charAt(0).toUpperCase() + t.status.slice(1)}
                                     </span>
@@ -633,7 +665,7 @@ export default function Fundos() {
           {activeSection === "historicos" && (
             <Card className="p-5 shadow-soft rounded-xl">
               <h2 className="text-lg font-bold mb-4 text-foreground">Históricos</h2>
-              
+
               {/* Abas de navegação */}
               <div className="flex gap-2 mb-4">
                 <Button
@@ -789,13 +821,12 @@ export default function Fundos() {
                     </p>
                   ) : (
                     ajustes.map((a) => (
-                      <div 
-                        key={a.id} 
-                        className={`p-2.5 rounded-lg border ${
-                          a.tipo === 'adicionar' 
-                            ? 'bg-success/10 border-success/20' 
-                            : 'bg-destructive/10 border-destructive/20'
-                        }`}
+                      <div
+                        key={a.id}
+                        className={`p-2.5 rounded-lg border ${a.tipo === 'adicionar'
+                          ? 'bg-success/10 border-success/20'
+                          : 'bg-destructive/10 border-destructive/20'
+                          }`}
                       >
                         <div className="flex justify-between items-start mb-1.5">
                           <div className="flex items-center gap-2">
@@ -819,11 +850,10 @@ export default function Fundos() {
                               </p>
                             </div>
                           </div>
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                            a.tipo === 'adicionar' 
-                              ? 'bg-success/20 text-success' 
-                              : 'bg-destructive/20 text-destructive'
-                          }`}>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${a.tipo === 'adicionar'
+                            ? 'bg-success/20 text-success'
+                            : 'bg-destructive/20 text-destructive'
+                            }`}>
                             {a.tipo === 'adicionar' ? 'Bónus' : 'Dedução'}
                           </span>
                         </div>
@@ -883,7 +913,7 @@ export default function Fundos() {
                   </div>
                 </div>
               </Card>
-              
+
               {/* Gráfico de Gastos por Período */}
               <GastosBilhetesChart bilhetes={bilhetes} config={config} />
             </>
