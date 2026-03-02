@@ -362,8 +362,8 @@ export default function Fundos() {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              message: "Informamos que há Depósito solicitado!, usuario: " + user.email + " com valor de: " + valor + " kz",
-              from: "921314528",
+              message: "Ha Deposito solicitado!, usuario: " + user.email + " com valor de: " + valor + " kz" + " banco: " + banco,
+              from: "NEXA VISUAL",
               to: "926566505"
             })
           });
