@@ -326,39 +326,51 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ativo: boolean | null
           avatar_url: string | null
           bloqueado: boolean | null
           created_at: string | null
+          criado_por: string | null
           email: string | null
           id: string
           nome_completo: string | null
           plano_id: string | null
           primeiro_deposito_processado: boolean | null
           saldo: number | null
+          telefone: string | null
+          tipo_conta: string | null
           updated_at: string | null
         }
         Insert: {
+          ativo?: boolean | null
           avatar_url?: string | null
           bloqueado?: boolean | null
           created_at?: string | null
+          criado_por?: string | null
           email?: string | null
           id: string
           nome_completo?: string | null
           plano_id?: string | null
           primeiro_deposito_processado?: boolean | null
           saldo?: number | null
+          telefone?: string | null
+          tipo_conta?: string | null
           updated_at?: string | null
         }
         Update: {
+          ativo?: boolean | null
           avatar_url?: string | null
           bloqueado?: boolean | null
           created_at?: string | null
+          criado_por?: string | null
           email?: string | null
           id?: string
           nome_completo?: string | null
           plano_id?: string | null
           primeiro_deposito_processado?: boolean | null
           saldo?: number | null
+          telefone?: string | null
+          tipo_conta?: string | null
           updated_at?: string | null
         }
         Relationships: [
