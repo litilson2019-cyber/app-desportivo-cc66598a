@@ -14,7 +14,8 @@ import {
   Settings,
   ClipboardList,
   UserCog,
-  Link2
+  Link2,
+  UserPlus
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DepositsManagement } from '@/components/admin/DepositsManagement';
@@ -25,6 +26,7 @@ import { SystemSettings } from '@/components/admin/SystemSettings';
 import { AdminLogs } from '@/components/admin/AdminLogs';
 import { TeamManagement } from '@/components/admin/TeamManagement';
 import { ReferralsManagement } from '@/components/admin/ReferralsManagement';
+import { EmployeeManagement } from '@/components/admin/EmployeeManagement';
 import { AdminNotifications } from '@/components/admin/AdminNotifications';
 import { QuickStats } from '@/components/admin/QuickStats';
 
@@ -177,6 +179,12 @@ const Admin = () => {
                 Equipa
               </TabsTrigger>
             )}
+            {permissions.isAdmin && (
+              <TabsTrigger value="funcionarios" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <UserPlus className="w-4 h-4" />
+                Funcionários
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -225,6 +233,12 @@ const Admin = () => {
         {permissions.gerenciar_equipa && (
           <TabsContent value="equipa" className="mt-0">
             <TeamManagement />
+          </TabsContent>
+        )}
+
+        {permissions.isAdmin && (
+          <TabsContent value="funcionarios" className="mt-0">
+            <EmployeeManagement />
           </TabsContent>
         )}
       </Tabs>

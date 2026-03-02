@@ -101,6 +101,25 @@ export default function Login() {
           }
         };
         await attemptLogin();
+        
+        // Check if account is admin-only
+        const { data: { user: loggedUser } } = await supabase.auth.getUser();
+        if (loggedUser) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('tipo_conta')
+            .eq('id', loggedUser.id)
+            .maybeSingle();
+          
+          if (profileData?.tipo_conta === 'admin' || profileData?.tipo_conta === 'super_admin') {
+            // Admin accounts go directly to admin panel
+            toast({ title: "Bem-vindo!", description: "Redirecionado ao painel administrativo." });
+            navigate("/admin");
+            setLoading(false);
+            return;
+          }
+        }
+        
         toast({ title: "Bem-vindo de volta!", description: "Login realizado com sucesso." });
         navigate("/");
       } else {
