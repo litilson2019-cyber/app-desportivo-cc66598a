@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Loader2, TrendingUp, RefreshCw, WifiOff } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -19,6 +20,14 @@ export default function Login() {
   const [last_name, setLastName] = useState("");
   const [connectionError, setConnectionError] = useState(false);
   const [retrying, setRetrying] = useState(false);
+
+  // Capture ref parameter and save to localStorage
+  useEffect(() => {
+    const refParam = searchParams.get("ref");
+    if (refParam) {
+      localStorage.setItem("convite_id", refParam);
+    }
+  }, [searchParams]);
 
   // Check if already logged in
   useEffect(() => {
@@ -178,6 +187,48 @@ export default function Login() {
 
         if (updateError) throw updateError;
 
+        // Process referral if convite_id exists
+        const conviteId = localStorage.getItem("convite_id");
+        if (conviteId && conviteId !== userId) {
+          try {
+            // Check if referrer exists
+            const { data: referrerProfile } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('id', conviteId)
+              .maybeSingle();
+
+            if (referrerProfile) {
+              // Insert into invited_users
+              await supabase
+                .from('invited_users')
+                .insert({
+                  referrer_id: conviteId,
+                  invited_user_id: userId,
+                });
+
+              // Increment total_convidados on referrals table
+              const { data: referralData } = await supabase
+                .from('referrals')
+                .select('id, total_convidados')
+                .eq('user_id', conviteId)
+                .maybeSingle();
+
+              if (referralData) {
+                await supabase
+                  .from('referrals')
+                  .update({ total_convidados: (referralData.total_convidados || 0) + 1 })
+                  .eq('id', referralData.id);
+              }
+            }
+          } catch (refError) {
+            console.error('Referral processing error:', refError);
+          } finally {
+            localStorage.removeItem("convite_id");
+          }
+        } else {
+          localStorage.removeItem("convite_id");
+        }
 
         toast({ title: "Conta criada!", description: "Bem-vindo à plataforma. - recebeste 500kz de Bónus de boas vindas" });
         navigate("/");
