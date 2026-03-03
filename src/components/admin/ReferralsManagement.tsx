@@ -59,9 +59,23 @@ export const ReferralsManagement = () => {
       const { data: referralsData, error: referralsError } = await supabase
         .from('referrals')
         .select('*')
-        .order('total_convidados', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (referralsError) throw referralsError;
+
+      // Fetch invited users
+      const { data: invitedData, error: invitedError } = await supabase
+        .from('invited_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (invitedError) throw invitedError;
+
+      // Calculate dynamic counts per referrer
+      const invitedCountMap = new Map<string, number>();
+      invitedData?.forEach(i => {
+        invitedCountMap.set(i.referrer_id, (invitedCountMap.get(i.referrer_id) || 0) + 1);
+      });
 
       // Get profile info for referrers
       const referrerIds = referralsData?.map(r => r.user_id) || [];
@@ -71,20 +85,13 @@ export const ReferralsManagement = () => {
         .in('id', referrerIds);
 
       const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-      const referralsWithProfiles = referralsData?.map(r => ({
+      const referralsWithProfiles = (referralsData?.map(r => ({
         ...r,
+        total_convidados: invitedCountMap.get(r.user_id) || 0,
         profiles: profilesMap.get(r.user_id) || { nome_completo: null, saldo: null }
-      })) || [];
+      })) || []).sort((a, b) => b.total_convidados - a.total_convidados);
 
       setReferrals(referralsWithProfiles);
-
-      // Fetch invited users
-      const { data: invitedData, error: invitedError } = await supabase
-        .from('invited_users')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (invitedError) throw invitedError;
 
       // Get profile info for invited users
       const invitedIds = invitedData?.map(i => i.invited_user_id) || [];
