@@ -66,7 +66,7 @@ export default function Menu() {
 
       const { data: referral, error } = await supabase
         .from("referrals")
-        .select("codigo_convite, total_convidados")
+        .select("codigo_convite")
         .eq("user_id", user.id)
         .single();
 
@@ -74,9 +74,16 @@ export default function Menu() {
         throw error;
       }
 
+      // Dynamic count from invited_users
+      const { count } = await supabase
+        .from("invited_users")
+        .select("*", { count: "exact", head: true })
+        .eq("referrer_id", user.id);
+
+      setTotalConvidados(count || 0);
+
       if (referral) {
         setCodigoConvite(referral.codigo_convite);
-        setTotalConvidados(referral.total_convidados);
       } else {
         // Generate new referral code
         const { data: newCode } = await supabase.rpc("generate_referral_code");

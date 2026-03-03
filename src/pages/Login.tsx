@@ -207,19 +207,7 @@ export default function Login() {
                   invited_user_id: userId,
                 });
 
-              // Increment total_convidados on referrals table
-              const { data: referralData } = await supabase
-                .from('referrals')
-                .select('id, total_convidados')
-                .eq('user_id', conviteId)
-                .maybeSingle();
-
-              if (referralData) {
-                await supabase
-                  .from('referrals')
-                  .update({ total_convidados: (referralData.total_convidados || 0) + 1 })
-                  .eq('id', referralData.id);
-              }
+              // total_convidados is now calculated dynamically from invited_users
             }
           } catch (refError) {
             console.error('Referral processing error:', refError);
