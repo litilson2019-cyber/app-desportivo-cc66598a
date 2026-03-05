@@ -21,7 +21,8 @@ import {
   Gift,
   Percent,
   Users,
-  Trophy
+  Trophy,
+  Upload
 } from 'lucide-react';
 
 interface Configuracao {
@@ -59,6 +60,7 @@ export const SystemSettings = () => {
   const [metodos, setMetodos] = useState<MetodoDeposito[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState('precos');
 
   // Form states
@@ -607,12 +609,47 @@ export const SystemSettings = () => {
               />
             </div>
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">URL da Imagem *</label>
-              <Input
-                value={bannerForm.imagem_url}
-                onChange={(e) => setBannerForm({ ...bannerForm, imagem_url: e.target.value })}
-                placeholder="https://..."
-              />
+              <label className="text-sm text-muted-foreground mb-1 block">Imagem do Banner *</label>
+              {bannerForm.imagem_url && (
+                <img src={bannerForm.imagem_url} alt="Preview" className="w-full h-32 object-cover rounded-md mb-2" />
+              )}
+              <label className="flex items-center justify-center gap-2 w-full h-10 px-4 rounded-md border border-dashed border-input bg-background text-sm cursor-pointer hover:bg-muted/50 transition-colors">
+                {uploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> A carregar...</>
+                ) : (
+                  <><Upload className="w-4 h-4" /> {bannerForm.imagem_url ? 'Trocar Imagem' : 'Selecionar Imagem'}</>
+                )}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast.error('Imagem deve ter no máximo 5MB');
+                      return;
+                    }
+                    setUploading(true);
+                    try {
+                      const ext = file.name.split('.').pop();
+                      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+                      const { error: uploadError } = await supabase.storage
+                        .from('banners')
+                        .upload(fileName, file, { contentType: file.type });
+                      if (uploadError) throw uploadError;
+                      const { data: urlData } = supabase.storage.from('banners').getPublicUrl(fileName);
+                      setBannerForm({ ...bannerForm, imagem_url: urlData.publicUrl });
+                      toast.success('Imagem carregada!');
+                    } catch (err: any) {
+                      console.error('Upload error:', err);
+                      toast.error('Erro ao carregar imagem');
+                    } finally {
+                      setUploading(false);
+                    }
+                  }}
+                />
+              </label>
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Link (opcional)</label>
