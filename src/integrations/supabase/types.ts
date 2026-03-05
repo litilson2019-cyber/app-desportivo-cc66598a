@@ -163,6 +163,39 @@ export type Database = {
           },
         ]
       }
+      bonus_convite_historico: {
+        Row: {
+          created_at: string | null
+          id: string
+          invited_user_id: string
+          referrer_id: string
+          tipo_bonus: string
+          transacao_deposito_id: string
+          valor_bonus: number
+          valor_deposito: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invited_user_id: string
+          referrer_id: string
+          tipo_bonus: string
+          transacao_deposito_id: string
+          valor_bonus: number
+          valor_deposito: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invited_user_id?: string
+          referrer_id?: string
+          tipo_bonus?: string
+          transacao_deposito_id?: string
+          valor_bonus?: number
+          valor_deposito?: number
+        }
+        Relationships: []
+      }
       configuracoes_sistema: {
         Row: {
           chave: string
@@ -249,6 +282,30 @@ export type Database = {
         }
         Relationships: []
       }
+      metas_convite_alcancadas: {
+        Row: {
+          created_at: string | null
+          id: string
+          nivel_convidados: number
+          user_id: string
+          valor_bonus: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nivel_convidados: number
+          user_id: string
+          valor_bonus: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nivel_convidados?: number
+          user_id?: string
+          valor_bonus?: number
+        }
+        Relationships: []
+      }
       metodos_deposito: {
         Row: {
           ativo: boolean | null
@@ -329,6 +386,8 @@ export type Database = {
           ativo: boolean | null
           avatar_url: string | null
           bloqueado: boolean | null
+          bonus_convite_pago: boolean | null
+          convidado_por: string | null
           created_at: string | null
           criado_por: string | null
           email: string | null
@@ -345,6 +404,8 @@ export type Database = {
           ativo?: boolean | null
           avatar_url?: string | null
           bloqueado?: boolean | null
+          bonus_convite_pago?: boolean | null
+          convidado_por?: string | null
           created_at?: string | null
           criado_por?: string | null
           email?: string | null
@@ -361,6 +422,8 @@ export type Database = {
           ativo?: boolean | null
           avatar_url?: string | null
           bloqueado?: boolean | null
+          bonus_convite_pago?: boolean | null
+          convidado_por?: string | null
           created_at?: string | null
           criado_por?: string | null
           email?: string | null

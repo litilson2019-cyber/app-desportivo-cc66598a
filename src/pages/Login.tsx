@@ -207,7 +207,11 @@ export default function Login() {
                   invited_user_id: userId,
                 });
 
-              // total_convidados is now calculated dynamically from invited_users
+              // Set convidado_por on the new user's profile
+              await supabase
+                .from('profiles')
+                .update({ convidado_por: conviteId })
+                .eq('id', userId);
             }
           } catch (refError) {
             console.error('Referral processing error:', refError);

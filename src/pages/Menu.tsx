@@ -24,6 +24,10 @@ import {
   Moon,
   Sun,
   Settings,
+  Trophy,
+  Users,
+  TrendingUp,
+  Target,
 } from "lucide-react";
 import {
   Dialog,
@@ -53,6 +57,9 @@ export default function Menu() {
   const [showConvitesDialog, setShowConvitesDialog] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
   const [totalConvidados, setTotalConvidados] = useState(0);
+  const [convidadosAtivos, setConvidadosAtivos] = useState(0);
+  const [totalGanho, setTotalGanho] = useState(0);
+  const [proximaMeta, setProximaMeta] = useState<{ convidados: number; bonus: number } | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -81,6 +88,57 @@ export default function Menu() {
         .eq("referrer_id", user.id);
 
       setTotalConvidados(count || 0);
+
+      // Count active invites (convidados que já fizeram depósito)
+      const { data: invitedList } = await supabase
+        .from("invited_users")
+        .select("invited_user_id")
+        .eq("referrer_id", user.id);
+
+      if (invitedList && invitedList.length > 0) {
+        const invitedIds = invitedList.map(i => i.invited_user_id);
+        const { count: activeCount } = await supabase
+          .from("profiles")
+          .select("*", { count: "exact", head: true })
+          .in("id", invitedIds)
+          .eq("primeiro_deposito_processado", true);
+        setConvidadosAtivos(activeCount || 0);
+      }
+
+      // Total earned from referral bonuses
+      const { data: bonusData } = await supabase
+        .from("bonus_convite_historico" as any)
+        .select("valor_bonus")
+        .eq("referrer_id", user.id);
+
+      if (bonusData) {
+        const total = (bonusData as any[]).reduce((sum: number, b: any) => sum + Number(b.valor_bonus || 0), 0);
+        setTotalGanho(total);
+      }
+
+      // Load goals config and calculate next goal
+      const { data: metasConfig } = await supabase
+        .from("configuracoes_sistema")
+        .select("valor")
+        .eq("chave", "metas_convite_niveis")
+        .single();
+
+      const { data: metasAtivoConfig } = await supabase
+        .from("configuracoes_sistema")
+        .select("valor")
+        .eq("chave", "metas_convite_ativo")
+        .single();
+
+      if (metasAtivoConfig?.valor === 'true' && metasConfig?.valor) {
+        try {
+          const metas = JSON.parse(metasConfig.valor) as { convidados: number; bonus: number }[];
+          const activeInvites = convidadosAtivos || 0;
+          const nextMeta = metas
+            .sort((a, b) => a.convidados - b.convidados)
+            .find(m => m.convidados > activeInvites);
+          setProximaMeta(nextMeta || null);
+        } catch {}
+      }
 
       if (referral) {
         setCodigoConvite(referral.codigo_convite);
@@ -236,18 +294,45 @@ export default function Menu() {
       <BottomNav />
 
       <Dialog open={showConvitesDialog} onOpenChange={setShowConvitesDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Convide Amigos</DialogTitle>
+            <DialogTitle>Programa de Convites</DialogTitle>
             <DialogDescription>
-              Compartilhe seu código de convite e ganhe benefícios quando seus amigos se cadastrarem.
+              Convide amigos e ganhe bónus quando eles fizerem o primeiro depósito.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Seus Convites</p>
-              <p className="text-2xl font-bold text-foreground">{totalConvidados}</p>
-              <p className="text-xs text-muted-foreground">pessoas convidadas</p>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-primary/10 p-3 rounded-lg text-center">
+                <Users className="w-5 h-5 text-primary mx-auto mb-1" />
+                <p className="text-xl font-bold text-primary">{totalConvidados}</p>
+                <p className="text-xs text-muted-foreground">Total Convidados</p>
+              </div>
+              <div className="bg-green-500/10 p-3 rounded-lg text-center">
+                <TrendingUp className="w-5 h-5 text-green-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-green-500">{convidadosAtivos}</p>
+                <p className="text-xs text-muted-foreground">Convidados Ativos</p>
+              </div>
+              <div className="bg-amber-500/10 p-3 rounded-lg text-center">
+                <Trophy className="w-5 h-5 text-amber-500 mx-auto mb-1" />
+                <p className="text-xl font-bold text-amber-500">{totalGanho.toLocaleString('pt-AO')} Kz</p>
+                <p className="text-xs text-muted-foreground">Total Ganho</p>
+              </div>
+              <div className="bg-purple-500/10 p-3 rounded-lg text-center">
+                <Target className="w-5 h-5 text-purple-500 mx-auto mb-1" />
+                {proximaMeta ? (
+                  <>
+                    <p className="text-xl font-bold text-purple-500">{proximaMeta.convidados}</p>
+                    <p className="text-xs text-muted-foreground">Próxima Meta ({proximaMeta.bonus.toLocaleString('pt-AO')} Kz)</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xl font-bold text-purple-500">✓</p>
+                    <p className="text-xs text-muted-foreground">Metas Completas</p>
+                  </>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -282,7 +367,7 @@ export default function Menu() {
                   onClick={copyInviteLink}
                 >
                   {copied ? (
-                    <Check className="w-4 h-4 text-success" />
+                    <Check className="w-4 h-4 text-green-500" />
                   ) : (
                     <Copy className="w-4 h-4" />
                   )}
