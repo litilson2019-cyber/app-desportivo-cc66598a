@@ -20,7 +20,8 @@ import {
   GripVertical,
   Gift,
   Percent,
-  Users
+  Users,
+  Trophy
 } from 'lucide-react';
 
 interface Configuracao {
@@ -267,7 +268,7 @@ export const SystemSettings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {configuracoes.filter(c => c.chave !== 'desconto_apenas_com_resultados' && !c.chave.startsWith('bonus_')).map((config) => (
+              {configuracoes.filter(c => c.chave !== 'desconto_apenas_com_resultados' && !c.chave.startsWith('bonus_') && !c.chave.startsWith('metas_convite')).map((config) => (
                 <div key={config.id}>
                   <label className="text-sm text-muted-foreground mb-1 block">
                     {config.descricao}
@@ -356,46 +357,95 @@ export const SystemSettings = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                Bónus de Indicação
+                Bónus de Convite (Indicação)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-sm">Ativar Bónus de Indicação</p>
-                  <p className="text-xs text-muted-foreground">Creditado ao indicador ao aprovar depósito do indicado</p>
+                  <p className="font-medium text-sm">Ativar Bónus de Convite</p>
+                  <p className="text-xs text-muted-foreground">Creditado ao indicador após 1º depósito aprovado do convidado</p>
                 </div>
                 <Switch
-                  checked={editedConfigs['bonus_indicacao_ativo'] === 'true'}
-                  onCheckedChange={(checked) => setEditedConfigs({ ...editedConfigs, bonus_indicacao_ativo: checked ? 'true' : 'false' })}
+                  checked={editedConfigs['bonus_convite_ativo'] === 'true'}
+                  onCheckedChange={(checked) => setEditedConfigs({ ...editedConfigs, bonus_convite_ativo: checked ? 'true' : 'false' })}
                 />
               </div>
               
-              {editedConfigs['bonus_indicacao_ativo'] === 'true' && (
+              {editedConfigs['bonus_convite_ativo'] === 'true' && (
                 <>
                   <div>
                     <label className="text-sm text-muted-foreground mb-1 block">Tipo de Bónus</label>
                     <select
-                      value={editedConfigs['bonus_indicacao_tipo'] || 'percentagem'}
-                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_indicacao_tipo: e.target.value })}
+                      value={editedConfigs['bonus_convite_tipo'] || 'fixo'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_convite_tipo: e.target.value })}
                       className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                     >
-                      <option value="percentagem">Percentagem (%)</option>
-                      <option value="valor_fixo">Valor Fixo (Kz)</option>
+                      <option value="fixo">Valor Fixo (Kz)</option>
+                      <option value="percentual">Percentual do Depósito (%)</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-sm text-muted-foreground mb-1 block">
-                      Valor do Bónus {editedConfigs['bonus_indicacao_tipo'] === 'percentagem' ? '(%)' : '(Kz)'}
+                      Valor do Bónus {editedConfigs['bonus_convite_tipo'] === 'percentual' ? '(%)' : '(Kz)'}
                     </label>
                     <Input
                       type="number"
                       min="0"
-                      value={editedConfigs['bonus_indicacao_valor'] || '0'}
-                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_indicacao_valor: e.target.value })}
+                      value={editedConfigs['bonus_convite_valor'] || '0'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_convite_valor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-1 block">
+                      Depósito Mínimo para Liberar Bónus (Kz)
+                    </label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={editedConfigs['bonus_convite_deposito_minimo'] || '0'}
+                      onChange={(e) => setEditedConfigs({ ...editedConfigs, bonus_convite_deposito_minimo: e.target.value })}
                     />
                   </div>
                 </>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card/50 backdrop-blur border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Trophy className="w-4 h-4" />
+                Metas de Convites
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Ativar Sistema de Metas</p>
+                  <p className="text-xs text-muted-foreground">Bónus extra ao atingir marcos de convidados ativos</p>
+                </div>
+                <Switch
+                  checked={editedConfigs['metas_convite_ativo'] === 'true'}
+                  onCheckedChange={(checked) => setEditedConfigs({ ...editedConfigs, metas_convite_ativo: checked ? 'true' : 'false' })}
+                />
+              </div>
+              
+              {editedConfigs['metas_convite_ativo'] === 'true' && (
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">
+                    Níveis de Metas (JSON)
+                  </label>
+                  <textarea
+                    value={editedConfigs['metas_convite_niveis'] || '[]'}
+                    onChange={(e) => setEditedConfigs({ ...editedConfigs, metas_convite_niveis: e.target.value })}
+                    className="w-full h-24 px-3 py-2 rounded-md border border-input bg-background text-xs font-mono"
+                    placeholder='[{"convidados":5,"bonus":2000}]'
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Formato: [{"{"}"convidados": N, "bonus": valor{"}"}]
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
