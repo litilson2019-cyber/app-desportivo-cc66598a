@@ -41,6 +41,8 @@ import { Input } from "@/components/ui/input";
 const menuItems = [
   { icon: User, label: "Perfil", description: "Gerir informações pessoais", action: "perfil" },
   { icon: Share2, label: "Convites", description: "Indicar novos usuários", action: "convites" },
+  { icon: Users, label: "Minha Loja", description: "Gerir loja e produtos", action: "minha-loja" },
+  { icon: FileText, label: "Meus Anúncios", description: "Gerir anúncios no mercado", action: "meus-anuncios" },
   { icon: HelpCircle, label: "Suporte", description: "Fale connosco", action: "suporte" },
   { icon: FileText, label: "FAQ", description: "Perguntas frequentes", action: "faq" },
   { icon: FileText, label: "Termos", description: "Termos e condições", action: "termos" },
@@ -169,6 +171,10 @@ export default function Menu() {
       navigate("/admin");
     } else if (action === "seguranca") {
       navigate("/seguranca");
+    } else if (action === "minha-loja") {
+      navigate("/minha-loja");
+    } else if (action === "meus-anuncios") {
+      navigate("/meus-anuncios");
     } else {
       toast({
         title: "Em desenvolvimento",
