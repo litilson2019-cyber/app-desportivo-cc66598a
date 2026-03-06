@@ -77,6 +77,80 @@ export type Database = {
         }
         Relationships: []
       }
+      anuncio_imagens: {
+        Row: {
+          anuncio_id: string
+          created_at: string | null
+          id: string
+          imagem_url: string
+          ordem: number | null
+        }
+        Insert: {
+          anuncio_id: string
+          created_at?: string | null
+          id?: string
+          imagem_url: string
+          ordem?: number | null
+        }
+        Update: {
+          anuncio_id?: string
+          created_at?: string | null
+          id?: string
+          imagem_url?: string
+          ordem?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anuncio_imagens_anuncio_id_fkey"
+            columns: ["anuncio_id"]
+            isOneToOne: false
+            referencedRelation: "anuncios_marketplace"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      anuncios_marketplace: {
+        Row: {
+          ativo: boolean | null
+          categoria: string
+          contacto_link: string | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          localizacao: string | null
+          preco: number | null
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string
+          contacto_link?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          localizacao?: string | null
+          preco?: number | null
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string
+          contacto_link?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          localizacao?: string | null
+          preco?: number | null
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           ativo: boolean | null
@@ -282,6 +356,48 @@ export type Database = {
         }
         Relationships: []
       }
+      lojas: {
+        Row: {
+          ativo: boolean | null
+          bio: string | null
+          contacto_outro: string | null
+          contacto_whatsapp: string | null
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          updated_at: string | null
+          user_id: string
+          verificado: boolean | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          bio?: string | null
+          contacto_outro?: string | null
+          contacto_whatsapp?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          updated_at?: string | null
+          user_id: string
+          verificado?: boolean | null
+        }
+        Update: {
+          ativo?: boolean | null
+          bio?: string | null
+          contacto_outro?: string | null
+          contacto_whatsapp?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          updated_at?: string | null
+          user_id?: string
+          verificado?: boolean | null
+        }
+        Relationships: []
+      }
       metas_convite_alcancadas: {
         Row: {
           created_at: string | null
@@ -380,6 +496,85 @@ export type Database = {
           verificacao_automatica?: boolean | null
         }
         Relationships: []
+      }
+      produto_imagens: {
+        Row: {
+          created_at: string | null
+          id: string
+          imagem_url: string
+          ordem: number | null
+          produto_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          imagem_url: string
+          ordem?: number | null
+          produto_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          imagem_url?: string
+          ordem?: number | null
+          produto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produto_imagens_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          ativo: boolean | null
+          contacto_link: string | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          loja_id: string
+          nome: string
+          ordem: number | null
+          preco: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          contacto_link?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          loja_id: string
+          nome: string
+          ordem?: number | null
+          preco?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          contacto_link?: string | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          loja_id?: string
+          nome?: string
+          ordem?: number | null
+          preco?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtos_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "lojas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

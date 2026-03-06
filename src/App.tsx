@@ -11,6 +11,11 @@ import Construcao from "./pages/Construcao";
 import Menu from "./pages/Menu";
 import Seguranca from "./pages/Seguranca";
 import Admin from "./pages/Admin";
+import Vitrine from "./pages/Vitrine";
+import Marketplace from "./pages/Marketplace";
+import LojaDetalhe from "./pages/LojaDetalhe";
+import MinhaLoja from "./pages/MinhaLoja";
+import MeusAnuncios from "./pages/MeusAnuncios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +35,11 @@ const App = () => (
             <Route path="/menu" element={<Menu />} />
             <Route path="/seguranca" element={<Seguranca />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/vitrine" element={<Vitrine />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/loja/:id" element={<LojaDetalhe />} />
+            <Route path="/minha-loja" element={<MinhaLoja />} />
+            <Route path="/meus-anuncios" element={<MeusAnuncios />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

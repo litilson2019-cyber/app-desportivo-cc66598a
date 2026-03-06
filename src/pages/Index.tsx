@@ -46,6 +46,13 @@ export default function Index() {
     "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80"
   ];
 
+  const quickActions = [
+    { icon: Eye, label: "Ver novas previsões", route: "/construcao" },
+    { icon: Wallet, label: "Consultar meus fundos", route: "/fundos" },
+    { icon: FileText, label: "Analisar bilhetes", route: "/menu" },
+    { icon: Target, label: "Explorar oportunidades", route: "/construcao" },
+  ];
+
   return (
     <AuthGuard>
       <div className="min-h-screen bg-gradient-subtle pb-20 p-4">
