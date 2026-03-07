@@ -182,6 +182,14 @@ export default function Menu() {
       navigate("/minha-loja");
     } else if (action === "meus-anuncios") {
       navigate("/meus-anuncios");
+    } else if (action === "meu-perfil-artista") {
+      navigate("/meu-perfil-artista");
+    } else if (action === "minha-produtora") {
+      navigate("/minha-produtora");
+    } else if (action === "planos-comerciais") {
+      navigate("/planos-comerciais");
+    } else if (action === "artistas") {
+      navigate("/artistas");
     } else {
       toast({
         title: "Em desenvolvimento",
