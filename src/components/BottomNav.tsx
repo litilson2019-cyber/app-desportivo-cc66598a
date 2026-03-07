@@ -3,6 +3,7 @@ import { NavLink } from "@/components/NavLink";
 
 const navItems = [
   { to: "/", icon: Home, label: "Início" },
+  { to: "/fundos", icon: Wallet, label: "Fundos" },
   { to: "/vitrine", icon: Store, label: "Vitrine" },
   { to: "/marketplace", icon: ShoppingBag, label: "Mercado" },
   { to: "/construcao", icon: Hammer, label: "Construção" },
