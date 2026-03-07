@@ -151,6 +151,77 @@ export type Database = {
         }
         Relationships: []
       }
+      artistas: {
+        Row: {
+          ativo: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          cidade: string | null
+          contacto: string | null
+          created_at: string | null
+          id: string
+          nome_artistico: string
+          percentagem_musico: number | null
+          percentagem_produtora: number | null
+          preco_album: number | null
+          preco_base_atuacao: number | null
+          produtora_id: string | null
+          tipo: string
+          tipo_evento_permitido: string | null
+          updated_at: string | null
+          user_id: string
+          verificado: boolean | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          cidade?: string | null
+          contacto?: string | null
+          created_at?: string | null
+          id?: string
+          nome_artistico: string
+          percentagem_musico?: number | null
+          percentagem_produtora?: number | null
+          preco_album?: number | null
+          preco_base_atuacao?: number | null
+          produtora_id?: string | null
+          tipo?: string
+          tipo_evento_permitido?: string | null
+          updated_at?: string | null
+          user_id: string
+          verificado?: boolean | null
+        }
+        Update: {
+          ativo?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          cidade?: string | null
+          contacto?: string | null
+          created_at?: string | null
+          id?: string
+          nome_artistico?: string
+          percentagem_musico?: number | null
+          percentagem_produtora?: number | null
+          preco_album?: number | null
+          preco_base_atuacao?: number | null
+          produtora_id?: string | null
+          tipo?: string
+          tipo_evento_permitido?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verificado?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artistas_produtora_id_fkey"
+            columns: ["produtora_id"]
+            isOneToOne: false
+            referencedRelation: "produtoras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banners: {
         Row: {
           ativo: boolean | null
@@ -269,6 +340,63 @@ export type Database = {
           valor_deposito?: number
         }
         Relationships: []
+      }
+      calculos_atuacao: {
+        Row: {
+          artista_id: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          percentagem_musico: number
+          percentagem_produtora: number
+          produtora_id: string | null
+          tipo_evento: string | null
+          valor_musico: number
+          valor_produtora: number
+          valor_total: number
+        }
+        Insert: {
+          artista_id: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          percentagem_musico: number
+          percentagem_produtora: number
+          produtora_id?: string | null
+          tipo_evento?: string | null
+          valor_musico: number
+          valor_produtora: number
+          valor_total: number
+        }
+        Update: {
+          artista_id?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          percentagem_musico?: number
+          percentagem_produtora?: number
+          produtora_id?: string | null
+          tipo_evento?: string | null
+          valor_musico?: number
+          valor_produtora?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calculos_atuacao_artista_id_fkey"
+            columns: ["artista_id"]
+            isOneToOne: false
+            referencedRelation: "artistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calculos_atuacao_produtora_id_fkey"
+            columns: ["produtora_id"]
+            isOneToOne: false
+            referencedRelation: "produtoras"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       configuracoes_sistema: {
         Row: {
@@ -497,6 +625,42 @@ export type Database = {
         }
         Relationships: []
       }
+      planos_comerciais: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          descricao: string | null
+          id: string
+          nome: string
+          preco_anual: number
+          preco_mensal: number
+          selo_verificado: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome: string
+          preco_anual?: number
+          preco_mensal?: number
+          selo_verificado?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          nome?: string
+          preco_anual?: number
+          preco_mensal?: number
+          selo_verificado?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       produto_imagens: {
         Row: {
           created_at: string | null
@@ -528,6 +692,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      produtoras: {
+        Row: {
+          ativo: boolean | null
+          bio: string | null
+          contacto: string | null
+          created_at: string | null
+          endereco: string | null
+          id: string
+          logo_url: string | null
+          nif: string | null
+          nome: string
+          responsavel: string | null
+          updated_at: string | null
+          user_id: string
+          verificado: boolean | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          bio?: string | null
+          contacto?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          id?: string
+          logo_url?: string | null
+          nif?: string | null
+          nome: string
+          responsavel?: string | null
+          updated_at?: string | null
+          user_id: string
+          verificado?: boolean | null
+        }
+        Update: {
+          ativo?: boolean | null
+          bio?: string | null
+          contacto?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          id?: string
+          logo_url?: string | null
+          nif?: string | null
+          nome?: string
+          responsavel?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verificado?: boolean | null
+        }
+        Relationships: []
       }
       produtos: {
         Row: {
@@ -664,6 +876,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      subscricoes_loja: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          data_fim: string
+          data_inicio: string
+          id: string
+          loja_id: string
+          plano_id: string
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          data_fim: string
+          data_inicio?: string
+          id?: string
+          loja_id: string
+          plano_id: string
+          tipo?: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          data_fim?: string
+          data_inicio?: string
+          id?: string
+          loja_id?: string
+          plano_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscricoes_loja_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "lojas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscricoes_loja_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_comerciais"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_profiles: {
         Row: {
