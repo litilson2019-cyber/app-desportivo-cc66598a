@@ -28,6 +28,9 @@ import {
   Users,
   TrendingUp,
   Target,
+  Music,
+  Building2,
+  Crown,
 } from "lucide-react";
 import {
   Dialog,
