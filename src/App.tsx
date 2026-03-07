@@ -16,6 +16,10 @@ import Marketplace from "./pages/Marketplace";
 import LojaDetalhe from "./pages/LojaDetalhe";
 import MinhaLoja from "./pages/MinhaLoja";
 import MeusAnuncios from "./pages/MeusAnuncios";
+import MeuPerfilArtista from "./pages/MeuPerfilArtista";
+import MinhaProdutora from "./pages/MinhaProdutora";
+import Artistas from "./pages/Artistas";
+import PlanosComerciais from "./pages/PlanosComerciais";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +44,10 @@ const App = () => (
             <Route path="/loja/:id" element={<LojaDetalhe />} />
             <Route path="/minha-loja" element={<MinhaLoja />} />
             <Route path="/meus-anuncios" element={<MeusAnuncios />} />
+            <Route path="/meu-perfil-artista" element={<MeuPerfilArtista />} />
+            <Route path="/minha-produtora" element={<MinhaProdutora />} />
+            <Route path="/artistas" element={<Artistas />} />
+            <Route path="/planos-comerciais" element={<PlanosComerciais />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
