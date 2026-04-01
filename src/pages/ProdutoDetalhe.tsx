@@ -4,6 +4,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKz } from "@/lib/formatKz";
+import { ImageFullscreen } from "@/components/marketplace/ImageFullscreen";
 import { Loader2, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Store, ShoppingBag, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ export default function ProdutoDetalhe() {
   const [loja, setLoja] = useState<any>(null);
   const [outrosProdutos, setOutrosProdutos] = useState<any[]>([]);
   const [currentImg, setCurrentImg] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
