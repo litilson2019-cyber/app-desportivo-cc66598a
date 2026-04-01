@@ -20,6 +20,7 @@ import MeuPerfilArtista from "./pages/MeuPerfilArtista";
 import MinhaProdutora from "./pages/MinhaProdutora";
 import Artistas from "./pages/Artistas";
 import PlanosComerciais from "./pages/PlanosComerciais";
+import ProdutoDetalhe from "./pages/ProdutoDetalhe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
