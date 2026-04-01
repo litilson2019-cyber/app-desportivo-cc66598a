@@ -45,8 +45,8 @@ export function AnalysisLoadingOverlay({ isLoading, modo }: AnalysisLoadingOverl
       return;
     }
 
-    let stepTimeout: NodeJS.Timeout;
-    let progressInterval: NodeJS.Timeout;
+    let stepTimeout: ReturnType<typeof setTimeout>;
+    let progressInterval: ReturnType<typeof setInterval>;
 
     const runStep = (index: number) => {
       if (index >= ANALYSIS_STEPS.length) return;
