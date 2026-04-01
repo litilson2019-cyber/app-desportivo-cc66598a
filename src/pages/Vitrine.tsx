@@ -127,6 +127,7 @@ export default function Vitrine() {
                       {loja.produtos.map((prod) => (
                         <ProductCard
                           key={prod.id}
+                          id={prod.id}
                           nome={prod.nome}
                           descricao={prod.descricao || undefined}
                           preco={prod.preco}
