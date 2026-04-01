@@ -43,6 +43,7 @@ const App = () => (
             <Route path="/vitrine" element={<Vitrine />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/loja/:id" element={<LojaDetalhe />} />
+            <Route path="/produto/:id" element={<ProdutoDetalhe />} />
             <Route path="/minha-loja" element={<MinhaLoja />} />
             <Route path="/meus-anuncios" element={<MeusAnuncios />} />
             <Route path="/meu-perfil-artista" element={<MeuPerfilArtista />} />
