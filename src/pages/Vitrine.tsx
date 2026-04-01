@@ -123,18 +123,21 @@ export default function Vitrine() {
                     verificado={loja.verificado}
                   />
                   {loja.produtos.length > 0 && (
-                    <div className="grid grid-cols-2 gap-3 pl-2">
-                      {loja.produtos.map((prod) => (
-                        <ProductCard
-                          key={prod.id}
-                          id={prod.id}
-                          nome={prod.nome}
-                          descricao={prod.descricao || undefined}
-                          preco={prod.preco}
-                          imagens={prod.imagens}
-                          contactoLink={prod.contacto_link || undefined}
-                        />
-                      ))}
+                    <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+                      <div className="flex gap-3" style={{ minWidth: "min-content" }}>
+                        {loja.produtos.map((prod) => (
+                          <div key={prod.id} className="w-[140px] flex-shrink-0">
+                            <ProductCard
+                              id={prod.id}
+                              nome={prod.nome}
+                              preco={prod.preco}
+                              imagens={prod.imagens}
+                              contactoLink={prod.contacto_link || undefined}
+                              compact
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

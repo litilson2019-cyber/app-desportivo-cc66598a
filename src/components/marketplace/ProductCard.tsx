@@ -12,9 +12,10 @@ interface ProductCardProps {
   preco: number;
   imagens: string[];
   contactoLink?: string;
+  compact?: boolean;
 }
 
-export const ProductCard = ({ id, nome, descricao, preco, imagens, contactoLink }: ProductCardProps) => {
+export const ProductCard = ({ id, nome, descricao, preco, imagens, contactoLink, compact }: ProductCardProps) => {
   const navigate = useNavigate();
 
   const handleContact = (e: React.MouseEvent) => {
@@ -27,6 +28,32 @@ export const ProductCard = ({ id, nome, descricao, preco, imagens, contactoLink 
   const handleClick = () => {
     if (id) navigate(`/produto/${id}`);
   };
+
+  if (compact) {
+    return (
+      <Card className="overflow-hidden shadow-soft rounded-xl cursor-pointer hover:shadow-md transition-shadow" onClick={handleClick}>
+        <div className="aspect-square w-full overflow-hidden bg-muted">
+          {imagens.length > 0 ? (
+            <img src={imagens[0]} alt={nome} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">Sem imagem</div>
+          )}
+        </div>
+        <div className="p-2 space-y-1">
+          <h4 className="font-semibold text-foreground text-xs line-clamp-1">{nome}</h4>
+          <p className="text-xs font-bold text-primary">{formatKz(preco)}</p>
+          <Button
+            size="sm"
+            className="w-full h-6 text-[10px] rounded-md"
+            onClick={handleContact}
+            disabled={!contactoLink}
+          >
+            Contactar
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="overflow-hidden shadow-soft rounded-xl cursor-pointer hover:shadow-md transition-shadow" onClick={handleClick}>

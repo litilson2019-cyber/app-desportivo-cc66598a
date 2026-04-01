@@ -137,3 +137,12 @@ All colors MUST be HSL.
     width: var(--progress-width);
   }
 }
+
+/* Hide scrollbar for horizontal carousels */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
