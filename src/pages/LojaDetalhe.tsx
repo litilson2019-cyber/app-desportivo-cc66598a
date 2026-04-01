@@ -123,6 +123,7 @@ export default function LojaDetalhe() {
                 {produtos.map((p) => (
                   <ProductCard
                     key={p.id}
+                    id={p.id}
                     nome={p.nome}
                     descricao={p.descricao || undefined}
                     preco={p.preco}

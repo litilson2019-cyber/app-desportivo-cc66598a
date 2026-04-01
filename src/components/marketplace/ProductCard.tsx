@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { ProductImageSlider } from "./ProductImageSlider";
 import { formatKz } from "@/lib/formatKz";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
+  id?: string;
   nome: string;
   descricao?: string;
   preco: number;
@@ -12,15 +14,22 @@ interface ProductCardProps {
   contactoLink?: string;
 }
 
-export const ProductCard = ({ nome, descricao, preco, imagens, contactoLink }: ProductCardProps) => {
-  const handleContact = () => {
+export const ProductCard = ({ id, nome, descricao, preco, imagens, contactoLink }: ProductCardProps) => {
+  const navigate = useNavigate();
+
+  const handleContact = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (contactoLink) {
       window.open(contactoLink, "_blank");
     }
   };
 
+  const handleClick = () => {
+    if (id) navigate(`/produto/${id}`);
+  };
+
   return (
-    <Card className="overflow-hidden shadow-soft rounded-xl">
+    <Card className="overflow-hidden shadow-soft rounded-xl cursor-pointer hover:shadow-md transition-shadow" onClick={handleClick}>
       <ProductImageSlider images={imagens} alt={nome} />
       <div className="p-3 space-y-2">
         <h4 className="font-semibold text-foreground text-sm line-clamp-1">{nome}</h4>
