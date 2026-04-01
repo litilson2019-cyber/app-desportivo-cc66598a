@@ -280,6 +280,9 @@ export default function ProdutoDetalhe() {
           )}
         </div>
       </div>
+      {fullscreen && (
+        <ImageFullscreen images={imgList} initialIndex={currentImg} onClose={() => setFullscreen(false)} />
+      )}
       <BottomNav />
     </AuthGuard>
   );
