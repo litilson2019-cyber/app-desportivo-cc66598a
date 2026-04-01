@@ -4,6 +4,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { formatKz } from "@/lib/formatKz";
+import { ImageFullscreen } from "@/components/marketplace/ImageFullscreen";
 import { Loader2, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Store, ShoppingBag, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ export default function ProdutoDetalhe() {
   const [loja, setLoja] = useState<any>(null);
   const [outrosProdutos, setOutrosProdutos] = useState<any[]>([]);
   const [currentImg, setCurrentImg] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -132,7 +134,7 @@ export default function ProdutoDetalhe() {
           <div className="bg-card rounded-xl shadow-soft p-4">
             <div className="flex gap-4">
               {/* Image */}
-              <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+              <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden bg-muted cursor-pointer" onClick={() => setFullscreen(true)}>
                 <img
                   src={imgList[currentImg]}
                   alt={produto.nome}
@@ -278,6 +280,9 @@ export default function ProdutoDetalhe() {
           )}
         </div>
       </div>
+      {fullscreen && (
+        <ImageFullscreen images={imgList} initialIndex={currentImg} onClose={() => setFullscreen(false)} />
+      )}
       <BottomNav />
     </AuthGuard>
   );
