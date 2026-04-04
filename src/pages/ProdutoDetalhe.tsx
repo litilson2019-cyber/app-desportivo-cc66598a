@@ -176,19 +176,22 @@ export default function ProdutoDetalhe() {
               </div>
             </div>
 
-            {/* Contact Button */}
-            <Button
-              className="w-full mt-4 gap-2 rounded-xl h-11 text-sm font-bold"
-              onClick={() => {
-                if (produto.contacto_link) window.open(produto.contacto_link, "_blank");
-                else if (loja?.contacto_whatsapp) window.open(`https://wa.me/${loja.contacto_whatsapp}`, "_blank");
-              }}
-              disabled={!produto.contacto_link && !loja?.contacto_whatsapp}
-            >
-              <MessageCircle className="w-4 h-4" />
-              Contactar
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex gap-2 mt-4">
+              <Button
+                className="flex-1 gap-2 rounded-xl h-11 text-sm font-bold"
+                onClick={() => {
+                  if (produto.contacto_link) window.open(produto.contacto_link, "_blank");
+                  else if (loja?.contacto_whatsapp) window.open(`https://wa.me/${loja.contacto_whatsapp}`, "_blank");
+                }}
+                disabled={!produto.contacto_link && !loja?.contacto_whatsapp}
+              >
+                <MessageCircle className="w-4 h-4" />
+                Contactar
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              <ShareLinkButton tipo="produto" itemId={produto.id} itemNome={produto.nome} />
+            </div>
           </div>
 
           {/* Other Products Section */}
