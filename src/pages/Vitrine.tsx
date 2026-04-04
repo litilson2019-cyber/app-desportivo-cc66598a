@@ -4,7 +4,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { StoreCard } from "@/components/marketplace/StoreCard";
 import { ProductCard } from "@/components/marketplace/ProductCard";
-import { Loader2, Store } from "lucide-react";
+import { Loader2, Store, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 
 interface Loja {
