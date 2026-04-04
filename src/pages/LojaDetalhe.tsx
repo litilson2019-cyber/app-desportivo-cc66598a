@@ -103,7 +103,19 @@ export default function LojaDetalhe() {
                 )}
               </div>
               {loja.bio && <p className="text-sm text-muted-foreground mt-1">{loja.bio}</p>}
-            </div>
+          </div>
+
+          <div className="flex gap-2">
+            {loja.contacto_whatsapp && (
+              <Button
+                className="flex-1 gap-2 rounded-xl"
+                onClick={() => window.open(`https://wa.me/${loja.contacto_whatsapp}`, "_blank")}
+              >
+                <MessageCircle className="w-4 h-4" /> Contactar via WhatsApp
+              </Button>
+            )}
+            <ShareLinkButton tipo="loja" itemId={loja.id} itemNome={loja.nome} />
+          </div>
           </div>
 
           {loja.contacto_whatsapp && (
