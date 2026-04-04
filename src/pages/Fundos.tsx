@@ -212,12 +212,13 @@ export default function Fundos() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("saldo")
+        .select("saldo, wallet_bonus_balance")
         .eq("id", user.id)
         .single();
 
       if (profile) {
         setSaldo(Number(profile.saldo));
+        setBonusSaldo(Number(profile.wallet_bonus_balance || 0));
       }
 
       const { data: transacoesData } = await supabase
