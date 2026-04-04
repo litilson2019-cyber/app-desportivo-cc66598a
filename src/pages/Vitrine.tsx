@@ -3,9 +3,8 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { BottomNav } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { StoreCard } from "@/components/marketplace/StoreCard";
-import { ProductCard } from "@/components/marketplace/ProductCard";
-import { Loader2, Store, ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef, useCallback } from "react";
+import { ProductCarousel } from "@/components/marketplace/ProductCarousel";
+import { Loader2, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface Loja {
