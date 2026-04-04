@@ -21,6 +21,8 @@ import MinhaProdutora from "./pages/MinhaProdutora";
 import Artistas from "./pages/Artistas";
 import PlanosComerciais from "./pages/PlanosComerciais";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
+import PromoRedirect from "./pages/PromoRedirect";
+import MinhasDivulgacoes from "./pages/MinhasDivulgacoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
