@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Store, CheckCircle2, MessageCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ShareLinkButton } from "@/components/marketplace/ShareLinkButton";
 
 export default function LojaDetalhe() {
   const { id } = useParams<{ id: string }>();
@@ -102,17 +103,21 @@ export default function LojaDetalhe() {
                 )}
               </div>
               {loja.bio && <p className="text-sm text-muted-foreground mt-1">{loja.bio}</p>}
-            </div>
           </div>
 
-          {loja.contacto_whatsapp && (
-            <Button
-              className="w-full gap-2 rounded-xl"
-              onClick={() => window.open(`https://wa.me/${loja.contacto_whatsapp}`, "_blank")}
-            >
-              <MessageCircle className="w-4 h-4" /> Contactar via WhatsApp
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {loja.contacto_whatsapp && (
+              <Button
+                className="flex-1 gap-2 rounded-xl"
+                onClick={() => window.open(`https://wa.me/${loja.contacto_whatsapp}`, "_blank")}
+              >
+                <MessageCircle className="w-4 h-4" /> Contactar via WhatsApp
+              </Button>
+            )}
+            <ShareLinkButton tipo="loja" itemId={loja.id} itemNome={loja.nome} />
+          </div>
+          </div>
+
 
           <div>
             <h2 className="text-lg font-bold text-foreground mb-3">Produtos ({produtos.length})</h2>

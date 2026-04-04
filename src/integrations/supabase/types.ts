@@ -425,6 +425,133 @@ export type Database = {
         }
         Relationships: []
       }
+      divulgacao_cliques: {
+        Row: {
+          convertido: boolean | null
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          link_id: string
+          referrer_user_id: string | null
+          user_agent: string | null
+          valor_comissao: number | null
+        }
+        Insert: {
+          convertido?: boolean | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          referrer_user_id?: string | null
+          user_agent?: string | null
+          valor_comissao?: number | null
+        }
+        Update: {
+          convertido?: boolean | null
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          referrer_user_id?: string | null
+          user_agent?: string | null
+          valor_comissao?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "divulgacao_cliques_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "divulgacao_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      divulgacao_comissoes: {
+        Row: {
+          created_at: string | null
+          descricao: string | null
+          id: string
+          item_id: string | null
+          item_tipo: string | null
+          link_id: string | null
+          status: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          item_id?: string | null
+          item_tipo?: string | null
+          link_id?: string | null
+          status?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          item_id?: string | null
+          item_tipo?: string | null
+          link_id?: string | null
+          status?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "divulgacao_comissoes_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "divulgacao_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      divulgacao_links: {
+        Row: {
+          ativo: boolean
+          cliques: number
+          codigo: string
+          comissao_percentual: number
+          conversoes: number
+          created_at: string | null
+          id: string
+          item_id: string
+          tipo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          cliques?: number
+          codigo: string
+          comissao_percentual?: number
+          conversoes?: number
+          created_at?: string | null
+          id?: string
+          item_id: string
+          tipo?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          cliques?: number
+          codigo?: string
+          comissao_percentual?: number
+          conversoes?: number
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          tipo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       investimentos_ativos: {
         Row: {
           created_at: string | null
@@ -806,6 +933,7 @@ export type Database = {
           telefone: string | null
           tipo_conta: string | null
           updated_at: string | null
+          wallet_bonus_balance: number | null
         }
         Insert: {
           ativo?: boolean | null
@@ -824,6 +952,7 @@ export type Database = {
           telefone?: string | null
           tipo_conta?: string | null
           updated_at?: string | null
+          wallet_bonus_balance?: number | null
         }
         Update: {
           ativo?: boolean | null
@@ -842,6 +971,7 @@ export type Database = {
           telefone?: string | null
           tipo_conta?: string | null
           updated_at?: string | null
+          wallet_bonus_balance?: number | null
         }
         Relationships: [
           {
@@ -1046,6 +1176,7 @@ export type Database = {
         Args: { valor_depositado: number }
         Returns: number
       }
+      generate_promo_code: { Args: never; Returns: string }
       generate_referral_code: { Args: never; Returns: string }
       has_permission: {
         Args: { _permission: string; _user_id: string }

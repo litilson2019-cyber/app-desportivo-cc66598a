@@ -21,6 +21,8 @@ import MinhaProdutora from "./pages/MinhaProdutora";
 import Artistas from "./pages/Artistas";
 import PlanosComerciais from "./pages/PlanosComerciais";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
+import PromoRedirect from "./pages/PromoRedirect";
+import MinhasDivulgacoes from "./pages/MinhasDivulgacoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +52,8 @@ const App = () => (
             <Route path="/minha-produtora" element={<MinhaProdutora />} />
             <Route path="/artistas" element={<Artistas />} />
             <Route path="/planos-comerciais" element={<PlanosComerciais />} />
+            <Route path="/r/:code" element={<PromoRedirect />} />
+            <Route path="/minhas-divulgacoes" element={<MinhasDivulgacoes />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

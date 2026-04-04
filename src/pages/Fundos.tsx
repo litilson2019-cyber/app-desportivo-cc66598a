@@ -56,6 +56,7 @@ import { formatKz } from '@/lib/formatKz';
 
 export default function Fundos() {
   const [saldo, setSaldo] = useState(0);
+  const [bonusSaldo, setBonusSaldo] = useState(0);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [ajustes, setAjustes] = useState<AjusteSaldo[]>([]);
   const [valor, setValor] = useState("");
@@ -135,9 +136,9 @@ export default function Fundos() {
             filter: `id=eq.${user.id}`
           },
           (payload) => {
-            console.log('Perfil atualizado:', payload);
-            const newProfile = payload.new as { saldo: number };
+            const newProfile = payload.new as { saldo: number; wallet_bonus_balance: number };
             setSaldo(Number(newProfile.saldo));
+            setBonusSaldo(Number(newProfile.wallet_bonus_balance || 0));
           }
         )
         .subscribe();
@@ -211,12 +212,13 @@ export default function Fundos() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("saldo")
+        .select("saldo, wallet_bonus_balance")
         .eq("id", user.id)
         .single();
 
       if (profile) {
         setSaldo(Number(profile.saldo));
+        setBonusSaldo(Number(profile.wallet_bonus_balance || 0));
       }
 
       const { data: transacoesData } = await supabase
@@ -441,6 +443,15 @@ export default function Fundos() {
             <p className="text-4xl font-bold text-white">
               {formatKz(saldo)}
             </p>
+            {bonusSaldo > 0 && (
+              <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-white/80" />
+                  <span className="text-white/80 text-xs">Saldo Bónus (Divulgação)</span>
+                </div>
+                <span className="text-white font-bold text-sm">{formatKz(bonusSaldo)}</span>
+              </div>
+            )}
             <p className="text-xs text-white/60 mt-2">Saldo não sacável – apenas para uso interno</p>
           </Card>
 
