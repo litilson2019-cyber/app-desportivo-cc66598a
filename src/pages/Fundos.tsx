@@ -443,6 +443,15 @@ export default function Fundos() {
             <p className="text-4xl font-bold text-white">
               {formatKz(saldo)}
             </p>
+            {bonusSaldo > 0 && (
+              <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-white/80" />
+                  <span className="text-white/80 text-xs">Saldo Bónus (Divulgação)</span>
+                </div>
+                <span className="text-white font-bold text-sm">{formatKz(bonusSaldo)}</span>
+              </div>
+            )}
             <p className="text-xs text-white/60 mt-2">Saldo não sacável – apenas para uso interno</p>
           </Card>
 
