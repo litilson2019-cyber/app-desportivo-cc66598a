@@ -56,6 +56,7 @@ import { formatKz } from '@/lib/formatKz';
 
 export default function Fundos() {
   const [saldo, setSaldo] = useState(0);
+  const [bonusSaldo, setBonusSaldo] = useState(0);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [ajustes, setAjustes] = useState<AjusteSaldo[]>([]);
   const [valor, setValor] = useState("");
