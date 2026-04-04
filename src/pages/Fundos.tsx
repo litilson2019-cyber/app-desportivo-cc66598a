@@ -136,9 +136,9 @@ export default function Fundos() {
             filter: `id=eq.${user.id}`
           },
           (payload) => {
-            console.log('Perfil atualizado:', payload);
-            const newProfile = payload.new as { saldo: number };
+            const newProfile = payload.new as { saldo: number; wallet_bonus_balance: number };
             setSaldo(Number(newProfile.saldo));
+            setBonusSaldo(Number(newProfile.wallet_bonus_balance || 0));
           }
         )
         .subscribe();
