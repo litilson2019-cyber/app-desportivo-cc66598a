@@ -192,6 +192,8 @@ export default function Menu() {
       navigate("/planos-comerciais");
     } else if (action === "artistas") {
       navigate("/artistas");
+    } else if (action === "minhas-divulgacoes") {
+      navigate("/minhas-divulgacoes");
     } else {
       toast({
         title: "Em desenvolvimento",
