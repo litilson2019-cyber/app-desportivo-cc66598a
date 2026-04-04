@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Store, CheckCircle2, MessageCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ShareLinkButton } from "@/components/marketplace/ShareLinkButton";
 
 export default function LojaDetalhe() {
   const { id } = useParams<{ id: string }>();
