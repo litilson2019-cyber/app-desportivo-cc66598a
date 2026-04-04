@@ -31,6 +31,7 @@ import {
   Music,
   Building2,
   Crown,
+  Link2,
 } from "lucide-react";
 import {
   Dialog,
