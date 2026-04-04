@@ -118,14 +118,6 @@ export default function LojaDetalhe() {
           </div>
           </div>
 
-          {loja.contacto_whatsapp && (
-            <Button
-              className="w-full gap-2 rounded-xl"
-              onClick={() => window.open(`https://wa.me/${loja.contacto_whatsapp}`, "_blank")}
-            >
-              <MessageCircle className="w-4 h-4" /> Contactar via WhatsApp
-            </Button>
-          )}
 
           <div>
             <h2 className="text-lg font-bold text-foreground mb-3">Produtos ({produtos.length})</h2>
