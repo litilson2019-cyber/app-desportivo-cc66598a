@@ -124,22 +124,7 @@ export default function Vitrine() {
                     verificado={loja.verificado}
                   />
                   {loja.produtos.length > 0 && (
-                    <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-                      <div className="flex gap-3" style={{ minWidth: "min-content" }}>
-                        {loja.produtos.map((prod) => (
-                          <div key={prod.id} className="w-[140px] flex-shrink-0">
-                            <ProductCard
-                              id={prod.id}
-                              nome={prod.nome}
-                              preco={prod.preco}
-                              imagens={prod.imagens}
-                              contactoLink={prod.contacto_link || undefined}
-                              compact
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <ProductCarousel produtos={loja.produtos} />
                   )}
                 </div>
               ))}
