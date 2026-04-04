@@ -8,6 +8,7 @@ import { ImageFullscreen } from "@/components/marketplace/ImageFullscreen";
 import { Loader2, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Store, ShoppingBag, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ShareLinkButton } from "@/components/marketplace/ShareLinkButton";
 
 export default function ProdutoDetalhe() {
   const { id } = useParams<{ id: string }>();
