@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Music, MapPin, Phone, BadgeCheck } from "lucide-react";
 import { formatKz } from "@/lib/formatKz";
+import { useNavigate } from "react-router-dom";
 
 interface Artista {
   id: string;
