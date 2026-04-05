@@ -19,6 +19,7 @@ import MeusAnuncios from "./pages/MeusAnuncios";
 import MeuPerfilArtista from "./pages/MeuPerfilArtista";
 import MinhaProdutora from "./pages/MinhaProdutora";
 import Artistas from "./pages/Artistas";
+import ArtistaDetalhe from "./pages/ArtistaDetalhe";
 import PlanosComerciais from "./pages/PlanosComerciais";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
 import PromoRedirect from "./pages/PromoRedirect";
