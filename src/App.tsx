@@ -23,6 +23,7 @@ import PlanosComerciais from "./pages/PlanosComerciais";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
 import PromoRedirect from "./pages/PromoRedirect";
 import MinhasDivulgacoes from "./pages/MinhasDivulgacoes";
+import MeusDestaques from "./pages/MeusDestaques";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
