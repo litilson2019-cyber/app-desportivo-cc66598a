@@ -32,6 +32,7 @@ import {
   Building2,
   Crown,
   Link2,
+  Star,
 } from "lucide-react";
 import {
   Dialog,
