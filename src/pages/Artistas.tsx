@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Music, MapPin, Phone, BadgeCheck } from "lucide-react";
 import { formatKz } from "@/lib/formatKz";
+import { useNavigate } from "react-router-dom";
 
 interface Artista {
   id: string;
@@ -23,6 +24,7 @@ interface Artista {
 }
 
 export default function Artistas() {
+  const navigate = useNavigate();
   const [artistas, setArtistas] = useState<Artista[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -94,7 +96,7 @@ export default function Artistas() {
           ) : (
             <div className="space-y-3">
               {filtered.map((a) => (
-                <Card key={a.id} className="p-4 shadow-soft rounded-xl">
+                <Card key={a.id} className="p-4 shadow-soft rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate(`/artista/${a.id}`)}>
                   <div className="flex items-start gap-3">
                     <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                       {a.avatar_url ? <img src={a.avatar_url} alt={a.nome_artistico} className="w-full h-full object-cover" /> : <Music className="w-6 h-6 text-muted-foreground" />}

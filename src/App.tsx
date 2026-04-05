@@ -19,6 +19,7 @@ import MeusAnuncios from "./pages/MeusAnuncios";
 import MeuPerfilArtista from "./pages/MeuPerfilArtista";
 import MinhaProdutora from "./pages/MinhaProdutora";
 import Artistas from "./pages/Artistas";
+import ArtistaDetalhe from "./pages/ArtistaDetalhe";
 import PlanosComerciais from "./pages/PlanosComerciais";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
 import PromoRedirect from "./pages/PromoRedirect";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/meu-perfil-artista" element={<MeuPerfilArtista />} />
             <Route path="/minha-produtora" element={<MinhaProdutora />} />
             <Route path="/artistas" element={<Artistas />} />
+            <Route path="/artista/:id" element={<ArtistaDetalhe />} />
             <Route path="/planos-comerciais" element={<PlanosComerciais />} />
             <Route path="/r/:code" element={<PromoRedirect />} />
             <Route path="/minhas-divulgacoes" element={<MinhasDivulgacoes />} />
