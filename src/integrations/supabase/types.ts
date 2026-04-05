@@ -425,6 +425,97 @@ export type Database = {
         }
         Relationships: []
       }
+      destaque_interacoes: {
+        Row: {
+          created_at: string | null
+          destaque_id: string
+          id: string
+          ip_address: string | null
+          tipo: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          destaque_id: string
+          id?: string
+          ip_address?: string | null
+          tipo: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          destaque_id?: string
+          id?: string
+          ip_address?: string | null
+          tipo?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destaque_interacoes_destaque_id_fkey"
+            columns: ["destaque_id"]
+            isOneToOne: false
+            referencedRelation: "destaques_vitrine"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      destaques_vitrine: {
+        Row: {
+          ativo: boolean
+          created_at: string | null
+          data_fim: string
+          data_inicio: string
+          gasto: number
+          id: string
+          loja_id: string
+          orcamento: number
+          preco_unitario: number
+          prioridade: number
+          tipo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string | null
+          data_fim: string
+          data_inicio?: string
+          gasto?: number
+          id?: string
+          loja_id: string
+          orcamento?: number
+          preco_unitario?: number
+          prioridade?: number
+          tipo?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string | null
+          data_fim?: string
+          data_inicio?: string
+          gasto?: number
+          id?: string
+          loja_id?: string
+          orcamento?: number
+          preco_unitario?: number
+          prioridade?: number
+          tipo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "destaques_vitrine_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "lojas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       divulgacao_cliques: {
         Row: {
           convertido: boolean | null
