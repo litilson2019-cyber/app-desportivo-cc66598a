@@ -24,6 +24,7 @@ interface Artista {
 }
 
 export default function Artistas() {
+  const navigate = useNavigate();
   const [artistas, setArtistas] = useState<Artista[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
