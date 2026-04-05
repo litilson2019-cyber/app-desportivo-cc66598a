@@ -196,6 +196,8 @@ export default function Menu() {
       navigate("/artistas");
     } else if (action === "minhas-divulgacoes") {
       navigate("/minhas-divulgacoes");
+    } else if (action === "meus-destaques") {
+      navigate("/meus-destaques");
     } else {
       toast({
         title: "Em desenvolvimento",
