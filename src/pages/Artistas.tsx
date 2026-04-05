@@ -96,7 +96,7 @@ export default function Artistas() {
           ) : (
             <div className="space-y-3">
               {filtered.map((a) => (
-                <Card key={a.id} className="p-4 shadow-soft rounded-xl">
+                <Card key={a.id} className="p-4 shadow-soft rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => navigate(`/artista/${a.id}`)}>
                   <div className="flex items-start gap-3">
                     <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
                       {a.avatar_url ? <img src={a.avatar_url} alt={a.nome_artistico} className="w-full h-full object-cover" /> : <Music className="w-6 h-6 text-muted-foreground" />}

@@ -53,6 +53,7 @@ const App = () => (
             <Route path="/meu-perfil-artista" element={<MeuPerfilArtista />} />
             <Route path="/minha-produtora" element={<MinhaProdutora />} />
             <Route path="/artistas" element={<Artistas />} />
+            <Route path="/artista/:id" element={<ArtistaDetalhe />} />
             <Route path="/planos-comerciais" element={<PlanosComerciais />} />
             <Route path="/r/:code" element={<PromoRedirect />} />
             <Route path="/minhas-divulgacoes" element={<MinhasDivulgacoes />} />
