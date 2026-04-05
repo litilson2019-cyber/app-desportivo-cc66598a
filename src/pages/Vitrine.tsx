@@ -6,6 +6,7 @@ import { StoreCard } from "@/components/marketplace/StoreCard";
 import { ProductCarousel } from "@/components/marketplace/ProductCarousel";
 import { Loader2, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface Loja {
   id: string;
@@ -13,6 +14,8 @@ interface Loja {
   logo_url: string | null;
   bio: string | null;
   verificado: boolean;
+  prioridade: number;
+  destacado: boolean;
   produtos: {
     id: string;
     nome: string;
@@ -42,6 +45,23 @@ export default function Vitrine() {
 
       if (!lojasData) { setLoading(false); return; }
 
+      // Load active highlights to determine priority
+      const now = new Date().toISOString();
+      const { data: destaques } = await supabase
+        .from("destaques_vitrine")
+        .select("loja_id, prioridade")
+        .eq("ativo", true)
+        .gte("data_fim", now)
+        .lte("data_inicio", now);
+
+      // Build priority map: highest priority per store
+      const prioridadeMap: Record<string, number> = {};
+      for (const d of destaques || []) {
+        const lojaId = (d as any).loja_id;
+        const prio = Number((d as any).prioridade) || 0;
+        prioridadeMap[lojaId] = Math.max(prioridadeMap[lojaId] || 0, prio);
+      }
+
       const lojasComProdutos: Loja[] = [];
 
       for (const loja of lojasData) {
@@ -65,12 +85,22 @@ export default function Vitrine() {
           });
         }
 
+        const prio = prioridadeMap[loja.id] || 0;
         lojasComProdutos.push({
           ...loja,
           verificado: loja.verificado ?? false,
+          prioridade: prio,
+          destacado: prio > 0,
           produtos: produtosComImagens,
         });
       }
+
+      // Sort: highlighted first (by priority desc), then verified, then rest
+      lojasComProdutos.sort((a, b) => {
+        if (a.prioridade !== b.prioridade) return b.prioridade - a.prioridade;
+        if (a.verificado !== b.verificado) return a.verificado ? -1 : 1;
+        return 0;
+      });
 
       setLojas(lojasComProdutos);
     } catch (err) {
@@ -115,13 +145,20 @@ export default function Vitrine() {
             <div className="space-y-6">
               {filtered.map((loja) => (
                 <div key={loja.id} className="space-y-3">
-                  <StoreCard
-                    id={loja.id}
-                    nome={loja.nome}
-                    logoUrl={loja.logo_url || undefined}
-                    bio={loja.bio || undefined}
-                    verificado={loja.verificado}
-                  />
+                  <div className="relative">
+                    {loja.destacado && (
+                      <Badge className="absolute -top-2 right-2 z-10 text-[10px] bg-amber-500 hover:bg-amber-600 gap-1">
+                        ⭐ Destaque
+                      </Badge>
+                    )}
+                    <StoreCard
+                      id={loja.id}
+                      nome={loja.nome}
+                      logoUrl={loja.logo_url || undefined}
+                      bio={loja.bio || undefined}
+                      verificado={loja.verificado}
+                    />
+                  </div>
                   {loja.produtos.length > 0 && (
                     <ProductCarousel produtos={loja.produtos} />
                   )}

@@ -32,6 +32,7 @@ import {
   Building2,
   Crown,
   Link2,
+  Star,
 } from "lucide-react";
 import {
   Dialog,
@@ -51,6 +52,7 @@ const menuItems = [
   { icon: Building2, label: "Minha Produtora", description: "Gerir produtora e músicos", action: "minha-produtora" },
   { icon: Crown, label: "Planos Comerciais", description: "Planos e selo verificado", action: "planos-comerciais" },
   { icon: Link2, label: "Minhas Divulgações", description: "Links e comissões de divulgação", action: "minhas-divulgacoes" },
+  { icon: Star, label: "Meus Destaques", description: "Promover loja na Vitrine", action: "meus-destaques" },
   { icon: Music, label: "Artistas & Músicos", description: "Ver artistas disponíveis", action: "artistas" },
   { icon: HelpCircle, label: "Suporte", description: "Fale connosco", action: "suporte" },
   { icon: FileText, label: "FAQ", description: "Perguntas frequentes", action: "faq" },
@@ -194,6 +196,8 @@ export default function Menu() {
       navigate("/artistas");
     } else if (action === "minhas-divulgacoes") {
       navigate("/minhas-divulgacoes");
+    } else if (action === "meus-destaques") {
+      navigate("/meus-destaques");
     } else {
       toast({
         title: "Em desenvolvimento",
