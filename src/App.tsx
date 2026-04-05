@@ -55,6 +55,7 @@ const App = () => (
             <Route path="/planos-comerciais" element={<PlanosComerciais />} />
             <Route path="/r/:code" element={<PromoRedirect />} />
             <Route path="/minhas-divulgacoes" element={<MinhasDivulgacoes />} />
+            <Route path="/meus-destaques" element={<MeusDestaques />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
