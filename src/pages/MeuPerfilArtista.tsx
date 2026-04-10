@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, ArrowLeft, Save, Music, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ArtistaGaleriaManager } from "@/components/artista/ArtistaGaleriaManager";
 
 export default function MeuPerfilArtista() {
   const { toast } = useToast();
@@ -239,6 +240,11 @@ export default function MeuPerfilArtista() {
               {artista ? "Guardar Alterações" : "Criar Perfil"}
             </Button>
           </Card>
+
+          {/* Gallery Manager */}
+          {artista && (
+            <ArtistaGaleriaManager artistaId={artista.id} />
+          )}
 
           {artista?.produtora_id && (
             <Card className="p-4 shadow-soft rounded-xl">

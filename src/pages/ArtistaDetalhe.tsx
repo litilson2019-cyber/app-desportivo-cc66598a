@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, ArrowLeft, Music, BadgeCheck, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatKz } from "@/lib/formatKz";
+import { ArtistaGaleriaDisplay } from "@/components/artista/ArtistaGaleriaDisplay";
 
 interface Produto {
   id: string;
@@ -216,6 +217,9 @@ export default function ArtistaDetalhe() {
             </Button>
           )}
         </div>
+
+        {/* Galeria de Fotos & Vídeos */}
+        <ArtistaGaleriaDisplay artistaId={artista.id} />
 
         {/* Álbuns & Produtos - Featured Grid */}
         {featuredProducts.length > 0 && (

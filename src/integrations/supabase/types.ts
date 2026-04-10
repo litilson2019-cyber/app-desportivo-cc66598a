@@ -151,6 +151,44 @@ export type Database = {
         }
         Relationships: []
       }
+      artista_galeria: {
+        Row: {
+          artista_id: string
+          created_at: string | null
+          id: string
+          ordem: number | null
+          tipo: string
+          titulo: string | null
+          url: string
+        }
+        Insert: {
+          artista_id: string
+          created_at?: string | null
+          id?: string
+          ordem?: number | null
+          tipo?: string
+          titulo?: string | null
+          url: string
+        }
+        Update: {
+          artista_id?: string
+          created_at?: string | null
+          id?: string
+          ordem?: number | null
+          tipo?: string
+          titulo?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artista_galeria_artista_id_fkey"
+            columns: ["artista_id"]
+            isOneToOne: false
+            referencedRelation: "artistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artistas: {
         Row: {
           ativo: boolean | null
