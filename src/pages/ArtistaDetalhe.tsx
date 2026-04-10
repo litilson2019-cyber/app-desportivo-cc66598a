@@ -22,6 +22,7 @@ interface ArtistaData {
   nome_artistico: string;
   bio: string | null;
   avatar_url: string | null;
+  banner_url: string | null;
   preco_base_atuacao: number;
   preco_album: number;
   cidade: string | null;
@@ -63,7 +64,7 @@ export default function ArtistaDetalhe() {
     try {
       const { data: a } = await supabase
         .from("artistas")
-        .select("id, nome_artistico, bio, avatar_url, preco_base_atuacao, preco_album, cidade, contacto, verificado, tipo, user_id, produtora_id")
+        .select("id, nome_artistico, bio, avatar_url, banner_url, preco_base_atuacao, preco_album, cidade, contacto, verificado, tipo, user_id, produtora_id")
         .eq("id", id!)
         .single();
 
@@ -157,9 +158,9 @@ export default function ArtistaDetalhe() {
         {/* Hero Banner */}
         <div className="relative">
           <div className="h-48 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 relative overflow-hidden">
-            {artista.avatar_url && (
+            {(artista.banner_url || artista.avatar_url) && (
               <img
-                src={artista.avatar_url}
+                src={artista.banner_url || artista.avatar_url!}
                 alt=""
                 className="w-full h-full object-cover opacity-60"
               />
@@ -351,6 +352,57 @@ export default function ArtistaDetalhe() {
                   <ChevronRight className="w-4 h-4 text-foreground" />
                 </button>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Ofertas Exclusivas */}
+        {produtos.length > 0 && (
+          <div className="px-4 py-4 space-y-3">
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              🔥 Ofertas Exclusivas
+            </h2>
+            <div className="rounded-2xl overflow-hidden bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 p-[2px]">
+              <div className="bg-card rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xl">🎵</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-foreground text-sm">Promoção Especial</p>
+                    <p className="text-xs text-muted-foreground">Álbuns e serviços com desconto exclusivo deste artista</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {artista.preco_album > 0 && (
+                    <div className="bg-muted/50 rounded-xl p-3 text-center">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Álbum</p>
+                      <p className="text-sm font-bold text-primary">{formatKz(artista.preco_album)}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatUsdt(artista.preco_album)}</p>
+                    </div>
+                  )}
+                  {artista.preco_base_atuacao > 0 && (
+                    <div className="bg-muted/50 rounded-xl p-3 text-center">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Atuação</p>
+                      <p className="text-sm font-bold text-primary">{formatKz(artista.preco_base_atuacao)}</p>
+                      <p className="text-[10px] text-muted-foreground">{formatUsdt(artista.preco_base_atuacao)}</p>
+                    </div>
+                  )}
+                </div>
+                {artista.contacto && (
+                  <a
+                    href={getWhatsappLink(artista.contacto)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button className="w-full rounded-xl gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold">
+                      <MessageCircle className="w-4 h-4" />
+                      Aproveitar Oferta
+                    </Button>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         )}
