@@ -155,6 +155,7 @@ export type Database = {
         Row: {
           ativo: boolean | null
           avatar_url: string | null
+          banner_url: string | null
           bio: string | null
           cidade: string | null
           contacto: string | null
@@ -175,6 +176,7 @@ export type Database = {
         Insert: {
           ativo?: boolean | null
           avatar_url?: string | null
+          banner_url?: string | null
           bio?: string | null
           cidade?: string | null
           contacto?: string | null
@@ -195,6 +197,7 @@ export type Database = {
         Update: {
           ativo?: boolean | null
           avatar_url?: string | null
+          banner_url?: string | null
           bio?: string | null
           cidade?: string | null
           contacto?: string | null
