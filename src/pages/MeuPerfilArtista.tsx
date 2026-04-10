@@ -122,6 +122,29 @@ export default function MeuPerfilArtista() {
     }
   };
 
+  const handleBannerUpload = async (file: File) => {
+    if (!artista) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Imagem deve ter no máximo 5MB", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `artistas/${artista.id}/banner_${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("marketplace").upload(fileName, file, { contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("marketplace").getPublicUrl(fileName);
+      await supabase.from("artistas").update({ banner_url: urlData.publicUrl }).eq("id", artista.id);
+      setArtista({ ...artista, banner_url: urlData.publicUrl });
+      toast({ title: "Banner atualizado!" });
+    } catch (err: any) {
+      toast({ title: "Erro ao carregar banner", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <AuthGuard>
@@ -142,6 +165,28 @@ export default function MeuPerfilArtista() {
           </button>
 
           <h1 className="text-3xl font-bold text-foreground">Perfil Artista</h1>
+
+          {/* Banner */}
+          <div className="space-y-2">
+            <label className="text-sm text-muted-foreground block">Imagem de Capa (Banner)</label>
+            <div className="w-full h-32 rounded-xl bg-muted overflow-hidden relative">
+              {artista?.banner_url ? (
+                <img src={artista.banner_url} alt="Banner" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-600/30 via-purple-600/30 to-pink-500/30">
+                  <span className="text-muted-foreground text-xs">Sem banner</span>
+                </div>
+              )}
+            </div>
+            {artista && (
+              <label className="cursor-pointer">
+                <Button variant="outline" size="sm" className="gap-1.5 rounded-xl" asChild>
+                  <span><Upload className="w-3 h-3" /> Alterar Banner</span>
+                </Button>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleBannerUpload(e.target.files[0])} />
+              </label>
+            )}
+          </div>
 
           {/* Avatar */}
           <div className="flex items-center gap-4">
