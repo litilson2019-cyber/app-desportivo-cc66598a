@@ -227,6 +227,62 @@ export type Database = {
           },
         ]
       }
+      artista_musicas: {
+        Row: {
+          artista_id: string
+          ativo: boolean | null
+          audio_url: string | null
+          contacto_link: string | null
+          created_at: string | null
+          duracao_preview: number | null
+          external_link: string | null
+          id: string
+          ordem: number | null
+          preco: number
+          preview_url: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          artista_id: string
+          ativo?: boolean | null
+          audio_url?: string | null
+          contacto_link?: string | null
+          created_at?: string | null
+          duracao_preview?: number | null
+          external_link?: string | null
+          id?: string
+          ordem?: number | null
+          preco?: number
+          preview_url?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          artista_id?: string
+          ativo?: boolean | null
+          audio_url?: string | null
+          contacto_link?: string | null
+          created_at?: string | null
+          duracao_preview?: number | null
+          external_link?: string | null
+          id?: string
+          ordem?: number | null
+          preco?: number
+          preview_url?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artista_musicas_artista_id_fkey"
+            columns: ["artista_id"]
+            isOneToOne: false
+            referencedRelation: "artistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artistas: {
         Row: {
           ativo: boolean | null
