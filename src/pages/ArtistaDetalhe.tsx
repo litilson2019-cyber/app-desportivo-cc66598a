@@ -9,6 +9,7 @@ import { Loader2, ArrowLeft, Music, BadgeCheck, MessageCircle, ChevronLeft, Chev
 import { formatKz } from "@/lib/formatKz";
 import { ArtistaGaleriaDisplay } from "@/components/artista/ArtistaGaleriaDisplay";
 import { ArtistaAvaliacoes } from "@/components/artista/ArtistaAvaliacoes";
+import { ArtistaMusicasPlayer } from "@/components/artista/ArtistaMusicasPlayer";
 
 interface Produto {
   id: string;
@@ -218,6 +219,9 @@ export default function ArtistaDetalhe() {
             </Button>
           )}
         </div>
+
+        {/* Músicas com Player de Preview */}
+        <ArtistaMusicasPlayer artistaId={artista.id} contactoArtista={artista.contacto} />
 
         {/* Galeria de Fotos & Vídeos */}
         <ArtistaGaleriaDisplay artistaId={artista.id} />
