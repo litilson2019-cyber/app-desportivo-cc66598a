@@ -25,8 +25,8 @@ export function ArtistaMusicasPlayer({ artistaId, contactoArtista }: { artistaId
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     loadMusicas();
