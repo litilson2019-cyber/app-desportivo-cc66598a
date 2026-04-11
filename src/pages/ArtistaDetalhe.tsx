@@ -8,6 +8,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Loader2, ArrowLeft, Music, BadgeCheck, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatKz } from "@/lib/formatKz";
 import { ArtistaGaleriaDisplay } from "@/components/artista/ArtistaGaleriaDisplay";
+import { ArtistaAvaliacoes } from "@/components/artista/ArtistaAvaliacoes";
 
 interface Produto {
   id: string;
@@ -418,6 +419,9 @@ export default function ArtistaDetalhe() {
             <p className="text-sm text-muted-foreground">Este artista ainda não tem produtos disponíveis</p>
           </div>
         )}
+
+        {/* Avaliações e Comentários */}
+        <ArtistaAvaliacoes artistaId={artista.id} />
       </div>
       <BottomNav />
     </AuthGuard>
