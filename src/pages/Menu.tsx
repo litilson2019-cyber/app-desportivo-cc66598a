@@ -28,11 +28,6 @@ import {
   Users,
   TrendingUp,
   Target,
-  Music,
-  Building2,
-  Crown,
-  Link2,
-  Star,
 } from "lucide-react";
 import {
   Dialog,
@@ -46,14 +41,6 @@ import { Input } from "@/components/ui/input";
 const menuItems = [
   { icon: User, label: "Perfil", description: "Gerir informações pessoais", action: "perfil" },
   { icon: Share2, label: "Convites", description: "Indicar novos usuários", action: "convites" },
-  { icon: Users, label: "Minha Loja", description: "Gerir loja e produtos", action: "minha-loja" },
-  { icon: FileText, label: "Meus Anúncios", description: "Gerir anúncios no mercado", action: "meus-anuncios" },
-  { icon: Music, label: "Perfil Artista", description: "Gerir perfil de artista", action: "meu-perfil-artista" },
-  { icon: Building2, label: "Minha Produtora", description: "Gerir produtora e músicos", action: "minha-produtora" },
-  { icon: Crown, label: "Planos Comerciais", description: "Planos e selo verificado", action: "planos-comerciais" },
-  { icon: Link2, label: "Minhas Divulgações", description: "Links e comissões de divulgação", action: "minhas-divulgacoes" },
-  { icon: Star, label: "Meus Destaques", description: "Promover loja na Vitrine", action: "meus-destaques" },
-  { icon: Music, label: "Artistas & Músicos", description: "Ver artistas disponíveis", action: "artistas" },
   { icon: HelpCircle, label: "Suporte", description: "Fale connosco", action: "suporte" },
   { icon: FileText, label: "FAQ", description: "Perguntas frequentes", action: "faq" },
   { icon: FileText, label: "Termos", description: "Termos e condições", action: "termos" },
@@ -182,22 +169,6 @@ export default function Menu() {
       navigate("/admin");
     } else if (action === "seguranca") {
       navigate("/seguranca");
-    } else if (action === "minha-loja") {
-      navigate("/minha-loja");
-    } else if (action === "meus-anuncios") {
-      navigate("/meus-anuncios");
-    } else if (action === "meu-perfil-artista") {
-      navigate("/meu-perfil-artista");
-    } else if (action === "minha-produtora") {
-      navigate("/minha-produtora");
-    } else if (action === "planos-comerciais") {
-      navigate("/planos-comerciais");
-    } else if (action === "artistas") {
-      navigate("/artistas");
-    } else if (action === "minhas-divulgacoes") {
-      navigate("/minhas-divulgacoes");
-    } else if (action === "meus-destaques") {
-      navigate("/meus-destaques");
     } else {
       toast({
         title: "Em desenvolvimento",
