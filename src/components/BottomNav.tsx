@@ -19,8 +19,8 @@ export const BottomNav = () => {
             className="flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-lg transition-all duration-200 text-muted-foreground hover:text-primary"
             activeClassName="text-primary bg-primary/10"
           >
-            <item.icon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <item.icon className="w-7 h-7" />
+            <span className="text-xs font-medium">{item.label}</span>
           </NavLink>
         ))}
       </div>
