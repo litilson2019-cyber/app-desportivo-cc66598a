@@ -11,6 +11,8 @@ import Construcao from "./pages/Construcao";
 import Menu from "./pages/Menu";
 import Seguranca from "./pages/Seguranca";
 import Admin from "./pages/Admin";
+import Odds from "./pages/Odds";
+import Planos from "./pages/Planos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/fundos" element={<Fundos />} />
             <Route path="/construcao" element={<Construcao />} />
+            <Route path="/odds" element={<Odds />} />
+            <Route path="/planos" element={<Planos />} />
             <Route path="/menu" element={<Menu />} />
             <Route path="/seguranca" element={<Seguranca />} />
             <Route path="/admin" element={<Admin />} />
