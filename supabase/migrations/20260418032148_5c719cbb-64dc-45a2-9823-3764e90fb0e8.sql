@@ -1,0 +1,20 @@
+DROP TABLE IF EXISTS public.destaque_interacoes CASCADE;
+DROP TABLE IF EXISTS public.destaques_vitrine CASCADE;
+DROP TABLE IF EXISTS public.divulgacao_cliques CASCADE;
+DROP TABLE IF EXISTS public.divulgacao_comissoes CASCADE;
+DROP TABLE IF EXISTS public.divulgacao_links CASCADE;
+DROP TABLE IF EXISTS public.subscricoes_loja CASCADE;
+DROP TABLE IF EXISTS public.planos_comerciais CASCADE;
+DROP TABLE IF EXISTS public.calculos_atuacao CASCADE;
+DROP TABLE IF EXISTS public.anuncio_imagens CASCADE;
+DROP TABLE IF EXISTS public.anuncios_marketplace CASCADE;
+DROP TABLE IF EXISTS public.produto_imagens CASCADE;
+DROP TABLE IF EXISTS public.produtos CASCADE;
+DROP TABLE IF EXISTS public.lojas CASCADE;
+DROP TABLE IF EXISTS public.artista_avaliacoes CASCADE;
+DROP TABLE IF EXISTS public.artista_galeria CASCADE;
+DROP TABLE IF EXISTS public.artista_musicas CASCADE;
+DROP TABLE IF EXISTS public.artistas CASCADE;
+DROP TABLE IF EXISTS public.produtoras CASCADE;
+
+DROP FUNCTION IF EXISTS public.generate_promo_code() CASCADE;
