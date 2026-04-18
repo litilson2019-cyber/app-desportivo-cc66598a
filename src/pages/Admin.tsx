@@ -15,7 +15,9 @@ import {
   ClipboardList,
   UserCog,
   Link2,
-  UserPlus
+  UserPlus,
+  Crown,
+  TrendingUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DepositsManagement } from '@/components/admin/DepositsManagement';
@@ -29,6 +31,8 @@ import { ReferralsManagement } from '@/components/admin/ReferralsManagement';
 import { EmployeeManagement } from '@/components/admin/EmployeeManagement';
 import { AdminNotifications } from '@/components/admin/AdminNotifications';
 import { QuickStats } from '@/components/admin/QuickStats';
+import { PlanosManagement } from '@/components/admin/PlanosManagement';
+import { OddsManagement } from '@/components/admin/OddsManagement';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -179,6 +183,18 @@ const Admin = () => {
                 Equipa
               </TabsTrigger>
             )}
+            {permissions.configuracoes && (
+              <TabsTrigger value="planos" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <Crown className="w-4 h-4" />
+                Planos
+              </TabsTrigger>
+            )}
+            {permissions.configuracoes && (
+              <TabsTrigger value="odds" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <TrendingUp className="w-4 h-4" />
+                Odds
+              </TabsTrigger>
+            )}
             {permissions.isAdmin && (
               <TabsTrigger value="funcionarios" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <UserPlus className="w-4 h-4" />
@@ -233,6 +249,18 @@ const Admin = () => {
         {permissions.gerenciar_equipa && (
           <TabsContent value="equipa" className="mt-0">
             <TeamManagement />
+          </TabsContent>
+        )}
+
+        {permissions.configuracoes && (
+          <TabsContent value="planos" className="mt-0">
+            <PlanosManagement />
+          </TabsContent>
+        )}
+
+        {permissions.configuracoes && (
+          <TabsContent value="odds" className="mt-0">
+            <OddsManagement />
           </TabsContent>
         )}
 
