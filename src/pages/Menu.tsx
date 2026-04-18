@@ -170,6 +170,8 @@ export default function Menu() {
       navigate("/admin");
     } else if (action === "seguranca") {
       navigate("/seguranca");
+    } else if (action === "planos") {
+      navigate("/planos");
     } else {
       toast({
         title: "Em desenvolvimento",
