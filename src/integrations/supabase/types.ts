@@ -345,6 +345,80 @@ export type Database = {
         }
         Relationships: []
       }
+      odds_casas: {
+        Row: {
+          casa_aposta: string
+          created_at: string | null
+          id: string
+          jogo_id: string
+          odd_casa: number | null
+          odd_empate: number | null
+          odd_fora: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          casa_aposta: string
+          created_at?: string | null
+          id?: string
+          jogo_id: string
+          odd_casa?: number | null
+          odd_empate?: number | null
+          odd_fora?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          casa_aposta?: string
+          created_at?: string | null
+          id?: string
+          jogo_id?: string
+          odd_casa?: number | null
+          odd_empate?: number | null
+          odd_fora?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "odds_casas_jogo_id_fkey"
+            columns: ["jogo_id"]
+            isOneToOne: false
+            referencedRelation: "odds_jogos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      odds_jogos: {
+        Row: {
+          ativo: boolean
+          competicao: string | null
+          created_at: string | null
+          data_inicio: string
+          equipa_casa: string
+          equipa_fora: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          competicao?: string | null
+          created_at?: string | null
+          data_inicio: string
+          equipa_casa: string
+          equipa_fora: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          competicao?: string | null
+          created_at?: string | null
+          data_inicio?: string
+          equipa_casa?: string
+          equipa_fora?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       planos: {
         Row: {
           acesso_mercados_avancados: boolean | null
@@ -378,6 +452,45 @@ export type Database = {
           nome?: string
           preco?: number
           verificacao_automatica?: boolean | null
+        }
+        Relationships: []
+      }
+      planos_carteira: {
+        Row: {
+          ativo: boolean | null
+          beneficios: Json | null
+          created_at: string | null
+          descricao: string | null
+          duracao_dias: number
+          id: string
+          nome: string
+          ordem: number | null
+          preco: number
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          beneficios?: Json | null
+          created_at?: string | null
+          descricao?: string | null
+          duracao_dias: number
+          id?: string
+          nome: string
+          ordem?: number | null
+          preco: number
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          beneficios?: Json | null
+          created_at?: string | null
+          descricao?: string | null
+          duracao_dias?: number
+          id?: string
+          nome?: string
+          ordem?: number | null
+          preco?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -553,6 +666,47 @@ export type Database = {
           },
         ]
       }
+      user_planos: {
+        Row: {
+          ativado_em: string
+          ativo: boolean
+          created_at: string | null
+          expira_em: string
+          id: string
+          plano_id: string
+          preco_pago: number
+          user_id: string
+        }
+        Insert: {
+          ativado_em?: string
+          ativo?: boolean
+          created_at?: string | null
+          expira_em: string
+          id?: string
+          plano_id: string
+          preco_pago: number
+          user_id: string
+        }
+        Update: {
+          ativado_em?: string
+          ativo?: boolean
+          created_at?: string | null
+          expira_em?: string
+          id?: string
+          plano_id?: string
+          preco_pago?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_planos_plano_id_fkey"
+            columns: ["plano_id"]
+            isOneToOne: false
+            referencedRelation: "planos_carteira"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -590,6 +744,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ativar_plano: { Args: { _plano_id: string }; Returns: Json }
       calculate_bonus_amount: {
         Args: { valor_depositado: number }
         Returns: number
@@ -610,6 +765,7 @@ export type Database = {
         Args: { amount: number; user_id: string }
         Returns: undefined
       }
+      tem_plano_ativo: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
