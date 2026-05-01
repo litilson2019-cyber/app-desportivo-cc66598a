@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock, ChevronDown, ChevronUp, AlertTriangle, Gift, Plus, Minus } from "lucide-react";
+import { Wallet, Loader2, Upload, Eye, TrendingUp, TrendingDown, Clock, ChevronDown, ChevronUp, AlertTriangle, Gift, Plus, Minus, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -43,7 +43,15 @@ interface Bilhete {
   created_at: string;
 }
 
-interface ResumoGastos {
+interface UserPlanoHist {
+  id: string;
+  plano_id: string;
+  preco_pago: number;
+  ativado_em: string;
+  expira_em: string;
+  ativo: boolean;
+  plano: { nome: string; duracao_dias: number } | null;
+}
   modoRisco: number;
   modoSeguro: number;
   total: number;
