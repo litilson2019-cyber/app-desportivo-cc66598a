@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserPlano } from "@/hooks/useUserPlano";
 import { useNavigate } from "react-router-dom";
-import { Flame, Lock, Loader2, Calendar, Clock, Search, Zap, BarChart3, TrendingUp } from "lucide-react";
+import { Flame, Lock, Loader2, Calendar, Clock, Search, Zap, BarChart3, TrendingUp, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 
 interface OddCasa {
   id: string;
@@ -29,43 +30,79 @@ interface Jogo {
   odds_casas: OddCasa[];
 }
 
+type ResultadoKey = "casa" | "empate" | "fora";
+
+type DetalheResultado = {
+  resultado: ResultadoKey;
+  label: string;
+  melhorCasa: string | null;
+  melhorOdd: number | null;
+  piorCasa: string | null;
+  piorOdd: number | null;
+  diffPct: number;
+};
+
 type Oportunidade = {
   nivel: "alta" | "media" | "baixa" | "nenhuma";
   diffPct: number;
-  resultado: "casa" | "empate" | "fora" | null;
+  resultado: ResultadoKey | null;
   melhorCasa: string | null;
   melhorOdd: number | null;
   piorOdd: number | null;
   equipaSugerida: string | null;
+  detalhes: DetalheResultado[];
 };
 
-const ALTA_THRESHOLD = 25; // % de diferença
+const ALTA_THRESHOLD = 25;
 const MEDIA_THRESHOLD = 10;
+const STORAGE_KEY = "odds_opp_seen"; // { [jogoId]: firstSeenTimestamp }
+const NOVO_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 function detectarOportunidade(jogo: Jogo): Oportunidade {
-  const empty: Oportunidade = { nivel: "nenhuma", diffPct: 0, resultado: null, melhorCasa: null, melhorOdd: null, piorOdd: null, equipaSugerida: null };
+  const empty: Oportunidade = {
+    nivel: "nenhuma", diffPct: 0, resultado: null,
+    melhorCasa: null, melhorOdd: null, piorOdd: null, equipaSugerida: null,
+    detalhes: [],
+  };
   if (jogo.odds_casas.length < 2) return empty;
 
-  const tipos: Array<{ key: "casa" | "empate" | "fora"; field: keyof OddCasa }> = [
-    { key: "casa", field: "odd_casa" },
-    { key: "empate", field: "odd_empate" },
-    { key: "fora", field: "odd_fora" },
+  const tipos: Array<{ key: ResultadoKey; field: keyof OddCasa; label: string }> = [
+    { key: "casa", field: "odd_casa", label: jogo.equipa_casa },
+    { key: "empate", field: "odd_empate", label: "Empate" },
+    { key: "fora", field: "odd_fora", label: jogo.equipa_fora },
   ];
 
-  let best: Oportunidade = empty;
+  const detalhes: DetalheResultado[] = [];
+  let best: Oportunidade = { ...empty };
 
   for (const t of tipos) {
     const valores = jogo.odds_casas
       .map((o) => ({ casa: o.casa_aposta, val: o[t.field] as number | null }))
       .filter((v) => v.val != null && v.val > 0) as { casa: string; val: number }[];
-    if (valores.length < 2) continue;
+
+    if (valores.length < 2) {
+      detalhes.push({
+        resultado: t.key, label: t.label,
+        melhorCasa: valores[0]?.casa ?? null, melhorOdd: valores[0]?.val ?? null,
+        piorCasa: null, piorOdd: null, diffPct: 0,
+      });
+      continue;
+    }
 
     const max = valores.reduce((a, b) => (b.val > a.val ? b : a));
     const min = valores.reduce((a, b) => (b.val < a.val ? b : a));
     const diffPct = ((max.val - min.val) / min.val) * 100;
 
+    detalhes.push({
+      resultado: t.key, label: t.label,
+      melhorCasa: max.casa, melhorOdd: max.val,
+      piorCasa: min.casa, piorOdd: min.val,
+      diffPct,
+    });
+
     if (diffPct > best.diffPct) {
       best = {
+        ...best,
         nivel: diffPct >= ALTA_THRESHOLD ? "alta" : diffPct >= MEDIA_THRESHOLD ? "media" : "baixa",
         diffPct,
         resultado: t.key,
@@ -77,7 +114,17 @@ function detectarOportunidade(jogo: Jogo): Oportunidade {
     }
   }
 
+  best.detalhes = detalhes;
   return best;
+}
+
+const nivelOrdem = { alta: 3, media: 2, baixa: 1, nenhuma: 0 } as const;
+
+function loadSeen(): Record<string, number> {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+}
+function saveSeen(map: Record<string, number>) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(map)); } catch { /* ignore */ }
 }
 
 export default function Odds() {
@@ -89,6 +136,8 @@ export default function Odds() {
   const [search, setSearch] = useState("");
   const [competicaoFiltro, setCompeticaoFiltro] = useState<string>("__all__");
   const [dataFiltro, setDataFiltro] = useState<string>("");
+  const [ordenacao, setOrdenacao] = useState<"data" | "nivel">("nivel");
+  const [seen, setSeen] = useState<Record<string, number>>(() => loadSeen());
 
   useEffect(() => {
     if (!hasActivePlano) return;
@@ -116,6 +165,32 @@ export default function Odds() {
     setLoading(false);
   };
 
+  // Marca jogos com oportunidade 🔥 como "vistos" no momento atual; limpa expirados
+  useEffect(() => {
+    if (!jogos.length) return;
+    const next = { ...seen };
+    let changed = false;
+    const cutoff = Date.now() - NOVO_WINDOW_MS;
+
+    // remove expirados
+    for (const id of Object.keys(next)) {
+      if (next[id] < cutoff) { delete next[id]; changed = true; }
+    }
+    // adiciona novos jogos com oportunidade alta
+    for (const j of jogos) {
+      const op = detectarOportunidade(j);
+      if (op.nivel === "alta" && !(j.id in next)) {
+        next[j.id] = Date.now();
+        changed = true;
+      }
+    }
+    if (changed) {
+      saveSeen(next);
+      setSeen(next);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jogos]);
+
   const competicoes = useMemo(() => {
     const set = new Set<string>();
     jogos.forEach((j) => j.competicao && set.add(j.competicao));
@@ -137,13 +212,31 @@ export default function Odds() {
     });
   }, [jogos, now, search, competicaoFiltro, dataFiltro]);
 
+  const visiveisOrdenados = useMemo(() => {
+    const arr = visiveis.map((j) => ({ jogo: j, op: detectarOportunidade(j) }));
+    if (ordenacao === "data") {
+      arr.sort((a, b) => new Date(a.jogo.data_inicio).getTime() - new Date(b.jogo.data_inicio).getTime());
+    } else {
+      arr.sort((a, b) => {
+        const n = nivelOrdem[b.op.nivel] - nivelOrdem[a.op.nivel];
+        if (n !== 0) return n;
+        if (b.op.diffPct !== a.op.diffPct) return b.op.diffPct - a.op.diffPct;
+        return new Date(a.jogo.data_inicio).getTime() - new Date(b.jogo.data_inicio).getTime();
+      });
+    }
+    return arr;
+  }, [visiveis, ordenacao]);
+
   const oportunidades = useMemo(() => {
-    return visiveis
-      .map((j) => ({ jogo: j, op: detectarOportunidade(j) }))
+    return visiveisOrdenados
       .filter((x) => x.op.nivel === "alta" || x.op.nivel === "media")
-      .sort((a, b) => b.op.diffPct - a.op.diffPct)
       .slice(0, 3);
-  }, [visiveis]);
+  }, [visiveisOrdenados]);
+
+  const isNovo = (jogoId: string) => {
+    const ts = seen[jogoId];
+    return !!ts && Date.now() - ts < NOVO_WINDOW_MS;
+  };
 
   if (loadingPlano) {
     return (
@@ -197,17 +290,7 @@ export default function Odds() {
               </div>
               <div className="space-y-2">
                 {oportunidades.map(({ jogo, op }) => (
-                  <div key={jogo.id} className="bg-background/60 rounded-xl p-3 text-xs">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold">{jogo.equipa_casa} vs {jogo.equipa_fora}</span>
-                      <NivelBadge nivel={op.nivel} diffPct={op.diffPct} />
-                    </div>
-                    <p className="text-muted-foreground">
-                      👉 <strong className="text-foreground">{op.equipaSugerida}</strong> na{" "}
-                      <strong className="text-foreground">{op.melhorCasa}</strong> @ {op.melhorOdd?.toFixed(2)}
-                      <span className="text-muted-foreground"> (vs {op.piorOdd?.toFixed(2)})</span>
-                    </p>
-                  </div>
+                  <OportunidadeItem key={jogo.id} jogo={jogo} op={op} novo={isNovo(jogo.id)} />
                 ))}
               </div>
               <p className="text-[10px] text-muted-foreground mt-2 italic">
@@ -246,6 +329,18 @@ export default function Odds() {
                 className="h-9 rounded-xl text-xs"
               />
             </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase text-muted-foreground font-medium">Ordenar:</span>
+              <Select value={ordenacao} onValueChange={(v) => setOrdenacao(v as "data" | "nivel")}>
+                <SelectTrigger className="h-8 rounded-xl text-xs flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nivel">Nível (🔥 → ⚡ → 📊)</SelectItem>
+                  <SelectItem value="data">Data do jogo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {(search || competicaoFiltro !== "__all__" || dataFiltro) && (
               <Button
                 variant="ghost"
@@ -260,17 +355,27 @@ export default function Odds() {
 
           {loading ? (
             <div className="flex justify-center p-10"><Loader2 className="w-6 h-6 animate-spin" /></div>
-          ) : visiveis.length === 0 ? (
+          ) : visiveisOrdenados.length === 0 ? (
             <Card className="p-6 text-center text-muted-foreground rounded-2xl">
               Sem jogos disponíveis de momento.
             </Card>
           ) : (
-            visiveis.map((jogo) => <JogoCard key={jogo.id} jogo={jogo} />)
+            visiveisOrdenados.map(({ jogo, op }) => (
+              <JogoCard key={jogo.id} jogo={jogo} op={op} novo={isNovo(jogo.id)} />
+            ))
           )}
         </div>
       </div>
       <BottomNav />
     </AuthGuard>
+  );
+}
+
+function NovoBadge() {
+  return (
+    <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] gap-1 animate-pulse">
+      <Sparkles className="w-3 h-3" /> Novo
+    </Badge>
   );
 }
 
@@ -284,11 +389,67 @@ function NivelBadge({ nivel, diffPct }: { nivel: Oportunidade["nivel"]; diffPct:
   return null;
 }
 
-function JogoCard({ jogo }: { jogo: Jogo }) {
+function OportunidadeItem({ jogo, op, novo }: { jogo: Jogo; op: Oportunidade; novo: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <div className="bg-background/60 rounded-xl p-3 text-xs">
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <span className="font-semibold flex items-center gap-1.5 flex-wrap">
+            {jogo.equipa_casa} vs {jogo.equipa_fora}
+            {novo && <NovoBadge />}
+          </span>
+          <NivelBadge nivel={op.nivel} diffPct={op.diffPct} />
+        </div>
+        <p className="text-muted-foreground">
+          👉 <strong className="text-foreground">{op.equipaSugerida}</strong> na{" "}
+          <strong className="text-foreground">{op.melhorCasa}</strong> @ {op.melhorOdd?.toFixed(2)}
+          <span className="text-muted-foreground"> (vs {op.piorOdd?.toFixed(2)})</span>
+        </p>
+        <CollapsibleTrigger asChild>
+          <button className="mt-2 text-[10px] text-primary flex items-center gap-1 font-medium">
+            {open ? <><ChevronUp className="w-3 h-3" /> Ocultar comparação</> : <><ChevronDown className="w-3 h-3" /> Ver comparação por resultado</>}
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <ComparisonPanel detalhes={op.detalhes} />
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
+  );
+}
+
+function ComparisonPanel({ detalhes }: { detalhes: DetalheResultado[] }) {
+  return (
+    <div className="mt-2 space-y-1.5 border-t border-border/50 pt-2">
+      {detalhes.map((d) => (
+        <div key={d.resultado} className="grid grid-cols-[80px_1fr_1fr_auto] gap-2 items-center text-[11px]">
+          <span className="font-medium text-foreground truncate">{d.label}</span>
+          <span className="text-muted-foreground">
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">↑ {d.melhorOdd?.toFixed(2) ?? "—"}</span>
+            <span className="text-[9px] block opacity-70 truncate">{d.melhorCasa ?? "—"}</span>
+          </span>
+          <span className="text-muted-foreground">
+            <span className="text-rose-600 dark:text-rose-400 font-semibold">↓ {d.piorOdd?.toFixed(2) ?? "—"}</span>
+            <span className="text-[9px] block opacity-70 truncate">{d.piorCasa ?? "—"}</span>
+          </span>
+          <Badge
+            variant="outline"
+            className={`text-[10px] ${d.diffPct >= ALTA_THRESHOLD ? "border-amber-500/40 text-amber-600 dark:text-amber-400" : d.diffPct >= MEDIA_THRESHOLD ? "border-blue-500/40 text-blue-600 dark:text-blue-400" : ""}`}
+          >
+            {d.diffPct > 0 ? `${d.diffPct.toFixed(0)}%` : "—"}
+          </Badge>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function JogoCard({ jogo, op, novo }: { jogo: Jogo; op: Oportunidade; novo: boolean }) {
+  const [openCmp, setOpenCmp] = useState(false);
   const data = new Date(jogo.data_inicio);
   const dia = data.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit", year: "numeric" });
   const hora = data.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
-  const op = useMemo(() => detectarOportunidade(jogo), [jogo]);
 
   const best = useMemo(() => {
     const result = { casa: -Infinity, empate: -Infinity, fora: -Infinity };
@@ -312,6 +473,7 @@ function JogoCard({ jogo }: { jogo: Jogo }) {
           <div className="flex flex-wrap gap-1 mt-1">
             {jogo.competicao && <Badge variant="secondary" className="text-[10px]">{jogo.competicao}</Badge>}
             <NivelBadge nivel={op.nivel} diffPct={op.diffPct} />
+            {novo && <NovoBadge />}
           </div>
         </div>
         <div className="text-right text-xs text-muted-foreground shrink-0 ml-2">
@@ -320,14 +482,14 @@ function JogoCard({ jogo }: { jogo: Jogo }) {
         </div>
       </div>
 
-      {op.nivel === "alta" || op.nivel === "media" ? (
+      {(op.nivel === "alta" || op.nivel === "media") && (
         <div className="mb-3 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20 text-xs flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-amber-500 shrink-0" />
           <span>
             Melhor: <strong>{op.equipaSugerida}</strong> na <strong>{op.melhorCasa}</strong> @ {op.melhorOdd?.toFixed(2)}
           </span>
         </div>
-      ) : null}
+      )}
 
       {jogo.odds_casas.length === 0 ? (
         <p className="text-xs text-muted-foreground text-center py-3">Sem odds disponíveis</p>
@@ -347,6 +509,19 @@ function JogoCard({ jogo }: { jogo: Jogo }) {
               <OddCell value={o.odd_fora} isBest={o.odd_fora === best.fora && best.fora > 0} />
             </div>
           ))}
+
+          {op.detalhes.length > 0 && (
+            <Collapsible open={openCmp} onOpenChange={setOpenCmp}>
+              <CollapsibleTrigger asChild>
+                <button className="mt-1 w-full text-[11px] text-primary flex items-center justify-center gap-1 font-medium py-1">
+                  {openCmp ? <><ChevronUp className="w-3 h-3" /> Ocultar comparação por resultado</> : <><ChevronDown className="w-3 h-3" /> Ver comparação por resultado</>}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <ComparisonPanel detalhes={op.detalhes} />
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </div>
       )}
     </Card>
