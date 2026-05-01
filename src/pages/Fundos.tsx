@@ -910,6 +910,56 @@ export default function Fundos() {
                   )}
                 </div>
               )}
+
+              {historyTab === "planos" && (
+                <div className="space-y-2">
+                  {planosHist.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-8 text-center">
+                      Ainda não ativou nenhum plano
+                    </p>
+                  ) : (
+                    <>
+                      <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Total gasto em planos</span>
+                        <span className="font-bold text-primary text-sm">
+                          {formatKz(planosHist.reduce((s, p) => s + Number(p.preco_pago), 0))}
+                        </span>
+                      </div>
+                      {planosHist.map((p) => {
+                        const expira = new Date(p.expira_em).getTime();
+                        const ativo = p.ativo && expira > Date.now();
+                        return (
+                          <div
+                            key={p.id}
+                            className={`p-2.5 rounded-lg border ${ativo ? 'bg-primary/10 border-primary/20' : 'bg-muted/30 border-border'}`}
+                          >
+                            <div className="flex justify-between items-start mb-1.5">
+                              <div className="flex items-center gap-2">
+                                <Crown className={`w-4 h-4 ${ativo ? 'text-primary' : 'text-muted-foreground'}`} />
+                                <div>
+                                  <p className="font-medium text-sm text-foreground">
+                                    {p.plano?.nome || 'Plano'}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Ativado: {new Date(p.ativado_em).toLocaleDateString("pt-PT")}
+                                  </p>
+                                </div>
+                              </div>
+                              <span className={`text-xs font-medium px-2 py-0.5 rounded ${ativo ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                {ativo ? 'Ativo' : 'Expirado'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs text-muted-foreground mt-2 pt-2 border-t border-border/30">
+                              <span>Pago: {formatKz(p.preco_pago)}</span>
+                              <span>Expira: {new Date(p.expira_em).toLocaleDateString("pt-PT")}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                </div>
+              )}
             </Card>
           )}
 
