@@ -715,6 +715,15 @@ export default function Fundos() {
                   <Gift className="w-3 h-3 mr-1" />
                   Bónus
                 </Button>
+                <Button
+                  variant={historyTab === "planos" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHistoryTab("planos")}
+                  className="flex-1"
+                >
+                  <Crown className="w-3 h-3 mr-1" />
+                  Planos
+                </Button>
               </div>
 
               {historyTab === "depositos" && (
