@@ -250,6 +250,14 @@ export default function Fundos() {
 
       setAjustes(ajustesData || []);
 
+      // Carregar histórico de planos ativados
+      const { data: planosData } = await supabase
+        .from("user_planos")
+        .select("id, plano_id, preco_pago, ativado_em, expira_em, ativo, plano:planos_carteira(nome, duracao_dias)")
+        .eq("user_id", user.id)
+        .order("ativado_em", { ascending: false });
+      setPlanosHist((planosData as any) || []);
+
       // Carregar bilhetes
       const { data: bilhetesData } = await supabase
         .from("bilhetes")
