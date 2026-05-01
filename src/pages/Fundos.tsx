@@ -52,6 +52,8 @@ interface UserPlanoHist {
   ativo: boolean;
   plano: { nome: string; duracao_dias: number } | null;
 }
+
+interface ResumoGastos {
   modoRisco: number;
   modoSeguro: number;
   total: number;
