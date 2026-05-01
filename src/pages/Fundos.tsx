@@ -69,6 +69,7 @@ export default function Fundos() {
   const [bonusSaldo, setBonusSaldo] = useState(0);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [ajustes, setAjustes] = useState<AjusteSaldo[]>([]);
+  const [planosHist, setPlanosHist] = useState<UserPlanoHist[]>([]);
   const [valor, setValor] = useState("");
   const [banco, setBanco] = useState("");
   const [comprovativo, setComprovativo] = useState<File | null>(null);
@@ -77,7 +78,7 @@ export default function Fundos() {
   const [resumo, setResumo] = useState<ResumoGastos>({ modoRisco: 0, modoSeguro: 0, total: 0, gastoRisco: 0, gastoSeguro: 0, gastoTotal: 0 });
   const [bilhetes, setBilhetes] = useState<Bilhete[]>([]);
   const [activeSection, setActiveSection] = useState<"deposito" | "historicos" | "resumo" | null>(null);
-  const [historyTab, setHistoryTab] = useState<"depositos" | "bonus">("depositos");
+  const [historyTab, setHistoryTab] = useState<"depositos" | "bonus" | "planos">("depositos");
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [showAllDeposits, setShowAllDeposits] = useState(false);
   const [avisoAberto, setAvisoAberto] = useState(false);
