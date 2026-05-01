@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, WifiOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PlanoExpiracaoBadge } from "@/components/PlanoExpiracaoBadge";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -131,5 +132,10 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <PlanoExpiracaoBadge />
+      {children}
+    </>
+  );
 };
