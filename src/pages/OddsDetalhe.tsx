@@ -69,6 +69,8 @@ export default function OddsDetalhe() {
   const { hasActivePlano, loading: loadingPlano } = useUserPlano();
   const [jogo, setJogo] = useState<Jogo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [favorito, setFavorito] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
 
   useEffect(() => {
     if (!id || !hasActivePlano) return;
