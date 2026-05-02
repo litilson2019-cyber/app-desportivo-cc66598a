@@ -189,9 +189,21 @@ export default function OddsDetalhe() {
                 {jogo.competicao && (
                   <Badge variant="secondary" className="text-[10px] mb-2">{jogo.competicao}</Badge>
                 )}
-                <h1 className="text-2xl font-bold leading-tight">
-                  {jogo.equipa_casa} <span className="text-muted-foreground text-lg">vs</span> {jogo.equipa_fora}
-                </h1>
+                <div className="flex items-start justify-between gap-3">
+                  <h1 className="text-2xl font-bold leading-tight flex-1">
+                    {jogo.equipa_casa} <span className="text-muted-foreground text-lg">vs</span> {jogo.equipa_fora}
+                  </h1>
+                  <Button
+                    variant={favorito ? "default" : "outline"}
+                    size="icon"
+                    className="rounded-full shrink-0 h-10 w-10"
+                    onClick={toggleFavorito}
+                    disabled={favLoading}
+                    aria-label={favorito ? "Remover dos favoritos" : "Salvar nos favoritos"}
+                  >
+                    <Heart className={`w-5 h-5 ${favorito ? "fill-current" : ""}`} />
+                  </Button>
+                </div>
                 <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
