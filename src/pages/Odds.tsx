@@ -446,6 +446,7 @@ function ComparisonPanel({ detalhes }: { detalhes: DetalheResultado[] }) {
 }
 
 function JogoCard({ jogo, op, novo }: { jogo: Jogo; op: Oportunidade; novo: boolean }) {
+  const navigate = useNavigate();
   const [openCmp, setOpenCmp] = useState(false);
   const data = new Date(jogo.data_inicio);
   const dia = data.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -464,7 +465,7 @@ function JogoCard({ jogo, op, novo }: { jogo: Jogo; op: Oportunidade; novo: bool
   const destaque = op.nivel === "alta";
 
   return (
-    <Card className={`p-4 rounded-2xl shadow-soft ${destaque ? "ring-2 ring-amber-500/40" : ""}`}>
+    <Card className={`p-4 rounded-2xl shadow-soft cursor-pointer hover:shadow-md transition-shadow ${destaque ? "ring-2 ring-amber-500/40" : ""}`} onClick={() => navigate(`/odds/${jogo.id}`)}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-base">
