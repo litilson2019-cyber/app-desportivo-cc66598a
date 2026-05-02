@@ -95,6 +95,37 @@ export default function OddsDetalhe() {
     setLoading(false);
   };
 
+  const loadFavorito = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !id) return;
+    const { data } = await supabase
+      .from("odds_favoritos")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("jogo_id", id)
+      .maybeSingle();
+    setFavorito(!!data);
+  };
+
+  const toggleFavorito = async () => {
+    if (!id || favLoading) return;
+    setFavLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setFavLoading(false); return; }
+
+    if (favorito) {
+      const { error } = await supabase.from("odds_favoritos").delete()
+        .eq("user_id", user.id).eq("jogo_id", id);
+      if (!error) { setFavorito(false); toast({ title: "Removido dos favoritos" }); }
+      else toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } else {
+      const { error } = await supabase.from("odds_favoritos").insert({ user_id: user.id, jogo_id: id });
+      if (!error) { setFavorito(true); toast({ title: "Salvo nos favoritos ❤️" }); }
+      else toast({ title: "Erro", description: error.message, variant: "destructive" });
+    }
+    setFavLoading(false);
+  };
+
   const mercados = useMemo<MercadoStats[]>(() => {
     if (!jogo) return [];
     return [
