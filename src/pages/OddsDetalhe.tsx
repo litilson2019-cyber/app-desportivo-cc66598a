@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserPlano } from "@/hooks/useUserPlano";
-import { ArrowLeft, Calendar, Clock, Flame, Loader2, Lock, TrendingUp, TrendingDown, Trophy } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Flame, Loader2, Lock, TrendingUp, TrendingDown, Trophy, Heart } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface OddCasa {
   id: string;
@@ -68,10 +69,13 @@ export default function OddsDetalhe() {
   const { hasActivePlano, loading: loadingPlano } = useUserPlano();
   const [jogo, setJogo] = useState<Jogo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [favorito, setFavorito] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
 
   useEffect(() => {
     if (!id || !hasActivePlano) return;
     load();
+    loadFavorito();
     const channel = supabase
       .channel(`odds_detalhe_${id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "odds_casas", filter: `jogo_id=eq.${id}` }, () => load())
@@ -89,6 +93,37 @@ export default function OddsDetalhe() {
       .maybeSingle();
     setJogo((data as any) || null);
     setLoading(false);
+  };
+
+  const loadFavorito = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !id) return;
+    const { data } = await supabase
+      .from("odds_favoritos")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("jogo_id", id)
+      .maybeSingle();
+    setFavorito(!!data);
+  };
+
+  const toggleFavorito = async () => {
+    if (!id || favLoading) return;
+    setFavLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setFavLoading(false); return; }
+
+    if (favorito) {
+      const { error } = await supabase.from("odds_favoritos").delete()
+        .eq("user_id", user.id).eq("jogo_id", id);
+      if (!error) { setFavorito(false); toast({ title: "Removido dos favoritos" }); }
+      else toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } else {
+      const { error } = await supabase.from("odds_favoritos").insert({ user_id: user.id, jogo_id: id });
+      if (!error) { setFavorito(true); toast({ title: "Salvo nos favoritos ❤️" }); }
+      else toast({ title: "Erro", description: error.message, variant: "destructive" });
+    }
+    setFavLoading(false);
   };
 
   const mercados = useMemo<MercadoStats[]>(() => {
@@ -154,9 +189,21 @@ export default function OddsDetalhe() {
                 {jogo.competicao && (
                   <Badge variant="secondary" className="text-[10px] mb-2">{jogo.competicao}</Badge>
                 )}
-                <h1 className="text-2xl font-bold leading-tight">
-                  {jogo.equipa_casa} <span className="text-muted-foreground text-lg">vs</span> {jogo.equipa_fora}
-                </h1>
+                <div className="flex items-start justify-between gap-3">
+                  <h1 className="text-2xl font-bold leading-tight flex-1">
+                    {jogo.equipa_casa} <span className="text-muted-foreground text-lg">vs</span> {jogo.equipa_fora}
+                  </h1>
+                  <Button
+                    variant={favorito ? "default" : "outline"}
+                    size="icon"
+                    className="rounded-full shrink-0 h-10 w-10"
+                    onClick={toggleFavorito}
+                    disabled={favLoading}
+                    aria-label={favorito ? "Remover dos favoritos" : "Salvar nos favoritos"}
+                  >
+                    <Heart className={`w-5 h-5 ${favorito ? "fill-current" : ""}`} />
+                  </Button>
+                </div>
                 <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />

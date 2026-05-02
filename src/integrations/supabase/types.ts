@@ -386,6 +386,27 @@ export type Database = {
           },
         ]
       }
+      odds_favoritos: {
+        Row: {
+          created_at: string
+          id: string
+          jogo_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jogo_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jogo_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       odds_jogos: {
         Row: {
           ativo: boolean
