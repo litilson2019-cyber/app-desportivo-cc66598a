@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserPlano } from "@/hooks/useUserPlano";
-import { ArrowLeft, Calendar, Clock, Flame, Loader2, Lock, TrendingUp, TrendingDown, Trophy } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Flame, Loader2, Lock, TrendingUp, TrendingDown, Trophy, Heart } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface OddCasa {
   id: string;
