@@ -75,6 +75,7 @@ export default function OddsDetalhe() {
   useEffect(() => {
     if (!id || !hasActivePlano) return;
     load();
+    loadFavorito();
     const channel = supabase
       .channel(`odds_detalhe_${id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "odds_casas", filter: `jogo_id=eq.${id}` }, () => load())
