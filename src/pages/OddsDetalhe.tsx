@@ -237,8 +237,10 @@ export default function OddsDetalhe() {
 
               {/* Modo Inteligente */}
               <SmartBetMode
+                jogoId={jogo.id}
                 equipaCasa={jogo.equipa_casa}
                 equipaFora={jogo.equipa_fora}
+                competicao={jogo.competicao}
                 oddsCasas={jogo.odds_casas}
               />
 

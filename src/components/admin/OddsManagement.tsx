@@ -23,6 +23,10 @@ interface OddCasa {
   odd_casa: number | null;
   odd_empate: number | null;
   odd_fora: number | null;
+  odd_over_25: number | null;
+  odd_under_25: number | null;
+  odd_btts_sim: number | null;
+  odd_btts_nao: number | null;
 }
 
 interface Jogo {
@@ -39,6 +43,7 @@ const emptyCasa = { nome: "", logo_url: "", ativo: true };
 const emptyJogo = {
   equipa_casa: "", equipa_fora: "", competicao: "", data_inicio: "", ativo: true,
   odd_casa: "", odd_empate: "", odd_fora: "",
+  odd_over_25: "", odd_under_25: "", odd_btts_sim: "", odd_btts_nao: "",
 };
 
 export const OddsManagement = () => {
@@ -120,6 +125,10 @@ export const OddsManagement = () => {
       odd_casa: odd?.odd_casa?.toString() ?? "",
       odd_empate: odd?.odd_empate?.toString() ?? "",
       odd_fora: odd?.odd_fora?.toString() ?? "",
+      odd_over_25: odd?.odd_over_25?.toString() ?? "",
+      odd_under_25: odd?.odd_under_25?.toString() ?? "",
+      odd_btts_sim: odd?.odd_btts_sim?.toString() ?? "",
+      odd_btts_nao: odd?.odd_btts_nao?.toString() ?? "",
     });
     setJogoDialog(true);
   };
@@ -158,6 +167,10 @@ export const OddsManagement = () => {
       odd_casa: jogoForm.odd_casa ? Number(jogoForm.odd_casa) : null,
       odd_empate: jogoForm.odd_empate ? Number(jogoForm.odd_empate) : null,
       odd_fora: jogoForm.odd_fora ? Number(jogoForm.odd_fora) : null,
+      odd_over_25: jogoForm.odd_over_25 ? Number(jogoForm.odd_over_25) : null,
+      odd_under_25: jogoForm.odd_under_25 ? Number(jogoForm.odd_under_25) : null,
+      odd_btts_sim: jogoForm.odd_btts_sim ? Number(jogoForm.odd_btts_sim) : null,
+      odd_btts_nao: jogoForm.odd_btts_nao ? Number(jogoForm.odd_btts_nao) : null,
     };
     const { error: oddErr } = editJogo?.oddId
       ? await supabase.from("odds_casas").update(oddPayload).eq("id", editJogo.oddId)
@@ -282,6 +295,30 @@ export const OddsManagement = () => {
                   <div>
                     <Label className="text-xs">{jogoForm.equipa_fora || "Fora"}</Label>
                     <Input type="number" step="0.01" value={jogoForm.odd_fora} onChange={e => setJogoForm(f => ({ ...f, odd_fora: e.target.value }))} placeholder="4.50" />
+                  </div>
+                </div>
+
+                <Label className="text-xs uppercase text-muted-foreground mt-3 block">Over/Under 2.5 (opcional)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div>
+                    <Label className="text-xs">Over 2.5</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_over_25} onChange={e => setJogoForm(f => ({ ...f, odd_over_25: e.target.value }))} placeholder="1.90" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Under 2.5</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_under_25} onChange={e => setJogoForm(f => ({ ...f, odd_under_25: e.target.value }))} placeholder="1.90" />
+                  </div>
+                </div>
+
+                <Label className="text-xs uppercase text-muted-foreground mt-3 block">Ambas Marcam (BTTS, opcional)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div>
+                    <Label className="text-xs">Sim</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_btts_sim} onChange={e => setJogoForm(f => ({ ...f, odd_btts_sim: e.target.value }))} placeholder="1.75" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Não</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_btts_nao} onChange={e => setJogoForm(f => ({ ...f, odd_btts_nao: e.target.value }))} placeholder="2.05" />
                   </div>
                 </div>
               </div>

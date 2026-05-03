@@ -381,9 +381,13 @@ export type Database = {
           created_at: string | null
           id: string
           jogo_id: string
+          odd_btts_nao: number | null
+          odd_btts_sim: number | null
           odd_casa: number | null
           odd_empate: number | null
           odd_fora: number | null
+          odd_over_25: number | null
+          odd_under_25: number | null
           updated_at: string | null
         }
         Insert: {
@@ -391,9 +395,13 @@ export type Database = {
           created_at?: string | null
           id?: string
           jogo_id: string
+          odd_btts_nao?: number | null
+          odd_btts_sim?: number | null
           odd_casa?: number | null
           odd_empate?: number | null
           odd_fora?: number | null
+          odd_over_25?: number | null
+          odd_under_25?: number | null
           updated_at?: string | null
         }
         Update: {
@@ -401,9 +409,13 @@ export type Database = {
           created_at?: string | null
           id?: string
           jogo_id?: string
+          odd_btts_nao?: number | null
+          odd_btts_sim?: number | null
           odd_casa?: number | null
           odd_empate?: number | null
           odd_fora?: number | null
+          odd_over_25?: number | null
+          odd_under_25?: number | null
           updated_at?: string | null
         }
         Relationships: [
