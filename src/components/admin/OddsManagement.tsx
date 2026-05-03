@@ -167,6 +167,10 @@ export const OddsManagement = () => {
       odd_casa: jogoForm.odd_casa ? Number(jogoForm.odd_casa) : null,
       odd_empate: jogoForm.odd_empate ? Number(jogoForm.odd_empate) : null,
       odd_fora: jogoForm.odd_fora ? Number(jogoForm.odd_fora) : null,
+      odd_over_25: jogoForm.odd_over_25 ? Number(jogoForm.odd_over_25) : null,
+      odd_under_25: jogoForm.odd_under_25 ? Number(jogoForm.odd_under_25) : null,
+      odd_btts_sim: jogoForm.odd_btts_sim ? Number(jogoForm.odd_btts_sim) : null,
+      odd_btts_nao: jogoForm.odd_btts_nao ? Number(jogoForm.odd_btts_nao) : null,
     };
     const { error: oddErr } = editJogo?.oddId
       ? await supabase.from("odds_casas").update(oddPayload).eq("id", editJogo.oddId)
