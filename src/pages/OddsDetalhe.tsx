@@ -235,6 +235,13 @@ export default function OddsDetalhe() {
                 </Card>
               )}
 
+              {/* Modo Inteligente */}
+              <SmartBetMode
+                equipaCasa={jogo.equipa_casa}
+                equipaFora={jogo.equipa_fora}
+                oddsCasas={jogo.odds_casas}
+              />
+
               {/* Análise por mercado */}
               <div className="space-y-3">
                 <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground px-1">Análise por Mercado</h2>
