@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserPlano } from "@/hooks/useUserPlano";
 import { ArrowLeft, Calendar, Clock, Flame, Loader2, Lock, TrendingUp, TrendingDown, Trophy, Heart } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { SmartBetMode } from "@/components/SmartBetMode";
 
 interface OddCasa {
   id: string;
@@ -233,6 +234,13 @@ export default function OddsDetalhe() {
                   </p>
                 </Card>
               )}
+
+              {/* Modo Inteligente */}
+              <SmartBetMode
+                equipaCasa={jogo.equipa_casa}
+                equipaFora={jogo.equipa_fora}
+                oddsCasas={jogo.odds_casas}
+              />
 
               {/* Análise por mercado */}
               <div className="space-y-3">
