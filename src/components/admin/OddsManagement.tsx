@@ -297,6 +297,30 @@ export const OddsManagement = () => {
                     <Input type="number" step="0.01" value={jogoForm.odd_fora} onChange={e => setJogoForm(f => ({ ...f, odd_fora: e.target.value }))} placeholder="4.50" />
                   </div>
                 </div>
+
+                <Label className="text-xs uppercase text-muted-foreground mt-3 block">Over/Under 2.5 (opcional)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div>
+                    <Label className="text-xs">Over 2.5</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_over_25} onChange={e => setJogoForm(f => ({ ...f, odd_over_25: e.target.value }))} placeholder="1.90" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Under 2.5</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_under_25} onChange={e => setJogoForm(f => ({ ...f, odd_under_25: e.target.value }))} placeholder="1.90" />
+                  </div>
+                </div>
+
+                <Label className="text-xs uppercase text-muted-foreground mt-3 block">Ambas Marcam (BTTS, opcional)</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div>
+                    <Label className="text-xs">Sim</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_btts_sim} onChange={e => setJogoForm(f => ({ ...f, odd_btts_sim: e.target.value }))} placeholder="1.75" />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Não</Label>
+                    <Input type="number" step="0.01" value={jogoForm.odd_btts_nao} onChange={e => setJogoForm(f => ({ ...f, odd_btts_nao: e.target.value }))} placeholder="2.05" />
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
