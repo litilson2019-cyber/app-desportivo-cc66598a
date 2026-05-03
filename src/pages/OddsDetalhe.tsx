@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserPlano } from "@/hooks/useUserPlano";
 import { ArrowLeft, Calendar, Clock, Flame, Loader2, Lock, TrendingUp, TrendingDown, Trophy, Heart } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { SmartBetMode } from "@/components/SmartBetMode";
 
 interface OddCasa {
   id: string;
