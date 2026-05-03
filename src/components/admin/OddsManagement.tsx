@@ -125,6 +125,10 @@ export const OddsManagement = () => {
       odd_casa: odd?.odd_casa?.toString() ?? "",
       odd_empate: odd?.odd_empate?.toString() ?? "",
       odd_fora: odd?.odd_fora?.toString() ?? "",
+      odd_over_25: odd?.odd_over_25?.toString() ?? "",
+      odd_under_25: odd?.odd_under_25?.toString() ?? "",
+      odd_btts_sim: odd?.odd_btts_sim?.toString() ?? "",
+      odd_btts_nao: odd?.odd_btts_nao?.toString() ?? "",
     });
     setJogoDialog(true);
   };
