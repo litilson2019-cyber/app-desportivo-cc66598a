@@ -23,6 +23,10 @@ interface OddCasa {
   odd_casa: number | null;
   odd_empate: number | null;
   odd_fora: number | null;
+  odd_over_25: number | null;
+  odd_under_25: number | null;
+  odd_btts_sim: number | null;
+  odd_btts_nao: number | null;
 }
 
 interface Jogo {
@@ -39,6 +43,7 @@ const emptyCasa = { nome: "", logo_url: "", ativo: true };
 const emptyJogo = {
   equipa_casa: "", equipa_fora: "", competicao: "", data_inicio: "", ativo: true,
   odd_casa: "", odd_empate: "", odd_fora: "",
+  odd_over_25: "", odd_under_25: "", odd_btts_sim: "", odd_btts_nao: "",
 };
 
 export const OddsManagement = () => {
