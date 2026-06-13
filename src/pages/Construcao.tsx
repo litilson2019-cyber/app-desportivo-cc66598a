@@ -14,6 +14,7 @@ import { MarketSelector, MarketType } from "@/components/MarketSelector";
 import { ConfidenceFilter, ConfidenceLevel } from "@/components/ConfidenceFilter";
 import { ModeComparison } from "@/components/ModeComparison";
 import { AnalysisLoadingOverlay } from "@/components/AnalysisLoadingOverlay";
+import { GoalAnalysisGuide } from "@/components/GoalAnalysisGuide";
 
 interface Jogo {
   id: string;
