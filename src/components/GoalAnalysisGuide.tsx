@@ -18,7 +18,7 @@ interface Categoria {
 
 const CATEGORIAS: Categoria[] = [
   {
-    titulo: "Over 1.5",
+    titulo: "Mais 1.5",
     subtitulo: "Mais Seguro — Tendência de jogos com pelo menos 2 golos",
     cor: "green",
     icon: <Flame className="w-4 h-4 text-emerald-500" />,
@@ -36,7 +36,7 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
-    titulo: "Over 2.5",
+    titulo: "Mais 2.5",
     subtitulo: "Bons Mercados — Tendência de jogos com pelo menos 3 golos",
     cor: "yellow",
     icon: <Flame className="w-4 h-4 text-amber-500" />,
@@ -53,7 +53,7 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
-    titulo: "Over 3.5",
+    titulo: "Mais 3.5",
     subtitulo: "Mais Arriscado — Procurar Jogos Específicos com pelo menos 4 golos",
     cor: "orange",
     icon: <Flame className="w-4 h-4 text-orange-500" />,
@@ -170,12 +170,6 @@ export function GoalAnalysisGuide({ children }: { children: React.ReactNode }) {
                 Referência rápida de campeonatos classificados por tendência de golos. Use como apoio na construção dos seus bilhetes.
               </SheetDescription>
             </div>
-            <SheetClose asChild>
-              <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 shrink-0 -mt-1 -mr-2">
-                <X className="w-4 h-4" />
-                <span className="sr-only">Fechar</span>
-              </Button>
-            </SheetClose>
           </div>
         </SheetHeader>
 
@@ -186,7 +180,7 @@ export function GoalAnalysisGuide({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <Flame className="w-5 h-5 text-amber-500" />
               <h2 className="text-sm font-bold uppercase tracking-wide text-foreground">
-                Melhores Campeonatos para Procurar Over
+                Melhores Campeonatos para Procurar Mais
               </h2>
             </div>
             <div className="space-y-3">
