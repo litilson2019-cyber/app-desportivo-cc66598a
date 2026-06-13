@@ -314,13 +314,30 @@ export default function Construcao() {
       
       <div className="min-h-screen bg-gradient-subtle pb-20 p-4">
         <div className="max-w-2xl mx-auto pt-6 space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Construção de Bilhete
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Adicione jogos e deixe a IA analisar
-            </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                Construção de Bilhete
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Adicione jogos e deixe a IA analisar
+              </p>
+            </div>
+            <GoalAnalysisGuide>
+              <button
+                type="button"
+                className="relative group shrink-0 mt-1"
+                aria-label="Abrir Guia de Análise de Golos"
+              >
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary shadow-medium flex items-center justify-center transition-transform duration-200 group-hover:scale-110 group-active:scale-95">
+                  <span className="text-xl">⚽</span>
+                </div>
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                </span>
+              </button>
+            </GoalAnalysisGuide>
           </div>
 
           {/* Modo de Análise */}
