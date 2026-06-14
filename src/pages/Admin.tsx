@@ -34,6 +34,7 @@ import { AdminNotifications } from '@/components/admin/AdminNotifications';
 import { QuickStats } from '@/components/admin/QuickStats';
 import { PlanosManagement } from '@/components/admin/PlanosManagement';
 import { OddsManagement } from '@/components/admin/OddsManagement';
+import { GuiaCampeonatosManagement } from '@/components/admin/GuiaCampeonatosManagement';
 
 const Admin = () => {
   const navigate = useNavigate();
