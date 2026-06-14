@@ -272,6 +272,12 @@ const Admin = () => {
           </TabsContent>
         )}
 
+        {permissions.configuracoes && (
+          <TabsContent value="guia" className="mt-0">
+            <GuiaCampeonatosManagement />
+          </TabsContent>
+        )}
+
         {permissions.isAdmin && (
           <TabsContent value="funcionarios" className="mt-0">
             <EmployeeManagement />
