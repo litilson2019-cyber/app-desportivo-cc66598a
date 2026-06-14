@@ -110,17 +110,26 @@ export default function Planos() {
             </Card>
           ) : (
             <div className="space-y-3">
+              {planoAtivo && (
+                <p className="text-xs text-muted-foreground px-1">
+                  Já tem um plano ativo. Pode fazer upgrade ativando um plano superior — o novo plano substitui o anterior na data de expiração.
+                </p>
+              )}
               {planos.map((plano) => {
                 const isCurrent = planoAtivo?.plano_id === plano.id;
+                const precoAtivo = Number(planoAtivo?.preco_pago || 0);
+                const isUpgrade = !!planoAtivo && !isCurrent && plano.preco > precoAtivo;
+                const isDowngrade = !!planoAtivo && !isCurrent && plano.preco < precoAtivo;
                 const beneficios: string[] = Array.isArray(plano.beneficios?.lista) ? plano.beneficios.lista : [];
                 return (
-                  <Card key={plano.id} className="p-5 rounded-2xl shadow-soft">
+                  <Card key={plano.id} className={`p-5 rounded-2xl shadow-soft ${isUpgrade ? "border-amber-500/40 ring-1 ring-amber-500/20" : ""}`}>
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-xl font-bold">{plano.nome}</h3>
                         {plano.descricao && <p className="text-sm text-muted-foreground">{plano.descricao}</p>}
                       </div>
                       {isCurrent && <Badge className="bg-green-500">Ativo</Badge>}
+                      {isUpgrade && <Badge className="bg-amber-500">Upgrade</Badge>}
                     </div>
                     <div className="flex items-baseline gap-2 mb-3">
                       <span className="text-3xl font-bold text-primary">{formatKz(plano.preco)}</span>
@@ -136,14 +145,19 @@ export default function Planos() {
                       </ul>
                     )}
                     <Button
-                      className="w-full h-11 rounded-xl"
+                      className={`w-full h-11 rounded-xl ${isUpgrade ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
                       onClick={() => ativarPlano(plano)}
                       disabled={activatingId === plano.id || isCurrent}
+                      variant={isDowngrade ? "outline" : "default"}
                     >
                       {activatingId === plano.id ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : isCurrent ? (
                         "Plano atual"
+                      ) : isUpgrade ? (
+                        `Fazer upgrade por ${formatKz(plano.preco)}`
+                      ) : isDowngrade ? (
+                        `Mudar para ${formatKz(plano.preco)}`
                       ) : (
                         `Ativar por ${formatKz(plano.preco)}`
                       )}

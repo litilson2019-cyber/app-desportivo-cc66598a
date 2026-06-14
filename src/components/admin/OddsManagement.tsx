@@ -346,6 +346,10 @@ export const OddsManagement = () => {
         <Button size="sm" onClick={openNewCasa}><Plus className="w-4 h-4 mr-1" /> Nova casa</Button>
       </div>
 
+      <Card className="p-3 bg-primary/5 border-primary/20 text-xs text-muted-foreground">
+        💡 <strong>Como cadastrar jogos:</strong> Crie primeiro a casa de apostas (ex: Elephant Bet) e depois <strong>clique sobre ela</strong> para abrir o painel onde poderá adicionar jogos, equipas e odds.
+      </Card>
+
       {casas.length === 0 ? (
         <Card className="p-6 text-center text-muted-foreground text-sm">
           Nenhuma casa de apostas cadastrada. Crie uma (ex: Elephant Bet, Betano) para começar a registar jogos.
