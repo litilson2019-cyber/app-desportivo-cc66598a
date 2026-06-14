@@ -197,6 +197,12 @@ const Admin = () => {
                 Odds
               </TabsTrigger>
             )}
+            {permissions.configuracoes && (
+              <TabsTrigger value="guia" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <BookOpen className="w-4 h-4" />
+                Guia
+              </TabsTrigger>
+            )}
             {permissions.isAdmin && (
               <TabsTrigger value="funcionarios" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <UserPlus className="w-4 h-4" />
