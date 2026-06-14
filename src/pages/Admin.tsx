@@ -17,7 +17,8 @@ import {
   Link2,
   UserPlus,
   Crown,
-  TrendingUp
+  TrendingUp,
+  BookOpen
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DepositsManagement } from '@/components/admin/DepositsManagement';
