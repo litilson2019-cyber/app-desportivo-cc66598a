@@ -15,6 +15,9 @@ import { ConfidenceFilter, ConfidenceLevel } from "@/components/ConfidenceFilter
 import { ModeComparison } from "@/components/ModeComparison";
 import { AnalysisLoadingOverlay } from "@/components/AnalysisLoadingOverlay";
 import { GoalAnalysisGuide } from "@/components/GoalAnalysisGuide";
+import { useUserPlano } from "@/hooks/useUserPlano";
+import { useNavigate } from "react-router-dom";
+import { Lock } from "lucide-react";
 
 interface Jogo {
   id: string;
@@ -56,6 +59,8 @@ export default function Construcao() {
   const [saldo, setSaldo] = useState<number>(0);
   const [loadingSaldo, setLoadingSaldo] = useState(true);
   const { toast } = useToast();
+  const { hasActivePlano } = useUserPlano();
+  const navigate = useNavigate();
 
   // Hook para buscar configurações do sistema
   const { config, loading: configLoading } = useSystemConfig();
@@ -323,21 +328,43 @@ export default function Construcao() {
                 Adicione jogos e deixe a IA analisar
               </p>
             </div>
-            <GoalAnalysisGuide>
+            {hasActivePlano ? (
+              <GoalAnalysisGuide>
+                <button
+                  type="button"
+                  className="relative group shrink-0 mt-1"
+                  aria-label="Abrir Guia de Análise de Golos"
+                >
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary shadow-medium flex items-center justify-center transition-transform duration-200 group-hover:scale-110 group-active:scale-95">
+                    <span className="text-xl">⚽</span>
+                  </div>
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                  </span>
+                </button>
+              </GoalAnalysisGuide>
+            ) : (
               <button
                 type="button"
+                onClick={() => {
+                  toast({
+                    title: "Recurso exclusivo de planos",
+                    description: "Ative um plano para desbloquear o Guia de Análise de Golos.",
+                  });
+                  navigate("/planos");
+                }}
                 className="relative group shrink-0 mt-1"
-                aria-label="Abrir Guia de Análise de Golos"
+                aria-label="Guia de Golos (requer plano ativo)"
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary shadow-medium flex items-center justify-center transition-transform duration-200 group-hover:scale-110 group-active:scale-95">
-                  <span className="text-xl">⚽</span>
+                <div className="w-12 h-12 rounded-full bg-muted/60 border border-border shadow-soft flex items-center justify-center opacity-70 transition-transform duration-200 group-hover:scale-105 group-active:scale-95">
+                  <span className="text-xl grayscale">⚽</span>
                 </div>
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center shadow">
+                  <Lock className="w-3 h-3 text-white" />
                 </span>
               </button>
-            </GoalAnalysisGuide>
+            )}
           </div>
 
           {/* Modo de Análise */}
