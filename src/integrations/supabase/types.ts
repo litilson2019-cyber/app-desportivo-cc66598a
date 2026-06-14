@@ -253,6 +253,36 @@ export type Database = {
         }
         Relationships: []
       }
+      guia_campeonatos: {
+        Row: {
+          bandeira: string
+          categoria: string
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          updated_at: string
+        }
+        Insert: {
+          bandeira: string
+          categoria: string
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          updated_at?: string
+        }
+        Update: {
+          bandeira?: string
+          categoria?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       investimentos_ativos: {
         Row: {
           created_at: string | null
