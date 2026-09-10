@@ -20,7 +20,25 @@ export default function Index() {
 
   useEffect(() => {
     loadData();
+    loadBanners();
+
+    const channel = supabase
+      .channel("banners-home")
+      .on("postgres_changes", { event: "*", schema: "public", table: "banners" }, () => loadBanners())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
+
+  const loadBanners = async () => {
+    const { data, error } = await supabase
+      .from("banners")
+      .select("*")
+      .eq("ativo", true)
+      .order("ordem", { ascending: true });
+    if (error) console.error(error);
+    setBanners(data || []);
+  };
 
   const loadData = async () => {
     try {
