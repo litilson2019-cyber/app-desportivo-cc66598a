@@ -81,6 +81,8 @@ export type Database = {
         Row: {
           ativo: boolean | null
           created_at: string | null
+          data_fim: string | null
+          data_inicio: string | null
           descricao: string | null
           duracao_segundos: number | null
           id: string
@@ -93,6 +95,8 @@ export type Database = {
         Insert: {
           ativo?: boolean | null
           created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
           descricao?: string | null
           duracao_segundos?: number | null
           id?: string
@@ -105,6 +109,8 @@ export type Database = {
         Update: {
           ativo?: boolean | null
           created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
           descricao?: string | null
           duracao_segundos?: number | null
           id?: string

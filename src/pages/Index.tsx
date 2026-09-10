@@ -37,7 +37,12 @@ export default function Index() {
       .eq("ativo", true)
       .order("ordem", { ascending: true });
     if (error) console.error(error);
-    setBanners(data || []);
+    const agora = Date.now();
+    const visiveis = (data || []).filter((b: any) =>
+      (!b.data_inicio || new Date(b.data_inicio).getTime() <= agora) &&
+      (!b.data_fim || new Date(b.data_fim).getTime() >= agora)
+    );
+    setBanners(visiveis);
   };
 
   const loadData = async () => {
