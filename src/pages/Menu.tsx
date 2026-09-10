@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useUserPlano } from "@/hooks/useUserPlano";
 import {
   User,
   HelpCircle,
@@ -55,6 +56,7 @@ export default function Menu() {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { isAdmin } = useAdminCheck();
+  const { plano: planoAtivo, loading: loadingPlano } = useUserPlano();
   const [showConvitesDialog, setShowConvitesDialog] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
   const [totalConvidados, setTotalConvidados] = useState(0);
@@ -264,6 +266,25 @@ export default function Menu() {
                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </button>
             )}
+            <button
+              onClick={() => navigate("/planos")}
+              className="w-full p-4 flex items-center gap-4 hover:bg-muted/50 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center flex-shrink-0">
+                <Crown className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Planos</p>
+                <p className="text-sm text-muted-foreground">
+                  {loadingPlano
+                    ? "A carregar..."
+                    : planoAtivo
+                    ? `Plano ativo até ${new Date(planoAtivo.expira_em).toLocaleDateString("pt-PT", { month: "long", year: "numeric" })}`
+                    : "Ver planos e histórico"}
+                </p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
             {menuItems.map((item, index) => (
               <button
                 key={index}
