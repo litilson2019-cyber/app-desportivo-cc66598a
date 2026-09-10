@@ -12,6 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 export default function Index() {
   const [avisoAberto, setAvisoAberto] = useState(false);
   const [nome, setNome] = useState("Investidor");
+  const [banners, setBanners] = useState<any[]>([]);
   const navigate = useNavigate();
   const autoplayPlugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
