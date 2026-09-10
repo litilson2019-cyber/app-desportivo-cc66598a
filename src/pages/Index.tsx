@@ -40,11 +40,15 @@ export default function Index() {
     }
   };
 
-  const bannerImages = [
+  const fallbackBanners = [
     "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80"
   ];
+
+  const bannerItems = banners.length > 0
+    ? banners
+    : fallbackBanners.map((url, i) => ({ id: `fb-${i}`, imagem_url: url, titulo: null, descricao: null, link: null }));
 
   const quickActions = [
     { icon: Eye, label: "Ver novas previsões", route: "/construcao" },
