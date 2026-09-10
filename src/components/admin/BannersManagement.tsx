@@ -18,6 +18,8 @@ interface Banner {
   ordem: number;
   ativo: boolean;
   duracao_segundos: number;
+  data_inicio: string | null;
+  data_fim: string | null;
   created_at: string;
 }
 
@@ -34,6 +36,8 @@ export function BannersManagement() {
     duracao_segundos: 5,
     ordem: 0,
     ativo: true,
+    data_inicio: "",
+    data_fim: "",
   });
 
   useEffect(() => {
@@ -68,6 +72,8 @@ export function BannersManagement() {
         duracao_segundos: banner.duracao_segundos || 5,
         ordem: banner.ordem,
         ativo: banner.ativo,
+        data_inicio: banner.data_inicio ? banner.data_inicio.slice(0, 16) : "",
+        data_fim: banner.data_fim ? banner.data_fim.slice(0, 16) : "",
       });
     } else {
       setEditingBanner(null);
@@ -79,6 +85,8 @@ export function BannersManagement() {
         duracao_segundos: 5,
         ordem: banners.length,
         ativo: true,
+        data_inicio: "",
+        data_fim: "",
       });
     }
     setShowModal(true);
@@ -92,7 +100,7 @@ export function BannersManagement() {
 
     try {
       if (editingBanner) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("banners")
           .update({
             titulo: formData.titulo || null,
@@ -102,11 +110,18 @@ export function BannersManagement() {
             duracao_segundos: formData.duracao_segundos,
             ordem: formData.ordem,
             ativo: formData.ativo,
+            data_inicio: formData.data_inicio ? new Date(formData.data_inicio).toISOString() : null,
+            data_fim: formData.data_fim ? new Date(formData.data_fim).toISOString() : null,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", editingBanner.id);
+          .eq("id", editingBanner.id)
+          .select();
 
         if (error) throw error;
+        if (!data || data.length === 0) {
+          toast.error("Sem permissão para editar banners");
+          return;
+        }
         toast.success("Banner atualizado com sucesso");
       } else {
         const { error } = await supabase.from("banners").insert({
@@ -117,6 +132,8 @@ export function BannersManagement() {
           duracao_segundos: formData.duracao_segundos,
           ordem: formData.ordem,
           ativo: formData.ativo,
+          data_inicio: formData.data_inicio ? new Date(formData.data_inicio).toISOString() : null,
+          data_fim: formData.data_fim ? new Date(formData.data_fim).toISOString() : null,
         });
 
         if (error) throw error;
@@ -213,6 +230,13 @@ export function BannersManagement() {
                       </span>
                     )}
                     <span>Ordem: {banner.ordem}</span>
+                    {(banner.data_inicio || banner.data_fim) && (
+                      <span>
+                        {banner.data_inicio ? new Date(banner.data_inicio).toLocaleDateString("pt-PT") : "—"}
+                        {" → "}
+                        {banner.data_fim ? new Date(banner.data_fim).toLocaleDateString("pt-PT") : "—"}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -314,6 +338,25 @@ export function BannersManagement() {
                   onChange={(e) =>
                     setFormData({ ...formData, ordem: parseInt(e.target.value) || 0 })
                   }
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Início da exibição</Label>
+                <Input
+                  type="datetime-local"
+                  value={formData.data_inicio}
+                  onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Fim da exibição</Label>
+                <Input
+                  type="datetime-local"
+                  value={formData.data_fim}
+                  onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
                 />
               </div>
             </div>
