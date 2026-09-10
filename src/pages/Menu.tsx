@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useUserPlano } from "@/hooks/useUserPlano";
 import {
   User,
   HelpCircle,
