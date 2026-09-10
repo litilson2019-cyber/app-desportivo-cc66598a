@@ -56,6 +56,7 @@ export default function Menu() {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { isAdmin } = useAdminCheck();
+  const { plano: planoAtivo, loading: loadingPlano } = useUserPlano();
   const [showConvitesDialog, setShowConvitesDialog] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState("");
   const [totalConvidados, setTotalConvidados] = useState(0);
