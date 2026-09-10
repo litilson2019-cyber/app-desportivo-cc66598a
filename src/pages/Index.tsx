@@ -115,15 +115,24 @@ export default function Index() {
             className="w-full"
           >
             <CarouselContent>
-              {bannerImages.map((image, index) => (
-                <CarouselItem key={index}>
-                  <Card className="overflow-hidden shadow-soft rounded-2xl border-0">
-                    <div className="aspect-video w-full">
-                      <img 
-                        src={image} 
-                        alt={`Banner ${index + 1}`}
+              {bannerItems.map((banner: any, index: number) => (
+                <CarouselItem key={banner.id || index}>
+                  <Card
+                    className={`overflow-hidden shadow-soft rounded-2xl border-0 ${banner.link ? "cursor-pointer" : ""}`}
+                    onClick={() => banner.link && window.open(banner.link, "_blank", "noopener")}
+                  >
+                    <div className="aspect-video w-full relative">
+                      <img
+                        src={banner.imagem_url}
+                        alt={banner.titulo || `Banner ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
+                      {(banner.titulo || banner.descricao) && (
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                          {banner.titulo && <p className="text-sm font-semibold text-white">{banner.titulo}</p>}
+                          {banner.descricao && <p className="text-xs text-white/80">{banner.descricao}</p>}
+                        </div>
+                      )}
                     </div>
                   </Card>
                 </CarouselItem>
