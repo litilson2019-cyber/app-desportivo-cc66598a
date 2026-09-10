@@ -12,6 +12,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 export default function Index() {
   const [avisoAberto, setAvisoAberto] = useState(false);
   const [nome, setNome] = useState("Investidor");
+  const [banners, setBanners] = useState<any[]>([]);
   const navigate = useNavigate();
   const autoplayPlugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
@@ -19,7 +20,25 @@ export default function Index() {
 
   useEffect(() => {
     loadData();
+    loadBanners();
+
+    const channel = supabase
+      .channel("banners-home")
+      .on("postgres_changes", { event: "*", schema: "public", table: "banners" }, () => loadBanners())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
+
+  const loadBanners = async () => {
+    const { data, error } = await supabase
+      .from("banners")
+      .select("*")
+      .eq("ativo", true)
+      .order("ordem", { ascending: true });
+    if (error) console.error(error);
+    setBanners(data || []);
+  };
 
   const loadData = async () => {
     try {
@@ -40,11 +59,15 @@ export default function Index() {
     }
   };
 
-  const bannerImages = [
+  const fallbackBanners = [
     "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
     "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80"
   ];
+
+  const bannerItems = banners.length > 0
+    ? banners
+    : fallbackBanners.map((url, i) => ({ id: `fb-${i}`, imagem_url: url, titulo: null, descricao: null, link: null }));
 
   const quickActions = [
     { icon: Eye, label: "Ver novas previsões", route: "/construcao" },
@@ -92,15 +115,24 @@ export default function Index() {
             className="w-full"
           >
             <CarouselContent>
-              {bannerImages.map((image, index) => (
-                <CarouselItem key={index}>
-                  <Card className="overflow-hidden shadow-soft rounded-2xl border-0">
-                    <div className="aspect-video w-full">
-                      <img 
-                        src={image} 
-                        alt={`Banner ${index + 1}`}
+              {bannerItems.map((banner: any, index: number) => (
+                <CarouselItem key={banner.id || index}>
+                  <Card
+                    className={`overflow-hidden shadow-soft rounded-2xl border-0 ${banner.link ? "cursor-pointer" : ""}`}
+                    onClick={() => banner.link && window.open(banner.link, "_blank", "noopener")}
+                  >
+                    <div className="aspect-video w-full relative">
+                      <img
+                        src={banner.imagem_url}
+                        alt={banner.titulo || `Banner ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
+                      {(banner.titulo || banner.descricao) && (
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                          {banner.titulo && <p className="text-sm font-semibold text-white">{banner.titulo}</p>}
+                          {banner.descricao && <p className="text-xs text-white/80">{banner.descricao}</p>}
+                        </div>
+                      )}
                     </div>
                   </Card>
                 </CarouselItem>
