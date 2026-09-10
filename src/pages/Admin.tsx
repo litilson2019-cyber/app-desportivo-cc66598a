@@ -18,7 +18,8 @@ import {
   UserPlus,
   Crown,
   TrendingUp,
-  BookOpen
+  BookOpen,
+  Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { DepositsManagement } from '@/components/admin/DepositsManagement';
@@ -35,6 +36,7 @@ import { QuickStats } from '@/components/admin/QuickStats';
 import { PlanosManagement } from '@/components/admin/PlanosManagement';
 import { OddsManagement } from '@/components/admin/OddsManagement';
 import { GuiaCampeonatosManagement } from '@/components/admin/GuiaCampeonatosManagement';
+import { BannersManagement } from '@/components/admin/BannersManagement';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -203,6 +205,12 @@ const Admin = () => {
                 Guia
               </TabsTrigger>
             )}
+            {permissions.configuracoes && (
+              <TabsTrigger value="banners" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
+                <ImageIcon className="w-4 h-4" />
+                Banners
+              </TabsTrigger>
+            )}
             {permissions.isAdmin && (
               <TabsTrigger value="funcionarios" className="flex flex-col items-center gap-0.5 py-2 px-3 text-[10px] min-w-[70px]">
                 <UserPlus className="w-4 h-4" />
@@ -275,6 +283,12 @@ const Admin = () => {
         {permissions.configuracoes && (
           <TabsContent value="guia" className="mt-0">
             <GuiaCampeonatosManagement />
+          </TabsContent>
+        )}
+
+        {permissions.configuracoes && (
+          <TabsContent value="banners" className="mt-0">
+            <BannersManagement />
           </TabsContent>
         )}
 
